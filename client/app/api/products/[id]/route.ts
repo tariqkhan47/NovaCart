@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { requireAdmin } from "@/lib/auth";
 
 // GET Single Product
 export async function GET(
@@ -41,12 +42,15 @@ export async function GET(
   }
 }
 
-// UPDATE Product
+// UPDATE Product (admin only)
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await requireAdmin(req);
+    if (guard instanceof NextResponse) return guard;
+
     await connectDB();
 
     const { id } = await params;
@@ -58,11 +62,12 @@ export async function PUT(
       );
     }
 
-    const body = await req.json();
+    const { name, price, category, image, description, stock } =
+      await req.json();
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      body,
+      { name, price, category, image, description, stock },
       {
         new: true,
         runValidators: true,
@@ -88,12 +93,15 @@ export async function PUT(
   }
 }
 
-// DELETE Product
+// DELETE Product (admin only)
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await requireAdmin(req);
+    if (guard instanceof NextResponse) return guard;
+
     await connectDB();
 
     const { id } = await params;

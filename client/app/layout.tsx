@@ -6,8 +6,6 @@ import "./globals.css";
 import { ThemeProvider } from "../context/ThemeContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
-import { ProductProvider } from "../context/ProductContext";
-import { OrderProvider } from "../context/OrderContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,15 +36,11 @@ export default function RootLayout({
     <body>
       <ThemeProvider>
         <AuthProvider>
-          <ProductProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <OrderProvider>
-                  {children}
-                </OrderProvider>
-              </WishlistProvider>
-            </CartProvider>
-          </ProductProvider>
+          <CartProvider>
+            <WishlistProvider>
+              {children}
+            </WishlistProvider>
+          </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </body>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,18 +14,19 @@ import {
   Legend,
 } from "recharts";
 
-import { products } from "../../data/products";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
-import { useOrders } from "../../context/OrderContext";
+import type { Order } from "../../types/order";
 
 export default function AdminPage() {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
-  const { orders } = useOrders();
   const { logout, isAdmin, loading } = useAuth();
   const router = useRouter();
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [productCount, setProductCount] = useState(0);
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -33,29 +34,55 @@ export default function AdminPage() {
     }
   }, [loading, isAdmin, router]);
 
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    fetch("/api/orders")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setOrders)
+      .catch(() => setOrders([]));
+
+    fetch("/api/products")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setProductCount(data.length))
+      .catch(() => setProductCount(0));
+  }, [isAdmin]);
+
   if (loading || !isAdmin) return null;
 
-  const totalRevenue = orders.reduce(
-  (sum, order) => sum + order.total,
-  0
-);
+  const liveOrders = orders.filter(
+    (order) => order.status !== "Cancelled"
+  );
 
-const pendingOrders = orders.filter(
-  (order) => order.status === "Pending"
-).length;
+  const totalRevenue = liveOrders.reduce(
+    (sum, order) => sum + order.total,
+    0
+  );
 
-const deliveredOrders = orders.filter(
-  (order) => order.status === "Delivered"
-).length;
+  const pendingOrders = orders.filter(
+    (order) => order.status === "Pending"
+  ).length;
 
-  const salesData = [
-    { month: "Jan", sales: 1200 },
-    { month: "Feb", sales: 2100 },
-    { month: "Mar", sales: 1800 },
-    { month: "Apr", sales: 2800 },
-    { month: "May", sales: 3500 },
-    { month: "Jun", sales: 4200 },
-  ];
+  const deliveredOrders = orders.filter(
+    (order) => order.status === "Delivered"
+  ).length;
+
+  // Revenue per month, built from real orders.
+  const salesByMonth = new Map<string, number>();
+
+  for (const order of liveOrders) {
+    const key = new Date(order.createdAt).toLocaleString("en", {
+      month: "short",
+      year: "2-digit",
+    });
+
+    salesByMonth.set(key, (salesByMonth.get(key) ?? 0) + order.total);
+  }
+
+  const salesData = Array.from(salesByMonth, ([month, sales]) => ({
+    month,
+    sales,
+  }));
 
   return (
     <main className="page p-8">
@@ -70,9 +97,10 @@ const deliveredOrders = orders.filter(
           </div>
 
           <button
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await logout();
               router.push("/admin/login");
+              router.refresh();
             }}
             className="btn btn-danger btn-sm"
           >
@@ -85,7 +113,7 @@ const deliveredOrders = orders.filter(
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
   {[
-    { label: "📦 Products", value: products.length, tone: "text-brand-600" },
+    { label: "📦 Products", value: productCount, tone: "text-brand-600" },
     { label: "📦 Orders", value: orders.length, tone: "text-ink-700 dark:text-brand-200" },
     { label: "⏳ Pending", value: pendingOrders, tone: "text-brand-700" },
     { label: "✅ Delivered", value: deliveredOrders, tone: "text-success" },
@@ -115,6 +143,11 @@ const deliveredOrders = orders.filter(
             📈 Sales Analytics
           </h2>
 
+          {salesData.length === 0 ? (
+            <p className="text-muted-soft text-center py-16">
+              No sales yet — the chart fills in as orders come in.
+            </p>
+          ) : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={salesData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -125,6 +158,7 @@ const deliveredOrders = orders.filter(
               <Bar dataKey="sales" fill="#f0a500" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          )}
 
         </div>
 

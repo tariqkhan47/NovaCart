@@ -3,49 +3,38 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   async function handleLogin() {
+    setError("");
+
     if (!email || !password) {
-      alert("Please fill all fields.");
+      setError("Please fill all fields.");
       return;
     }
 
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+    setSubmitting(true);
 
-      const data = await res.json();
+    const result = await login(email, password);
 
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
+    setSubmitting(false);
 
-      localStorage.setItem(
-        "novacart-user",
-        JSON.stringify(data.user)
-      );
-
-      alert("Login Successful!");
-      router.push("/");
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong!");
+    if (!result.ok) {
+      setError(result.message);
+      return;
     }
+
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -75,11 +64,16 @@ export default function LoginPage() {
             className="field"
           />
 
+          {error && (
+            <p className="text-danger text-sm text-center">{error}</p>
+          )}
+
           <button
             onClick={handleLogin}
+            disabled={submitting}
             className="btn btn-primary btn-block btn-lg"
           >
-            Login
+            {submitting ? "Logging in..." : "Login"}
           </button>
 
           <p className="text-center text-muted-soft">

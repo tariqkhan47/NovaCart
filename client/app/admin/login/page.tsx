@@ -1,29 +1,75 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
 
-export default function AdminLoginPage() {
-    const { login } = useAuth();
+function AdminLoginForm() {
+  const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setSubmitting(true);
 
-    const success = login(username, password);
+    const result = await login(email, password);
 
-    if (success) {
-      alert("✅ Login Successful");
-      router.push("/admin");
-    } else {
-      alert("❌ Invalid Username or Password");
+    setSubmitting(false);
+
+    if (!result.ok) {
+      setError(result.message);
+      return;
     }
+
+    // The session cookie decides what happens next: proxy.ts bounces
+    // non-admins straight back here.
+    router.push(searchParams.get("next") || "/admin");
+    router.refresh();
   };
 
+  return (
+    <form onSubmit={handleLogin} className="space-y-5">
+
+      <input
+        type="email"
+        placeholder="Admin email"
+        className="field"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        className="field"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      {error && (
+        <p className="text-danger text-sm text-center">{error}</p>
+      )}
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="btn btn-primary btn-block btn-lg"
+      >
+        {submitting ? "Checking..." : "Login"}
+      </button>
+
+    </form>
+  );
+}
+
+export default function AdminLoginPage() {
   return (
     <main className="page flex items-center justify-center px-6">
       <div className="panel p-8 w-full max-w-md">
@@ -35,32 +81,10 @@ export default function AdminLoginPage() {
           </h1>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-
-          <input
-            type="text"
-            placeholder="Username"
-            className="field"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="field"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <button
-            type="submit"
-            className="btn btn-primary btn-block btn-lg"
-          >
-            Login
-          </button>
-
-        </form>
+        {/* useSearchParams needs a Suspense boundary during prerender. */}
+        <Suspense fallback={<div className="h-64" />}>
+          <AdminLoginForm />
+        </Suspense>
 
       </div>
     </main>

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useWishlist } from "../context/WishlistContext";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 type NavbarProps = {
   cart: number;
@@ -12,23 +13,13 @@ type NavbarProps = {
 export default function Navbar({ cart }: NavbarProps) {
   const { wishlist } = useWishlist();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAdmin, logout } = useAuth();
+  const router = useRouter();
 
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-  } | null>(null);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem("novacart-user");
-
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
-  function handleLogout() {
-    localStorage.removeItem("novacart-user");
-    window.location.reload();
+  async function handleLogout() {
+    await logout();
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -77,6 +68,18 @@ export default function Navbar({ cart }: NavbarProps) {
               <span className="font-semibold text-foreground">
                 👋 {user.name}
               </span>
+
+              {isAdmin && (
+                <Link href="/admin">
+                  <button className="btn btn-dark btn-sm">
+                    Admin
+                  </button>
+                </Link>
+              )}
+
+              <Link href="/orders" className="nav-link">
+                My Orders
+              </Link>
 
               <button
                 onClick={handleLogout}

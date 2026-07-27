@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { requireAdmin } from "@/lib/auth";
 
 // GET ALL PRODUCTS
 export async function GET() {
@@ -20,14 +21,26 @@ export async function GET() {
   }
 }
 
-// ADD PRODUCT
+// ADD PRODUCT (admin only)
 export async function POST(req: NextRequest) {
   try {
+    const guard = await requireAdmin(req);
+    if (guard instanceof NextResponse) return guard;
+
     await connectDB();
 
-    const body = await req.json();
+    const { name, price, category, image, description, stock } =
+      await req.json();
 
-    const product = await Product.create(body);
+    // Only accept known fields, so a caller cannot inject their own.
+    const product = await Product.create({
+      name,
+      price,
+      category,
+      image,
+      description,
+      stock,
+    });
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
