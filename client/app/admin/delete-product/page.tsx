@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { formatPrice } from "../../../lib/currency";
 
 type Product = {
   _id: string;
@@ -12,7 +14,10 @@ type Product = {
 };
 
 export default function DeleteProductPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -40,6 +45,9 @@ export default function DeleteProductPage() {
 
     if (!confirmDelete) return;
 
+    setError("");
+    setSuccess("");
+
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: "DELETE",
@@ -48,16 +56,21 @@ export default function DeleteProductPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Delete Failed");
+        if (res.status === 401 || res.status === 403) {
+          router.push("/admin/login");
+          return;
+        }
+
+        setError(data.message || "Delete failed");
         return;
       }
 
-      alert("✅ Product Deleted Successfully!");
+      setSuccess(`"${name}" deleted.`);
 
       fetchProducts();
     } catch (error) {
       console.error(error);
-      alert("Something went wrong.");
+      setError("Something went wrong.");
     }
   }
 
@@ -68,6 +81,14 @@ export default function DeleteProductPage() {
         <h1 className="text-4xl font-bold text-center mb-8">
           🗑 Delete Products
         </h1>
+
+        {error && (
+          <div className="card p-4 mb-6 text-danger">{error}</div>
+        )}
+
+        {success && (
+          <div className="card p-4 mb-6 text-success">✅ {success}</div>
+        )}
 
         {products.length === 0 ? (
           <p className="text-center text-muted-soft text-xl">
@@ -86,7 +107,7 @@ export default function DeleteProductPage() {
                   </h2>
 
                   <p className="price">
-                    ${product.price}
+                    {formatPrice(product.price)}
                   </p>
                 </div>
 

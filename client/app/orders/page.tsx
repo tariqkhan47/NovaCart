@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import type { Order } from "../../types/order";
+import { formatPrice } from "../../lib/currency";
 
 export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
@@ -76,7 +77,7 @@ export default function OrdersPage() {
 
                   <div className="text-right">
                     <p className="price text-2xl">
-                      ${order.total.toFixed(2)}
+                      {formatPrice(order.total)}
                     </p>
 
                     <span className="badge mt-2">{order.status}</span>
@@ -94,7 +95,7 @@ export default function OrdersPage() {
                       </span>
 
                       <span>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}

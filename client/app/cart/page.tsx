@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
+import { formatPrice } from "../../lib/currency";
 
 export default function CartPage() {
   const {
@@ -43,6 +44,7 @@ export default function CartPage() {
                   <img
                     src={item.image}
                     alt={item.name}
+                    loading="lazy"
                     className="w-24 h-24 object-cover rounded-lg"
                   />
 
@@ -52,7 +54,7 @@ export default function CartPage() {
                     </h2>
 
                     <p className="price">
-                      ${item.price.toFixed(2)}
+                      {formatPrice(item.price)}
                     </p>
                   </div>
 
@@ -92,7 +94,7 @@ export default function CartPage() {
               </h3>
 
               <span className="price text-3xl">
-                ${total.toFixed(2)}
+                {formatPrice(total)}
               </span>
             </div>
 

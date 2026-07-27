@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
+import { formatPrice } from "../../lib/currency";
 
 export default function WishlistPage() {
   const {
@@ -51,6 +52,7 @@ export default function WishlistPage() {
                 <img
                   src={item.image}
                   alt={item.name}
+                  loading="lazy"
                   className="w-40 h-40 rounded-2xl object-cover surface-muted"
                 />
 
@@ -61,7 +63,7 @@ export default function WishlistPage() {
                   </h2>
 
                   <p className="price text-xl mt-3">
-                    ${item.price.toFixed(2)}
+                    {formatPrice(item.price)}
                   </p>
 
                   <div className="flex gap-3 mt-8">

@@ -10,12 +10,23 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   async function handleSignup() {
+    setError("");
+
     if (!name || !email || !password) {
-      alert("Please fill all fields.");
+      setError("Please fill all fields.");
       return;
     }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const res = await fetch("/api/signup", {
@@ -33,15 +44,16 @@ export default function SignupPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message);
+        setError(data.message ?? "Could not create your account.");
         return;
       }
 
-      alert("Account created successfully!");
       router.push("/login");
     } catch (error) {
       console.error(error);
-      alert("Something went wrong!");
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -80,11 +92,16 @@ export default function SignupPage() {
             className="field"
           />
 
+          {error && (
+            <p className="text-danger text-sm text-center">{error}</p>
+          )}
+
           <button
             onClick={handleSignup}
+            disabled={submitting}
             className="btn btn-primary btn-block btn-lg"
           >
-            Create Account
+            {submitting ? "Creating account..." : "Create Account"}
           </button>
 
           <p className="text-center text-muted-soft">

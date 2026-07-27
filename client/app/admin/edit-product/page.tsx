@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { formatPrice } from "../../../lib/currency";
 
 type Product = {
   _id: string;
@@ -10,6 +11,7 @@ type Product = {
   category: string;
   image: string;
   description: string;
+  stock: number;
 };
 
 export default function EditProductPage() {
@@ -25,6 +27,10 @@ export default function EditProductPage() {
   const [image, setImage] = useState("");
   const [description, setDescription] =
     useState("");
+  const [stock, setStock] = useState("");
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     fetchProducts();
@@ -44,12 +50,17 @@ export default function EditProductPage() {
     setCategory(product.category);
     setImage(product.image);
     setDescription(product.description);
+    setStock(String(product.stock ?? 0));
+    setError("");
+    setSuccess("");
   }
 
   async function handleUpdate(
     e: React.FormEvent
   ) {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     if (!selectedProduct) return;
 
@@ -67,6 +78,7 @@ export default function EditProductPage() {
           category,
           image,
           description,
+          stock: Number(stock),
         }),
       }
     );
@@ -74,11 +86,16 @@ export default function EditProductPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.message);
+      if (res.status === 401 || res.status === 403) {
+        router.push("/admin/login");
+        return;
+      }
+
+      setError(data.message ?? "Could not update the product.");
       return;
     }
 
-    alert("✅ Product Updated!");
+    setSuccess(`"${data.name}" updated.`);
 
     fetchProducts();
 
@@ -96,6 +113,10 @@ export default function EditProductPage() {
           ✏️ Edit Products
         </h1>
 
+        {success && (
+          <div className="card p-4 mb-6 text-success">✅ {success}</div>
+        )}
+
         <div className="panel p-6 mb-10">
 
           {products.map((product) => (
@@ -108,7 +129,10 @@ export default function EditProductPage() {
                   {product.name}
                 </h2>
 
-                <p className="price">${product.price}</p>
+                <p className="price">{formatPrice(product.price)}</p>
+                <p className="text-muted-soft text-sm">
+                  {product.stock ?? 0} in stock
+                </p>
               </div>
 
               <button
@@ -163,12 +187,25 @@ export default function EditProductPage() {
               className="field"
             />
 
+            <input
+              type="number"
+              min={0}
+              placeholder="Stock"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              className="field"
+            />
+
             <textarea
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="field h-32"
             />
+
+            {error && (
+              <p className="text-danger text-sm text-center">{error}</p>
+            )}
 
             <button
               type="submit"

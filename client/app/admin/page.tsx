@@ -18,6 +18,7 @@ import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
 import type { Order } from "../../types/order";
+import { formatPrice } from "../../lib/currency";
 
 export default function AdminPage() {
   const { cart } = useCart();
@@ -121,7 +122,7 @@ export default function AdminPage() {
     { label: "❤️ Wishlist", value: wishlist.length, tone: "text-danger" },
     {
       label: "💰 Revenue",
-      value: `$${totalRevenue.toFixed(2)}`,
+      value: formatPrice(totalRevenue),
       tone: "text-brand-600",
     },
   ].map((stat) => (

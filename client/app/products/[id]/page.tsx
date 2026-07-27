@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { useCart } from "../../../context/CartContext";
+import { formatPrice } from "../../../lib/currency";
 
 type Product = {
   _id: string;
@@ -75,6 +76,7 @@ export default function ProductDetailPage() {
                   src={product.image}
                   alt={product.name}
                   className="w-full h-96 object-cover"
+                  loading="lazy"
                 />
               </div>
 
@@ -84,7 +86,7 @@ export default function ProductDetailPage() {
                 <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
 
                 <p className="price text-3xl mt-4">
-                  ${product.price}
+                  {formatPrice(product.price)}
                 </p>
 
                 <p className="text-muted-soft mt-4">{product.description}</p>

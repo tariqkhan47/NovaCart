@@ -11,46 +11,60 @@ export default function AddProductPage() {
   const [category, setCategory] = useState("Electronics");
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
+  const [stock, setStock] = useState("10");
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
 
-  try {
-    const res = await fetch("/api/products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        price: Number(price),
-        category,
-        image,
-        description,
-        stock: 10,
-      }),
-    });
+    try {
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          price: Number(price),
+          category,
+          image,
+          description,
+          stock: Number(stock),
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message);
-      return;
+      if (!res.ok) {
+        // The session may have expired while the form was open.
+        if (res.status === 401 || res.status === 403) {
+          router.push("/admin/login");
+          return;
+        }
+
+        setError(data.message ?? "Could not save the product.");
+        return;
+      }
+
+      setSuccess(`"${data.name}" added.`);
+
+      setName("");
+      setPrice("");
+      setCategory("Electronics");
+      setImage("");
+      setDescription("");
+      setStock("10");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    alert("✅ Product Added Successfully!");
-
-    setName("");
-    setPrice("");
-    setCategory("Electronics");
-    setImage("");
-    setDescription("");
-
-    router.push("/");
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong!");
-  }
   };
 
   return (
@@ -130,6 +144,22 @@ export default function AddProductPage() {
 
           <div>
             <label className="block font-semibold mb-2">
+              Stock
+            </label>
+
+            <input
+              type="number"
+              min={0}
+              placeholder="Units available"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              className="field"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">
               Description
             </label>
 
@@ -143,11 +173,20 @@ export default function AddProductPage() {
             />
           </div>
 
+          {error && (
+            <p className="text-danger text-sm text-center">{error}</p>
+          )}
+
+          {success && (
+            <p className="text-success text-sm text-center">✅ {success}</p>
+          )}
+
           <button
             type="submit"
+            disabled={submitting}
             className="btn btn-primary btn-block btn-lg"
           >
-            Save Product
+            {submitting ? "Saving..." : "Save Product"}
           </button>
 
         </form>

@@ -31,7 +31,7 @@ if (!process.env.MONGODB_URI) {
 const seed = [
   {
     name: "Wireless Headphones",
-    price: 49.99,
+    price: 14999,
     category: "Electronics",
     image:
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
@@ -40,7 +40,7 @@ const seed = [
   },
   {
     name: "Smart Watch",
-    price: 79.99,
+    price: 22999,
     category: "Accessories",
     image:
       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
@@ -49,7 +49,7 @@ const seed = [
   },
   {
     name: "Gaming Mouse",
-    price: 29.99,
+    price: 6499,
     category: "Electronics",
     image:
       "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500",
@@ -58,7 +58,7 @@ const seed = [
   },
   {
     name: "Bluetooth Speaker",
-    price: 99.99,
+    price: 18999,
     category: "Electronics",
     image:
       "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500",

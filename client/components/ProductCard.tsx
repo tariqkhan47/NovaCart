@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
+import { formatPrice } from "../lib/currency";
 
 type ProductProps = {
   id: string;
   name: string;
-  price: string;
+  price: number;
   image: string;
   onAddToCart: () => void;
 };
@@ -37,12 +38,7 @@ export default function ProductCard({
           if (isWishlisted) {
             removeFromWishlist(id);
           } else {
-            addToWishlist({
-              id,
-              name,
-              price: Number(price.replace("$", "")),
-              image,
-            });
+            addToWishlist({ id, name, price, image });
           }
         }}
         aria-label={
@@ -57,6 +53,7 @@ export default function ProductCard({
         <img
           src={image}
           alt={name}
+          loading="lazy"
           className="w-full h-52 object-cover transition duration-500 hover:scale-105"
         />
       </div>
@@ -67,7 +64,7 @@ export default function ProductCard({
         </h3>
       </Link>
 
-      <p className="price text-lg mt-2">{price}</p>
+      <p className="price text-lg mt-2">{formatPrice(price)}</p>
 
       <button
         onClick={onAddToCart}

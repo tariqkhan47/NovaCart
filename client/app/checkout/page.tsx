@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { formatPrice } from "../../lib/currency";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -153,7 +154,7 @@ export default function CheckoutPage() {
             </h2>
 
             <span className="price text-3xl">
-              ${total.toFixed(2)}
+              {formatPrice(total)}
             </span>
           </div>
 

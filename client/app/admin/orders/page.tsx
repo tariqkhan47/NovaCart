@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ORDER_STATUSES, type Order, type OrderStatus } from "../../../types/order";
+import { formatPrice } from "../../../lib/currency";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -67,7 +68,7 @@ export default function AdminOrdersPage() {
 
           <div className="text-right">
             <p className="text-muted-soft text-sm">Revenue (excl. cancelled)</p>
-            <p className="price text-3xl">${revenue.toFixed(2)}</p>
+            <p className="price text-3xl">{formatPrice(revenue)}</p>
           </div>
         </div>
 
@@ -111,7 +112,7 @@ export default function AdminOrdersPage() {
 
                   <div className="text-right">
                     <p className="price text-2xl">
-                      ${order.total.toFixed(2)}
+                      {formatPrice(order.total)}
                     </p>
 
                     <p className="text-muted-soft text-sm mt-1">
@@ -148,7 +149,7 @@ export default function AdminOrdersPage() {
                       </span>
 
                       <span>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}

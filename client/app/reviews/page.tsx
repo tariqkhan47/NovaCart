@@ -28,10 +28,13 @@ export default function ReviewsPage() {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [error, setError] = useState("");
 
   function addReview() {
+    setError("");
+
     if (!name || !comment) {
-      alert("Please fill all fields.");
+      setError("Please fill in your name and review.");
       return;
     }
 
@@ -85,6 +88,10 @@ export default function ReviewsPage() {
             onChange={(e) => setComment(e.target.value)}
             className="field h-32"
           />
+
+          {error && (
+            <p className="text-danger text-sm">{error}</p>
+          )}
 
           <button
             onClick={addReview}
