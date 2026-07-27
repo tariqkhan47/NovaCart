@@ -13,8 +13,8 @@ export default function WishlistPage() {
   const { addToCart } = useCart();
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10">
-      <div className="max-w-6xl mx-auto bg-white shadow-xl rounded-xl p-8">
+    <main className="page py-10 px-6">
+      <div className="max-w-6xl mx-auto panel p-8">
 
         <h1 className="text-4xl font-bold mb-8">
           ❤️ My Wishlist
@@ -27,12 +27,12 @@ export default function WishlistPage() {
               Your Wishlist is Empty
             </h2>
 
-            <p className="text-gray-500 mb-8">
+            <p className="text-muted-soft mb-8">
               Save your favourite products here.
             </p>
 
             <Link href="/">
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700">
+              <button className="btn btn-primary btn-lg">
                 Continue Shopping
               </button>
             </Link>
@@ -45,13 +45,13 @@ export default function WishlistPage() {
 
               <div
                 key={item.id}
-                className="bg-gray-50 rounded-xl shadow p-5 flex gap-6"
+                className="card card-hover p-5 flex gap-6"
               >
 
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-40 h-40 rounded-lg object-cover"
+                  className="w-40 h-40 rounded-2xl object-cover surface-muted"
                 />
 
                 <div className="flex-1">
@@ -60,7 +60,7 @@ export default function WishlistPage() {
                     {item.name}
                   </h2>
 
-                  <p className="text-blue-600 text-xl font-bold mt-3">
+                  <p className="price text-xl mt-3">
                     ${item.price.toFixed(2)}
                   </p>
 
@@ -75,7 +75,7 @@ export default function WishlistPage() {
                           image: item.image,
                         })
                       }
-                      className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
+                      className="btn btn-primary btn-sm"
                     >
                       🛒 Add to Cart
                     </button>
@@ -84,7 +84,7 @@ export default function WishlistPage() {
                       onClick={() =>
                         removeFromWishlist(item.id)
                       }
-                      className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700"
+                      className="btn btn-danger btn-sm"
                     >
                       Remove
                     </button>

@@ -11,30 +11,49 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleSignup() {
+  async function handleSignup() {
     if (!name || !email || !password) {
       alert("Please fill all fields.");
       return;
     }
 
-    localStorage.setItem(
-      "novacart-user",
-      JSON.stringify({
-        name,
-        email,
-      })
-    );
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
 
-    alert("Account created successfully!");
-    router.push("/");
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      alert("Account created successfully!");
+      router.push("/login");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong!");
+    }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          Sign Up
-        </h1>
+    <main className="page flex items-center justify-center px-6">
+      <div className="panel p-8 w-full max-w-md">
+        <div className="text-center mb-7">
+          <span className="eyebrow">Join NovaCart</span>
+          <h1 className="text-3xl font-bold mt-3">
+            Sign Up
+          </h1>
+        </div>
 
         <div className="space-y-5">
           <input
@@ -42,7 +61,7 @@ export default function SignupPage() {
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <input
@@ -50,7 +69,7 @@ export default function SignupPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <input
@@ -58,21 +77,21 @@ export default function SignupPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <button
             onClick={handleSignup}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
+            className="btn btn-primary btn-block btn-lg"
           >
             Create Account
           </button>
 
-          <p className="text-center">
+          <p className="text-center text-muted-soft">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="text-blue-600 font-semibold"
+              className="link-brand"
             >
               Login
             </Link>

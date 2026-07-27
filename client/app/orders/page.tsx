@@ -6,14 +6,14 @@ export default function OrdersPage() {
   const { orders, updateStatus } = useOrders();
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8">
+    <main className="page p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">
           📦 Customer Orders
         </h1>
 
         {orders.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center text-gray-500 text-xl">
+          <div className="panel p-8 text-center text-muted-soft text-xl">
             No Orders Found.
           </div>
         ) : (
@@ -21,7 +21,7 @@ export default function OrdersPage() {
             {orders.map((order: Order) => (
               <div
                 key={order.id}
-                className="bg-white rounded-xl shadow-lg p-6"
+                className="card p-6"
               >
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -29,13 +29,13 @@ export default function OrdersPage() {
                       Order #{order.id}
                     </h2>
 
-                    <p className="text-gray-500">
+                    <p className="text-muted-soft">
                       {order.date}
                     </p>
                   </div>
 
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="price text-2xl">
                       ${order.total.toFixed(2)}
                     </p>
 
@@ -47,7 +47,7 @@ export default function OrdersPage() {
                           e.target.value as "Pending" | "Delivered"
                         )
                       }
-                      className="border rounded-lg px-3 py-2 mt-2"
+                      className="field w-auto px-3 py-2 mt-2"
                     >
                       <option value="Pending">
                         Pending
@@ -60,7 +60,7 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
-                <div className="border-t pt-4">
+                <div className="border-t divider pt-4">
                   {order.items.map((item: OrderItem) => (
                     <div
                       key={item.id}

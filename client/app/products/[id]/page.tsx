@@ -1,62 +1,121 @@
-import Link from "next/link";
-import { products } from "../../../data/products";
+"use client";
 
-type Props = {
-  params: Promise<{
-    id: string;
-  }>;
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Navbar from "../../../components/Navbar";
+import Footer from "../../../components/Footer";
+import { useCart } from "../../../context/CartContext";
+
+type Product = {
+  _id: string;
+  name: string;
+  price: number;
+  category: string;
+  image: string;
+  description: string;
+  stock: number;
 };
 
-export default async function ProductDetails({ params }: Props) {
-  const { id } = await params;
+export default function ProductDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { cart, addToCart } = useCart();
 
-  const product = products.find((p) => p.id === Number(id));
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!product) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <h1 className="text-4xl font-bold">Product Not Found</h1>
-      </main>
-    );
-  }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`/api/products/${id}`);
+
+        if (!res.ok) {
+          setError("Product not found");
+          return;
+        }
+
+        const data = await res.json();
+        setProduct(data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load product");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchProduct();
+  }, [id]);
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10 px-6">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8 grid md:grid-cols-2 gap-10">
+    <>
+      <Navbar cart={cart.length} />
 
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-96 object-cover rounded-xl"
-        />
+      <main className="page py-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          {loading ? (
+            <p className="text-center text-muted-soft text-xl">Loading...</p>
+          ) : error || !product ? (
+            <div className="text-center">
+              <p className="text-xl text-muted-soft mb-4">
+                {error || "Product not found"}
+              </p>
+              <button
+                onClick={() => router.push("/")}
+                className="btn btn-primary"
+              >
+                Back to Home
+              </button>
+            </div>
+          ) : (
+            <div className="panel p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="overflow-hidden rounded-2xl surface-muted">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-96 object-cover"
+                />
+              </div>
 
-        <div>
-          <h1 className="text-4xl font-bold">{product.name}</h1>
+              <div>
+                <span className="badge">{product.category}</span>
 
-          <p className="text-yellow-500 text-xl mt-3">
-            ⭐⭐⭐⭐⭐ (4.9)
-          </p>
+                <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
 
-          <p className="text-3xl font-bold text-blue-600 mt-4">
-            ${product.price}
-          </p>
+                <p className="price text-3xl mt-4">
+                  ${product.price}
+                </p>
 
-          <p className="text-gray-600 mt-6">
-            {product.description}
-          </p>
+                <p className="text-muted-soft mt-4">{product.description}</p>
 
-          <button className="mt-8 bg-blue-600 text-white px-8 py-3 rounded-lg">
-            Add to Cart
-          </button>
+                <p className="text-sm text-muted-soft mt-3">
+                  {product.stock > 0
+                    ? `${product.stock} in stock`
+                    : "Out of stock"}
+                </p>
 
-          <Link href="/">
-            <button className="ml-4 mt-8 border border-blue-600 text-blue-600 px-8 py-3 rounded-lg">
-              Back
-            </button>
-          </Link>
+                <button
+                  onClick={() =>
+                    addToCart({
+                      id: product._id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                    })
+                  }
+                  disabled={product.stock <= 0}
+                  className="btn btn-primary btn-block btn-lg mt-7"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+      </main>
 
-      </div>
-    </main>
+      <Footer />
+    </>
   );
 }

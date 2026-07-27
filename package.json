@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "mongoose": "^9.8.0",
     "recharts": "^3.9.2"
   }
 }

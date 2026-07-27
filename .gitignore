@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# archives / local backups
+*.zip
+
+# env files (never commit credentials)
+.env
+.env.*
+!.env.example
+
+# next.js build output
+.next/
+out/
+build/
+
+# misc
+.DS_Store
+*.log

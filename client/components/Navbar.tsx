@@ -32,33 +32,33 @@ export default function Navbar({ cart }: NavbarProps) {
   }
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-md">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4">
 
         <Link href="/">
-          <h1 className="text-3xl font-bold text-blue-600">
-            NovaCart
+          <h1 className="text-3xl font-bold text-foreground">
+            Nova<span className="text-primary">Cart</span>
           </h1>
         </Link>
 
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
 
-          <Link href="/">Home</Link>
+          <Link href="/" className="nav-link">Home</Link>
 
-          <Link href="/">Products</Link>
+          <Link href="/" className="nav-link">Products</Link>
 
-          <a href="#">Categories</a>
+          <a href="#" className="nav-link">Categories</a>
 
-          <a href="#">Contact</a>
+          <a href="#" className="nav-link">Contact</a>
 
           <Link href="/wishlist">
-            <button className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
-              ❤️ Wishlist ({wishlist.length})
+            <button className="btn btn-outline btn-sm">
+              ♥ Wishlist ({wishlist.length})
             </button>
           </Link>
 
           <Link href="/cart">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            <button className="btn btn-primary btn-sm">
               🛒 Cart ({cart})
             </button>
           </Link>
@@ -66,20 +66,21 @@ export default function Navbar({ cart }: NavbarProps) {
           {/* Dark Mode Button */}
           <button
             onClick={toggleTheme}
-            className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+            aria-label="Toggle colour theme"
+            className="btn btn-dark btn-sm"
           >
             {theme === "light" ? "🌙 Dark" : "☀️ Light"}
           </button>
 
           {user ? (
             <>
-              <span className="font-semibold text-green-600">
+              <span className="font-semibold text-foreground">
                 👋 {user.name}
               </span>
 
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                className="btn btn-danger btn-sm"
               >
                 Logout
               </button>
@@ -87,13 +88,13 @@ export default function Navbar({ cart }: NavbarProps) {
           ) : (
             <>
               <Link href="/login">
-                <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-600 hover:text-white">
+                <button className="btn btn-outline btn-sm">
                   Login
                 </button>
               </Link>
 
               <Link href="/signup">
-                <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                <button className="btn btn-dark btn-sm">
                   Sign Up
                 </button>
               </Link>
@@ -102,6 +103,6 @@ export default function Navbar({ cart }: NavbarProps) {
 
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

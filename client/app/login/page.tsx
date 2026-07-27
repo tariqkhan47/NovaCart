@@ -10,30 +10,53 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleLogin() {
+  async function handleLogin() {
     if (!email || !password) {
       alert("Please fill all fields.");
       return;
     }
 
-    localStorage.setItem(
-      "novacart-user",
-      JSON.stringify({
-        name: "NovaCart User",
-        email,
-      })
-    );
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    alert("Login Successful!");
-    router.push("/");
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      localStorage.setItem(
+        "novacart-user",
+        JSON.stringify(data.user)
+      );
+
+      alert("Login Successful!");
+      router.push("/");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong!");
+    }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          Login
-        </h1>
+    <main className="page flex items-center justify-center px-6">
+      <div className="panel p-8 w-full max-w-md">
+        <div className="text-center mb-7">
+          <span className="eyebrow">Welcome Back</span>
+          <h1 className="text-3xl font-bold mt-3">
+            Login
+          </h1>
+        </div>
 
         <div className="space-y-5">
           <input
@@ -41,7 +64,7 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <input
@@ -49,21 +72,21 @@ export default function LoginPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <button
             onClick={handleLogin}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+            className="btn btn-primary btn-block btn-lg"
           >
             Login
           </button>
 
-          <p className="text-center">
+          <p className="text-center text-muted-soft">
             Don't have an account?{" "}
             <Link
               href="/signup"
-              className="text-blue-600 font-semibold"
+              className="link-brand"
             >
               Sign Up
             </Link>

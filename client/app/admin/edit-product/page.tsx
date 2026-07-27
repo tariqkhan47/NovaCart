@@ -1,24 +1,44 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useProducts } from "../../../context/ProductContext";
+
+type Product = {
+  _id: string;
+  name: string;
+  price: number;
+  category: string;
+  image: string;
+  description: string;
+};
 
 export default function EditProductPage() {
-  const { products, updateProduct } = useProducts();
   const router = useRouter();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] =
+    useState<Product | null>(null);
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] =
+    useState("");
 
-  function handleEdit(id: number) {
-    const product = products.find((p) => p.id === id);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-    if (!product) return;
+  async function fetchProducts() {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+    setProducts(data);
+  }
 
-    setSelectedId(product.id);
+  function handleEdit(product: Product) {
+    setSelectedProduct(product);
+
     setName(product.name);
     setPrice(product.price.toString());
     setCategory(product.category);
@@ -26,65 +46,86 @@ export default function EditProductPage() {
     setDescription(product.description);
   }
 
-  function handleUpdate(e: React.FormEvent) {
+  async function handleUpdate(
+    e: React.FormEvent
+  ) {
     e.preventDefault();
 
-    if (selectedId === null) return;
+    if (!selectedProduct) return;
 
-    updateProduct({
-      id: selectedId,
-      name,
-      price: Number(price),
-      category,
-      image,
-      description,
-    });
+    const res = await fetch(
+      `/api/products/${selectedProduct._id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          price: Number(price),
+          category,
+          image,
+          description,
+        }),
+      }
+    );
 
-    alert("✅ Product Updated Successfully!");
-router.push("/admin");
-    setSelectedId(null);
-    setName("");
-    setPrice("");
-    setCategory("");
-    setImage("");
-    setDescription("");
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message);
+      return;
+    }
+
+    alert("✅ Product Updated!");
+
+    fetchProducts();
+
+    setSelectedProduct(null);
+
+    router.refresh();
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-10">
+    <main className="page py-12 px-6">
+
       <div className="max-w-6xl mx-auto">
 
         <h1 className="text-4xl font-bold mb-8">
           ✏️ Edit Products
         </h1>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-10">
+        <div className="panel p-6 mb-10">
 
           {products.map((product) => (
             <div
-              key={product.id}
-              className="flex justify-between items-center border-b py-4"
+              key={product._id}
+              className="flex justify-between items-center border-b divider py-4"
             >
               <div>
-                <h2 className="font-bold">{product.name}</h2>
-                <p>${product.price}</p>
+                <h2 className="font-bold">
+                  {product.name}
+                </h2>
+
+                <p className="price">${product.price}</p>
               </div>
 
               <button
-                onClick={() => handleEdit(product.id)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                onClick={() =>
+                  handleEdit(product)
+                }
+                className="btn btn-outline btn-sm"
               >
                 Edit
               </button>
             </div>
           ))}
-
         </div>
-
-        {selectedId && (
+                {selectedProduct && (
           <form
             onSubmit={handleUpdate}
-            className="bg-white rounded-xl shadow-lg p-8 space-y-5"
+            className="panel p-8 space-y-5"
           >
             <h2 className="text-2xl font-bold">
               Update Product
@@ -95,7 +136,7 @@ router.push("/admin");
               placeholder="Product Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
             />
 
             <input
@@ -103,7 +144,7 @@ router.push("/admin");
               placeholder="Price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
             />
 
             <input
@@ -111,7 +152,7 @@ router.push("/admin");
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
             />
 
             <input
@@ -119,19 +160,19 @@ router.push("/admin");
               placeholder="Image URL"
               value={image}
               onChange={(e) => setImage(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
             />
 
             <textarea
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border rounded-lg p-3 h-32"
+              className="field h-32"
             />
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700"
+              className="btn btn-primary btn-block btn-lg"
             >
               Update Product
             </button>

@@ -1,27 +1,416 @@
 @import "tailwindcss";
 
+/* Dark mode is driven by the `.dark` class on <html> (see ThemeContext),
+   so the default prefers-color-scheme variant is replaced here. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   Pengu-inspired theme — warm amber brand ramp on cream + deep brown.
+   --------------------------------------------------------------- */
+@theme {
+  --color-brand-50: #fff9ec;
+  --color-brand-100: #fdefc9;
+  --color-brand-200: #fbdd8e;
+  --color-brand-300: #f9c552;
+  --color-brand-400: #f7b02b;
+  --color-brand-500: #f0a500;
+  --color-brand-600: #d48806;
+  --color-brand-700: #a96407;
+  --color-brand-800: #8a4f0e;
+  --color-brand-900: #74420f;
+
+  --color-ink-50: #f7f2ea;
+  --color-ink-100: #ece0cd;
+  --color-ink-500: #6b5133;
+  --color-ink-700: #3e2c1c;
+  --color-ink-900: #201711;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fcf8f1;
+  --surface: #ffffff;
+  --surface-alt: #fbf5ea;
+  --foreground: #1f1b16;
+  --muted: #7c6a53;
+  --border: #ecdfc9;
+
+  --primary: #f0a500;
+  --primary-hover: #d48806;
+  --on-primary: #201711;
+
+  --danger: #c0392b;
+  --danger-hover: #a52f23;
+  --success: #4f7b3a;
+  --success-hover: #416430;
+
+  --ring: rgb(240 165 0 / 0.35);
+  --shadow: 0 10px 30px -14px rgb(62 44 28 / 0.35);
+  --shadow-lg: 0 24px 50px -22px rgb(62 44 28 / 0.45);
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #14110d;
+  --surface: #1e1a14;
+  --surface-alt: #262019;
+  --foreground: #f3ece0;
+  --muted: #a2917a;
+  --border: #3a3126;
+
+  --primary: #f7b02b;
+  --primary-hover: #f0a500;
+  --on-primary: #17130e;
+
+  --danger: #e0614f;
+  --danger-hover: #c94d3c;
+  --success: #7aa860;
+  --success-hover: #689350;
+
+  --ring: rgb(247 176 43 / 0.3);
+  --shadow: 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --shadow-lg: 0 24px 50px -22px rgb(0 0 0 / 0.8);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  transition:
-    background 0.3s ease,
-    color 0.3s ease;
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    transition:
+      background 0.3s ease,
+      color 0.3s ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+}
+
+@layer components {
+  /* Page shell ------------------------------------------------- */
+  .page {
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  .surface-muted {
+    background: var(--surface-alt);
+  }
+
+  /* Typography ------------------------------------------------- */
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--primary-hover);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+  }
+
+  .text-muted-soft {
+    color: var(--muted);
+  }
+
+  .price {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--primary-hover);
+  }
+
+  /* Buttons ---------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    padding: 0.7rem 1.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.15s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--ring);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 10px 24px -14px var(--primary);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+  }
+
+  .btn-dark {
+    background: var(--color-ink-700);
+    color: #fff;
+  }
+
+  .btn-dark:hover:not(:disabled) {
+    background: var(--color-ink-900);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--foreground);
+    border-color: var(--border);
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background: var(--danger-hover);
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: #fff;
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background: var(--success-hover);
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  .btn-lg {
+    padding: 0.95rem 2rem;
+    font-size: 1.05rem;
+  }
+
+  .btn-sm {
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Surfaces --------------------------------------------------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-hover {
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .divider {
+    border-color: var(--border);
+  }
+
+  /* Form controls ---------------------------------------------- */
+  .field {
+    width: 100%;
+    background: var(--surface);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .field::placeholder {
+    color: var(--muted);
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--ring);
+  }
+
+  /* Chips / badges --------------------------------------------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--foreground);
+    border-radius: 9999px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .chip:hover {
+    border-color: var(--primary);
+    color: var(--primary-hover);
+  }
+
+  .chip-active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+
+  .chip-active:hover {
+    color: var(--on-primary);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 9999px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--color-brand-100);
+    color: var(--color-brand-800);
+  }
+
+  /* Hero ------------------------------------------------------- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        60rem 32rem at 85% -10%,
+        var(--color-brand-300) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        135deg,
+        var(--color-ink-900) 0%,
+        var(--color-ink-700) 55%,
+        var(--color-brand-800) 100%
+      );
+    color: #fff8ec;
+  }
+
+  .hero-pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.16;
+    background-image: radial-gradient(
+      circle at center,
+      var(--color-brand-200) 1.5px,
+      transparent 1.6px
+    );
+    background-size: 26px 26px;
+  }
+
+  /* Links ------------------------------------------------------ */
+  .nav-link {
+    position: relative;
+    font-weight: 500;
+    color: var(--foreground);
+    transition: color 0.2s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--primary-hover);
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    height: 2px;
+    width: 0;
+    background: var(--primary);
+    transition: width 0.25s ease;
+  }
+
+  .nav-link:hover::after {
+    width: 100%;
+  }
+
+  .link-brand {
+    color: var(--primary-hover);
+    font-weight: 600;
+  }
+
+  .link-brand:hover {
+    text-decoration: underline;
+  }
 }

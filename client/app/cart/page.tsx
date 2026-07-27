@@ -16,19 +16,19 @@ export default function CartPage() {
   );
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10 px-6">
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-8">
+    <main className="page py-10 px-6">
+      <div className="max-w-5xl mx-auto panel p-8">
         <h1 className="text-4xl font-bold mb-8">
           🛒 Shopping Cart
         </h1>
 
         {cart.length === 0 ? (
-          <div className="border-b pb-6 mb-6">
+          <div className="border-b divider pb-6 mb-6">
             <h2 className="text-2xl font-semibold">
               Your cart is empty.
             </h2>
 
-            <p className="text-gray-500 mt-2">
+            <p className="text-muted-soft mt-2">
               Add some products to your cart.
             </p>
           </div>
@@ -38,7 +38,7 @@ export default function CartPage() {
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-6 border-b pb-4"
+                  className="flex items-center gap-6 border-b divider pb-4"
                 >
                   <img
                     src={item.image}
@@ -51,7 +51,7 @@ export default function CartPage() {
                       {item.name}
                     </h2>
 
-                    <p className="text-blue-600 font-bold">
+                    <p className="price">
                       ${item.price.toFixed(2)}
                     </p>
                   </div>
@@ -59,7 +59,7 @@ export default function CartPage() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => decreaseQuantity(item.id)}
-                      className="bg-gray-200 px-3 py-1 rounded-lg text-lg"
+                      className="btn btn-outline btn-sm w-10 h-10 p-0 text-lg"
                     >
                       −
                     </button>
@@ -70,7 +70,7 @@ export default function CartPage() {
 
                     <button
                       onClick={() => increaseQuantity(item.id)}
-                      className="bg-gray-200 px-3 py-1 rounded-lg text-lg"
+                      className="btn btn-outline btn-sm w-10 h-10 p-0 text-lg"
                     >
                       +
                     </button>
@@ -78,7 +78,7 @@ export default function CartPage() {
 
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                    className="btn btn-danger btn-sm"
                   >
                     Remove
                   </button>
@@ -91,16 +91,16 @@ export default function CartPage() {
                 Total:
               </h3>
 
-              <span className="text-3xl font-bold text-blue-600">
+              <span className="price text-3xl">
                 ${total.toFixed(2)}
               </span>
             </div>
 
             <Link href="/checkout">
-  <button className="mt-8 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
-    Checkout
-  </button>
-</Link>
+              <button className="btn btn-primary btn-block btn-lg mt-8">
+                Checkout
+              </button>
+            </Link>
           </>
         )}
       </div>

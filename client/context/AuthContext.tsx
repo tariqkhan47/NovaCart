@@ -10,6 +10,7 @@ import {
 
 type AuthContextType = {
   isAdmin: boolean;
+  loading: boolean;
   login: (username: string, password: string) => boolean;
   logout: () => void;
 };
@@ -22,6 +23,7 @@ export function AuthProvider({
   children: ReactNode;
 }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const saved = localStorage.getItem("novacart-admin");
@@ -29,6 +31,8 @@ export function AuthProvider({
     if (saved === "true") {
       setIsAdmin(true);
     }
+
+    setLoading(false);
   }, []);
 
   const login = (username: string, password: string) => {
@@ -50,6 +54,7 @@ export function AuthProvider({
     <AuthContext.Provider
       value={{
         isAdmin,
+        loading,
         login,
         logout,
       }}

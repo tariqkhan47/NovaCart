@@ -9,7 +9,7 @@ import {
 } from "react";
 
 type WishlistItem = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -18,7 +18,7 @@ type WishlistItem = {
 type WishlistContextType = {
   wishlist: WishlistItem[];
   addToWishlist: (product: WishlistItem) => void;
-  removeFromWishlist: (id: number) => void;
+  removeFromWishlist: (id: string) => void;
 };
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
@@ -57,7 +57,7 @@ export function WishlistProvider({
     }
   }
 
-  function removeFromWishlist(id: number) {
+  function removeFromWishlist(id: string) {
     setWishlist((prev) =>
       prev.filter((item) => item.id !== id)
     );

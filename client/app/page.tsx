@@ -1,14 +1,28 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
-import { useProducts } from "../context/ProductContext";
+
 export default function Home() {
 const { cart, addToCart } = useCart();
-const { products } = useProducts();
+const [products, setProducts] = useState<any[]>([]);
+
+useEffect(() => {
+  fetchProducts();
+}, []);
+
+const fetchProducts = async () => {
+  try {
+    const res = await fetch("/api/products");
+    const data = await res.json();
+    setProducts(data);
+  } catch (error) {
+    console.error(error);
+  }
+};
 const router = useRouter();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -50,33 +64,39 @@ const router = useRouter();
     <>
       <Navbar cart={cart.length} />
 
-      <main className="min-h-screen bg-gray-100">
+      <main className="page">
 
         {/* Hero Section */}
-        <section className="bg-blue-600 text-white py-20">
-          <div className="max-w-7xl mx-auto px-6 text-center">
-            <h1 className="text-5xl font-bold mb-4">
-              Welcome to NovaCart
+        <section className="hero py-24">
+          <div className="hero-pattern" />
+
+          <div className="relative max-w-7xl mx-auto px-6 text-center">
+            <span className="eyebrow text-brand-300">
+              Quality · Value · Fast Delivery
+            </span>
+
+            <h1 className="text-5xl md:text-6xl font-bold mt-4 mb-5">
+              Welcome to Nova<span className="text-brand-400">Cart</span>
             </h1>
 
-            <p className="text-lg mb-8">
+            <p className="text-lg text-brand-50/80 max-w-2xl mx-auto mb-9">
               Discover the best products at the best prices.
             </p>
 
-            <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold">
+            <button className="btn btn-primary btn-lg">
               Shop Now
             </button>
           </div>
         </section>
 
         {/* Search */}
-        <section className="max-w-7xl mx-auto px-6 mt-10">
+        <section className="max-w-7xl mx-auto px-6 mt-12">
           <input
             type="text"
             placeholder="🔍 Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-4 border rounded-lg shadow"
+            className="field p-4 shadow-sm"
           />
         </section>
 
@@ -94,10 +114,8 @@ const router = useRouter();
               <button
                 key={item}
                 onClick={() => setCategory(item)}
-                className={`px-5 py-2 rounded-lg font-semibold transition ${
-                  category === item
-                    ? "bg-blue-600 text-white"
-                    : "bg-white border hover:bg-blue-100"
+                className={`chip ${
+                  category === item ? "chip-active" : ""
                 }`}
               >
                 {item}
@@ -111,7 +129,7 @@ const router = useRouter();
               onChange={(e) =>
                 setSortBy(e.target.value)
               }
-              className="border rounded-lg px-4 py-2 shadow"
+              className="field w-auto px-4 py-2"
             >
               <option value="default">
                 Sort By
@@ -141,27 +159,30 @@ const router = useRouter();
 
         <section className="max-w-7xl mx-auto py-12 px-6">
 
-          <h2 className="text-3xl font-bold text-center mb-10">
-            Featured Products
-          </h2>
+          <div className="text-center mb-10">
+            <span className="eyebrow">Our Collection</span>
+            <h2 className="section-title text-4xl mt-3">
+              Featured Products
+            </h2>
+          </div>
 
           {filteredProducts.length === 0 ? (
-            <div className="text-center text-gray-500 text-xl">
+            <div className="text-center text-muted-soft text-xl">
               No products found.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
               {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
+               <ProductCard
+  key={product._id}
+  id={product._id}
                   name={product.name}
                   price={`$${product.price}`}
                   image={product.image}
                   onAddToCart={() =>
                     addToCart({
-                      id: product.id,
+                      id: product._id,
                       name: product.name,
                       price: product.price,
                       image: product.image,
@@ -175,40 +196,33 @@ const router = useRouter();
 
         </section>
                 {/* Categories */}
-        <section className="bg-gray-50 py-16">
+        <section className="surface-muted py-16 border-y border-border">
           <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center mb-10">
-              Categories
-            </h2>
+            <div className="text-center mb-10">
+              <span className="eyebrow">Browse By</span>
+              <h2 className="section-title text-4xl mt-3">
+                Categories
+              </h2>
+            </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="bg-white shadow-lg rounded-xl p-6 text-center">
-                <div className="text-5xl">📱</div>
-                <h3 className="mt-3 font-semibold">
-                  Electronics
-                </h3>
-              </div>
-
-              <div className="bg-white shadow-lg rounded-xl p-6 text-center">
-                <div className="text-5xl">👕</div>
-                <h3 className="mt-3 font-semibold">
-                  Fashion
-                </h3>
-              </div>
-
-              <div className="bg-white shadow-lg rounded-xl p-6 text-center">
-                <div className="text-5xl">⌚</div>
-                <h3 className="mt-3 font-semibold">
-                  Accessories
-                </h3>
-              </div>
-
-              <div className="bg-white shadow-lg rounded-xl p-6 text-center">
-                <div className="text-5xl">🏠</div>
-                <h3 className="mt-3 font-semibold">
-                  Home
-                </h3>
-              </div>
+              {[
+                { icon: "📱", label: "Electronics" },
+                { icon: "👕", label: "Fashion" },
+                { icon: "⌚", label: "Accessories" },
+                { icon: "🏠", label: "Home" },
+              ].map((cat) => (
+                <button
+                  key={cat.label}
+                  onClick={() => setCategory(cat.label)}
+                  className="card card-hover p-8 text-center"
+                >
+                  <div className="text-5xl">{cat.icon}</div>
+                  <h3 className="mt-4 font-semibold text-foreground">
+                    {cat.label}
+                  </h3>
+                </button>
+              ))}
             </div>
           </div>
         </section>

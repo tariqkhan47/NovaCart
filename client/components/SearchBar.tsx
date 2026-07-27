@@ -16,7 +16,7 @@ export default function SearchBar({
         placeholder="🔍 Search products..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full border rounded-lg p-4 shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="field p-4"
       />
     </div>
   );

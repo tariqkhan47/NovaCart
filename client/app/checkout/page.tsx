@@ -65,12 +65,15 @@ const { placeOrder } = useOrders();
   router.push("/success");
 }
 
-  return (    <main className="min-h-screen bg-gray-100 py-12">
-      <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-xl p-8">
+  return (    <main className="page py-12 px-6">
+      <div className="max-w-3xl mx-auto panel p-8">
 
-        <h1 className="text-4xl font-bold text-center mb-8">
-          Checkout
-        </h1>
+        <div className="text-center mb-8">
+          <span className="eyebrow">Almost There</span>
+          <h1 className="text-4xl font-bold mt-3">
+            Checkout
+          </h1>
+        </div>
 
         <div className="space-y-5">
 
@@ -79,7 +82,7 @@ const { placeOrder } = useOrders();
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <input
@@ -87,7 +90,7 @@ const { placeOrder } = useOrders();
             placeholder="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <input
@@ -95,17 +98,17 @@ const { placeOrder } = useOrders();
             placeholder="Phone Number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <textarea
             placeholder="Shipping Address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full border rounded-lg p-3 h-32"
+            className="field h-32"
           />
 
-          <div className="border-t pt-6">
+          <div className="border-t divider pt-6">
             <h2 className="text-xl font-bold mb-4">
               Payment Method
             </h2>
@@ -113,6 +116,7 @@ const { placeOrder } = useOrders();
             <label className="flex items-center gap-3 mb-3">
               <input
                 type="radio"
+                className="accent-primary w-4 h-4"
                 value="cod"
                 checked={payment === "cod"}
                 onChange={(e) => setPayment(e.target.value)}
@@ -123,6 +127,7 @@ const { placeOrder } = useOrders();
             <label className="flex items-center gap-3 mb-3">
               <input
                 type="radio"
+                className="accent-primary w-4 h-4"
                 value="card"
                 checked={payment === "card"}
                 onChange={(e) => setPayment(e.target.value)}
@@ -133,6 +138,7 @@ const { placeOrder } = useOrders();
             <label className="flex items-center gap-3 mb-3">
               <input
                 type="radio"
+                className="accent-primary w-4 h-4"
                 value="jazzcash"
                 checked={payment === "jazzcash"}
                 onChange={(e) => setPayment(e.target.value)}
@@ -143,6 +149,7 @@ const { placeOrder } = useOrders();
             <label className="flex items-center gap-3">
               <input
                 type="radio"
+                className="accent-primary w-4 h-4"
                 value="easypaisa"
                 checked={payment === "easypaisa"}
                 onChange={(e) => setPayment(e.target.value)}
@@ -159,7 +166,7 @@ const { placeOrder } = useOrders();
                 placeholder="Card Number"
                 value={cardNumber}
                 onChange={(e) => setCardNumber(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="field"
               />
 
               <div className="grid grid-cols-2 gap-4">
@@ -168,7 +175,7 @@ const { placeOrder } = useOrders();
                   placeholder="MM/YY"
                   value={expiry}
                   onChange={(e) => setExpiry(e.target.value)}
-                  className="border rounded-lg p-3"
+                  className="field"
                 />
 
                 <input
@@ -176,26 +183,26 @@ const { placeOrder } = useOrders();
                   placeholder="CVV"
                   value={cvv}
                   onChange={(e) => setCvv(e.target.value)}
-                  className="border rounded-lg p-3"
+                  className="field"
                 />
               </div>
 
             </div>
           )}
 
-          <div className="border-t pt-6 flex justify-between items-center">
+          <div className="border-t divider pt-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold">
               Total
             </h2>
 
-            <span className="text-3xl font-bold text-blue-600">
+            <span className="price text-3xl">
               ${total.toFixed(2)}
             </span>
           </div>
 
           <button
             onClick={handleOrder}
-            className="w-full bg-blue-600 text-white py-4 rounded-lg text-lg hover:bg-blue-700"
+            className="btn btn-primary btn-block btn-lg"
           >
             Place Order
           </button>

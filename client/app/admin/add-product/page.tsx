@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useProducts } from "../../../context/ProductContext";
 
 export default function AddProductPage() {
-  const { addProduct } = useProducts();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -14,19 +12,31 @@ export default function AddProductPage() {
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const newProduct = {
-      id: Date.now(),
-      name,
-      price: Number(price),
-      category,
-      image,
-      description,
-    };
+  try {
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        price: Number(price),
+        category,
+        image,
+        description,
+        stock: 10,
+      }),
+    });
 
-    addProduct(newProduct);
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message);
+      return;
+    }
 
     alert("✅ Product Added Successfully!");
 
@@ -37,15 +47,22 @@ export default function AddProductPage() {
     setDescription("");
 
     router.push("/");
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong!");
+  }
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
+    <main className="page py-10 px-6">
+      <div className="max-w-3xl mx-auto panel p-8">
 
-        <h1 className="text-4xl font-bold text-center mb-8">
-          ➕ Add New Product
-        </h1>
+        <div className="text-center mb-8">
+          <span className="eyebrow">Catalogue</span>
+          <h1 className="text-4xl font-bold mt-3">
+            ➕ Add New Product
+          </h1>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -59,7 +76,7 @@ export default function AddProductPage() {
               placeholder="Enter product name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
               required
             />
           </div>
@@ -74,7 +91,7 @@ export default function AddProductPage() {
               placeholder="Enter price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
               required
             />
           </div>
@@ -87,7 +104,7 @@ export default function AddProductPage() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
             >
               <option>Electronics</option>
               <option>Fashion</option>
@@ -106,7 +123,7 @@ export default function AddProductPage() {
               placeholder="https://example.com/image.jpg"
               value={image}
               onChange={(e) => setImage(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
               required
             />
           </div>
@@ -121,14 +138,14 @@ export default function AddProductPage() {
               placeholder="Enter product description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border rounded-lg p-3"
+              className="field"
               required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 font-bold text-lg"
+            className="btn btn-primary btn-block btn-lg"
           >
             Save Product
           </button>

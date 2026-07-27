@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
 
 type ProductProps = {
-  id: number;
+  id: string;
   name: string;
   price: string;
   image: string;
@@ -29,7 +29,7 @@ export default function ProductCard({
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4 relative hover:shadow-2xl transition">
+    <div className="card card-hover p-4 relative overflow-hidden">
 
       {/* Wishlist Button */}
       <button
@@ -45,28 +45,33 @@ export default function ProductCard({
             });
           }
         }}
-        className="absolute top-3 right-3 text-2xl"
+        aria-label={
+          isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+        }
+        className="absolute top-5 right-5 z-10 text-xl w-10 h-10 rounded-full bg-surface/90 border border-border shadow flex items-center justify-center transition hover:scale-110"
       >
         {isWishlisted ? "❤️" : "🤍"}
       </button>
 
-      <img
-        src={image}
-        alt={name}
-        className="w-full h-52 object-cover rounded-lg"
-      />
+      <div className="overflow-hidden rounded-2xl surface-muted">
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-52 object-cover transition duration-500 hover:scale-105"
+        />
+      </div>
 
       <Link href={`/products/${id}`}>
-        <h3 className="mt-4 text-xl font-bold hover:text-blue-600 cursor-pointer">
+        <h3 className="mt-4 text-xl font-bold text-foreground hover:text-primary transition cursor-pointer">
           {name}
         </h3>
       </Link>
 
-      <p className="text-gray-600 mt-2">{price}</p>
+      <p className="price text-lg mt-2">{price}</p>
 
       <button
         onClick={onAddToCart}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+        className="btn btn-primary btn-block mt-4"
       >
         Add to Cart
       </button>

@@ -9,7 +9,7 @@ import {
 } from "react";
 
 export type OrderItem = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;

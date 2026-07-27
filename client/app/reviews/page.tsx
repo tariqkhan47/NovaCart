@@ -50,8 +50,8 @@ export default function ReviewsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+    <main className="page py-10 px-6">
+      <div className="max-w-4xl mx-auto panel p-8">
 
         <h1 className="text-4xl font-bold mb-8">
           ⭐ Product Reviews
@@ -64,13 +64,13 @@ export default function ReviewsPage() {
             placeholder="Your Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="field"
           />
 
           <select
             value={rating}
             onChange={(e) => setRating(Number(e.target.value))}
-            className="w-full border rounded-lg p-3"
+            className="field"
           >
             <option value={5}>⭐⭐⭐⭐⭐</option>
             <option value={4}>⭐⭐⭐⭐</option>
@@ -83,12 +83,12 @@ export default function ReviewsPage() {
             placeholder="Write your review..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="w-full border rounded-lg p-3 h-32"
+            className="field h-32"
           />
 
           <button
             onClick={addReview}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+            className="btn btn-primary"
           >
             Submit Review
           </button>
@@ -100,17 +100,17 @@ export default function ReviewsPage() {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="border rounded-lg p-5"
+              className="card p-5"
             >
               <h2 className="text-xl font-bold">
                 {review.name}
               </h2>
 
-              <p className="text-yellow-500 text-lg">
+              <p className="text-brand-500 text-lg">
                 {"⭐".repeat(review.rating)}
               </p>
 
-              <p className="mt-3 text-gray-600">
+              <p className="mt-3 text-muted-soft">
                 {review.comment}
               </p>
             </div>
