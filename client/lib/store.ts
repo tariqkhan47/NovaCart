@@ -16,7 +16,25 @@ export const STORE = {
   phoneIntl: "+92 311 2424058",
 
   country: "Pakistan",
+
+  /**
+   * Where the site lives. Only needed for links that leave the site and have
+   * to come back — the unsubscribe link in an email, for one.
+   */
+  siteUrl:
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://nova-cart-eosin.vercel.app",
 } as const;
+
+/**
+ * The link to put at the bottom of any bulk email.
+ *
+ * Customers land on the mailing list by ordering rather than by asking, so
+ * every message has to carry a way off it — both because it is the decent
+ * thing and because Gmail and Outlook file mail without one as spam.
+ */
+export function unsubscribeUrl(token: string) {
+  return `${STORE.siteUrl}/unsubscribe?token=${encodeURIComponent(token)}`;
+}
 
 export const CONTACT_LINKS = {
   email: `mailto:${STORE.email}`,

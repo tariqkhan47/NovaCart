@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
-import Subscriber from "@/models/Subscriber";
+import Subscriber, { newUnsubscribeToken } from "@/models/Subscriber";
 import { getSessionFromRequest, requireUser } from "@/lib/auth";
 import { DELIVERY_CHARGE } from "@/lib/delivery";
 
@@ -134,12 +134,19 @@ export async function POST(req: NextRequest) {
     // so a repeat customer just has their details refreshed and their order
     // count bumped. The order is already placed at this point, so a failure
     // here is logged and swallowed rather than handed back to the shopper.
+    //
+    // active and the token are only set on insert: somebody who has already
+    // unsubscribed stays off the list no matter how much they order.
     try {
       await Subscriber.updateOne(
         { email: String(email).trim().toLowerCase() },
         {
           $set: { name, phone },
-          $setOnInsert: { source: "order", active: true },
+          $setOnInsert: {
+            source: "order",
+            active: true,
+            unsubscribeToken: newUnsubscribeToken(),
+          },
           $inc: { orderCount: 1 },
         },
         { upsert: true }

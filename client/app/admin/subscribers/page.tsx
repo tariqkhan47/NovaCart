@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { unsubscribeUrl } from "../../../lib/store";
 
 type Subscriber = {
   _id: string;
@@ -10,6 +11,7 @@ type Subscriber = {
   source: string;
   orderCount: number;
   active: boolean;
+  unsubscribeToken: string;
   createdAt: string;
 };
 
@@ -58,14 +60,18 @@ export default function AdminSubscribersPage() {
   function downloadCsv() {
     const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
 
+    // The unsubscribe link rides along so a mail merge can drop it into every
+    // message — bulk email without one lands in spam.
     const rows = [
-      ["Email", "Name", "Phone", "Orders", "Joined"],
+      ["Email", "Name", "Phone", "Orders", "Joined", "Status", "Unsubscribe link"],
       ...subscribers.map((subscriber) => [
         subscriber.email,
         subscriber.name ?? "",
         subscriber.phone ?? "",
         String(subscriber.orderCount),
         new Date(subscriber.createdAt).toLocaleDateString(),
+        subscriber.active ? "Subscribed" : "Unsubscribed",
+        unsubscribeUrl(subscriber.unsubscribeToken),
       ]),
     ];
 
@@ -153,6 +159,10 @@ export default function AdminSubscribersPage() {
                   <div className="min-w-0">
                     <p className="font-semibold break-words">
                       {subscriber.name || "—"}
+
+                      {!subscriber.active && (
+                        <span className="badge ml-2">Unsubscribed</span>
+                      )}
                     </p>
 
                     <p className="text-muted-soft text-sm break-words">

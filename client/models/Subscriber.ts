@@ -1,4 +1,10 @@
+import { randomBytes } from "node:crypto";
 import mongoose, { Schema, models } from "mongoose";
+
+/** Secret that stands in for the email address in an unsubscribe link. */
+export function newUnsubscribeToken() {
+  return randomBytes(16).toString("hex");
+}
 
 /**
  * The shop's mailing list.
@@ -31,10 +37,18 @@ const SubscriberSchema = new Schema(
     // count without having to scan the orders collection.
     orderCount: { type: Number, default: 0 },
 
-    // Cleared when someone asks to be taken off the list. Nothing sets this
-    // to false yet; it is here so removing a subscriber does not mean losing
-    // the record and re-adding them on their next order.
+    // Cleared when someone unsubscribes. The row stays behind so a later
+    // order does not quietly put them back on the list.
     active: { type: Boolean, default: true },
+
+    // What an unsubscribe link carries instead of the email address, so the
+    // link cannot be used to guess at or remove somebody else's address.
+    unsubscribeToken: {
+      type: String,
+      required: true,
+      unique: true,
+      default: newUnsubscribeToken,
+    },
   },
   { timestamps: true }
 );
