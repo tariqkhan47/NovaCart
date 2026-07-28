@@ -1,17 +1,64 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
+import { CATEGORIES } from "../lib/categories";
+
+/**
+ * Deals one product from each collection in turn.
+ *
+ * The catalog was seeded collection by collection, so plain newest-first puts
+ * all 32 watches ahead of everything else and the first screenful looks like a
+ * watch shop. Round-robin instead: the first row of cards is one product per
+ * collection, the next row is the second from each, and so on.
+ */
+function interleaveByCategory(list: any[]) {
+  const buckets = new Map<string, any[]>();
+
+  for (const product of list) {
+    const bucket = buckets.get(product.category);
+
+    if (bucket) {
+      bucket.push(product);
+    } else {
+      buckets.set(product.category, [product]);
+    }
+  }
+
+  // Deal in the order the collections are listed, so the run starts at Home
+  // Decor rather than wherever the newest product happened to land. Anything
+  // on a retired collection sorts to the back instead of jumping the queue.
+  const rank = (name: string) => {
+    const index = CATEGORIES.findIndex((item) => item.name === name);
+    return index === -1 ? CATEGORIES.length : index;
+  };
+
+  const dealt: any[] = [];
+  const rows = [...buckets.entries()].sort(
+    (a, b) => rank(a[0]) - rank(b[0])
+  );
+
+  for (let round = 0; dealt.length < list.length; round++) {
+    for (const [, bucket] of rows) {
+      if (round < bucket.length) dealt.push(bucket[round]);
+    }
+  }
+
+  return dealt;
+}
 
 export default function Home() {
 const { cart, addToCart } = useCart();
 const [products, setProducts] = useState<any[]>([]);
+const [featured, setFeatured] = useState<any[]>([]);
 
 useEffect(() => {
   fetchProducts();
+  fetchFeatured();
 }, []);
 
 const fetchProducts = async () => {
@@ -19,6 +66,17 @@ const fetchProducts = async () => {
     const res = await fetch("/api/products");
     const data = await res.json();
     setProducts(data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// The admin's hand-picked row, one product per collection.
+const fetchFeatured = async () => {
+  try {
+    const res = await fetch("/api/products?featured=true");
+    const data = await res.json();
+    setFeatured(interleaveByCategory(Array.isArray(data) ? data : []));
   } catch (error) {
     console.error(error);
   }
@@ -36,7 +94,7 @@ const router = useRouter();
   // Every filter change makes a fresh list, so it starts from the top again.
   const showFirstPage = () => setVisible(PAGE_SIZE);
 
-  const filteredProducts = products
+  const matchingProducts = products
     .filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
@@ -71,6 +129,13 @@ const router = useRouter();
       }
     });
 
+  // An explicit sort is the shopper's own order, so leave it alone; only the
+  // unsorted default gets spread across the collections.
+  const filteredProducts =
+    sortBy === "default"
+      ? interleaveByCategory(matchingProducts)
+      : matchingProducts;
+
   return (
   
     <>
@@ -101,6 +166,45 @@ const router = useRouter();
           </div>
         </section>
 
+        {/* Featured Products — the hand-picked row, one per collection. */}
+        {featured.length > 0 && (
+          <section className="max-w-7xl mx-auto pt-14 px-4 sm:px-6">
+            <div className="text-center mb-10">
+              <span className="eyebrow">Handpicked</span>
+
+              <h2 className="section-title text-3xl sm:text-4xl mt-3">
+                Featured Products
+              </h2>
+
+              <p className="text-muted-soft mt-3">
+                One standout pick from every collection.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featured.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  id={product._id}
+                  name={product.name}
+                  price={product.price}
+                  image={product.image}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  onAddToCart={() =>
+                    addToCart({
+                      id: product._id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Search */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-12">
           <input
@@ -119,16 +223,7 @@ const router = useRouter();
         <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
 
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
-            {[
-              "All",
-              "Home Decor",
-              "Kitchen",
-              "Fashion",
-              "Watches",
-              "Accessories",
-              "Kids Items",
-              "Kids Accessories",
-            ].map((item) => (
+            {["All", ...CATEGORIES.map((item) => item.name)].map((item) => (
               <button
                 key={item}
                 onClick={() => {
@@ -188,7 +283,7 @@ const router = useRouter();
           <div className="text-center mb-10">
             <span className="eyebrow">Our Collection</span>
             <h2 className="section-title text-3xl sm:text-4xl mt-3">
-              Featured Products
+              All Products
             </h2>
           </div>
 
@@ -252,28 +347,22 @@ const router = useRouter();
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { icon: "🛋️", label: "Home Decor" },
-                { icon: "🍳", label: "Kitchen" },
-                { icon: "👗", label: "Fashion" },
-                { icon: "⌚", label: "Watches" },
-                { icon: "👜", label: "Accessories" },
-                { icon: "🧸", label: "Kids Items" },
-                { icon: "🎒", label: "Kids Accessories" },
-              ].map((cat) => (
-                <button
-                  key={cat.label}
-                  onClick={() => {
-                    setCategory(cat.label);
-                    showFirstPage();
-                  }}
+              {CATEGORIES.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/category/${cat.slug}`}
                   className="card card-hover p-6 sm:p-8 text-center"
                 >
                   <div className="text-4xl sm:text-5xl">{cat.icon}</div>
+
                   <h3 className="mt-4 font-semibold text-foreground">
-                    {cat.label}
+                    {cat.name}
                   </h3>
-                </button>
+
+                  <p className="mt-2 text-sm text-muted-soft">
+                    {cat.tagline}
+                  </p>
+                </Link>
               ))}
             </div>
           </div>

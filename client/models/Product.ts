@@ -31,6 +31,12 @@ const ProductSchema = new Schema(
       type: Number,
       default: 0,
     },
+
+    // Hand-picked for the Featured Products row on the home page.
+    featured: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

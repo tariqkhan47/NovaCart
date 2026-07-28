@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { slugifyCategory } from "../../../lib/categories";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { useCart } from "../../../context/CartContext";
@@ -82,7 +84,12 @@ export default function ProductDetailPage() {
               </div>
 
               <div className="min-w-0">
-                <span className="badge">{product.category}</span>
+                <Link
+                  href={`/category/${slugifyCategory(product.category)}`}
+                  className="badge"
+                >
+                  {product.category}
+                </Link>
 
                 <h1 className="text-2xl sm:text-3xl font-bold mt-4 break-words">
                   {product.name}

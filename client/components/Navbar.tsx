@@ -41,9 +41,9 @@ export default function Navbar({ cart }: NavbarProps) {
         Products
       </Link>
 
-      <a href="#" className="nav-link py-1 md:py-0" onClick={close}>
+      <Link href="/category" className="nav-link py-1 md:py-0" onClick={close}>
         Categories
-      </a>
+      </Link>
 
       <a href="#" className="nav-link py-1 md:py-0" onClick={close}>
         Contact

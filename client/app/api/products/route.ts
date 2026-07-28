@@ -5,11 +5,22 @@ import { requireAdmin } from "@/lib/auth";
 
 // GET ALL PRODUCTS, each with its average rating and review count.
 // Done as one aggregation rather than a query per product.
-export async function GET() {
+//
+// ?category=Home Decor narrows it to one collection, so a category page does
+// not have to pull the whole catalog down and filter in the browser.
+export async function GET(req: NextRequest) {
   try {
     await connectDB();
 
+    const category = req.nextUrl.searchParams.get("category");
+    const featuredOnly = req.nextUrl.searchParams.get("featured") === "true";
+
+    const match: Record<string, unknown> = {};
+    if (category) match.category = category;
+    if (featuredOnly) match.featured = true;
+
     const products = await Product.aggregate([
+      ...(Object.keys(match).length ? [{ $match: match }] : []),
       {
         $lookup: {
           from: "reviews",
@@ -48,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const { name, price, category, image, description, stock } =
+    const { name, price, category, image, description, stock, featured } =
       await req.json();
 
     // Only accept known fields, so a caller cannot inject their own.
@@ -59,6 +70,7 @@ export async function POST(req: NextRequest) {
       image,
       description,
       stock,
+      featured: Boolean(featured),
     });
 
     return NextResponse.json(product, { status: 201 });

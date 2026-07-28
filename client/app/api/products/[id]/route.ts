@@ -62,12 +62,20 @@ export async function PUT(
       );
     }
 
-    const { name, price, category, image, description, stock } =
+    const { name, price, category, image, description, stock, featured } =
       await req.json();
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, price, category, image, description, stock },
+      {
+        name,
+        price,
+        category,
+        image,
+        description,
+        stock,
+        featured: Boolean(featured),
+      },
       {
         new: true,
         runValidators: true,

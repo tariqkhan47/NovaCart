@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CATEGORY_NAMES } from "../../../lib/categories";
 
 export default function AddProductPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Home Decor");
+  const [category, setCategory] = useState(CATEGORY_NAMES[0]);
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState("10");
+  const [isFeatured, setIsFeatured] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -36,6 +38,7 @@ export default function AddProductPage() {
           image,
           description,
           stock: Number(stock),
+          featured: isFeatured,
         }),
       });
 
@@ -120,13 +123,11 @@ export default function AddProductPage() {
               onChange={(e) => setCategory(e.target.value)}
               className="field"
             >
-              <option>Home Decor</option>
-              <option>Kitchen</option>
-              <option>Fashion</option>
-              <option>Watches</option>
-              <option>Accessories</option>
-              <option>Kids Items</option>
-              <option>Kids Accessories</option>
+              {CATEGORY_NAMES.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -175,6 +176,16 @@ export default function AddProductPage() {
               required
             />
           </div>
+
+          <label className="flex items-center gap-3 font-semibold">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-4 h-4"
+            />
+            Show in Featured Products on the home page
+          </label>
 
           {error && (
             <p className="text-danger text-sm text-center">{error}</p>

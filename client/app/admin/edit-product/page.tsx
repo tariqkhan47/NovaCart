@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "../../../lib/currency";
+import { CATEGORY_NAMES } from "../../../lib/categories";
 
 type Product = {
   _id: string;
@@ -12,6 +13,7 @@ type Product = {
   image: string;
   description: string;
   stock: number;
+  featured?: boolean;
 };
 
 export default function EditProductPage() {
@@ -28,6 +30,7 @@ export default function EditProductPage() {
   const [description, setDescription] =
     useState("");
   const [stock, setStock] = useState("");
+  const [isFeatured, setIsFeatured] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -51,6 +54,7 @@ export default function EditProductPage() {
     setImage(product.image);
     setDescription(product.description);
     setStock(String(product.stock ?? 0));
+    setIsFeatured(Boolean(product.featured));
     setError("");
     setSuccess("");
   }
@@ -79,6 +83,7 @@ export default function EditProductPage() {
           image,
           description,
           stock: Number(stock),
+          featured: isFeatured,
         }),
       }
     );
@@ -171,13 +176,23 @@ export default function EditProductPage() {
               className="field"
             />
 
-            <input
-              type="text"
-              placeholder="Category"
+            <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="field"
-            />
+            >
+              {/* A product left on a retired collection keeps its own option,
+                  so opening the form does not quietly re-file it. */}
+              {!CATEGORY_NAMES.includes(category) && (
+                <option value={category}>{category} (uncategorized)</option>
+              )}
+
+              {CATEGORY_NAMES.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
 
             <input
               type="text"
@@ -202,6 +217,16 @@ export default function EditProductPage() {
               onChange={(e) => setDescription(e.target.value)}
               className="field h-32"
             />
+
+            <label className="flex items-center gap-3 font-semibold">
+              <input
+                type="checkbox"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="w-4 h-4"
+              />
+              Show in Featured Products on the home page
+            </label>
 
             {error && (
               <p className="text-danger text-sm text-center">{error}</p>
