@@ -3,12 +3,31 @@ import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { requireAdmin } from "@/lib/auth";
 
-// GET ALL PRODUCTS
+// GET ALL PRODUCTS, each with its average rating and review count.
+// Done as one aggregation rather than a query per product.
 export async function GET() {
   try {
     await connectDB();
 
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "product",
+          as: "reviews",
+        },
+      },
+      {
+        $addFields: {
+          // null when a product has no reviews yet
+          rating: { $avg: "$reviews.rating" },
+          reviewCount: { $size: "$reviews" },
+        },
+      },
+      { $project: { reviews: 0 } },
+      { $sort: { createdAt: -1 } },
+    ]);
 
     return NextResponse.json(products);
   } catch (error) {

@@ -54,6 +54,10 @@ const router = useRouter();
         case "za":
           return b.name.localeCompare(a.name);
 
+        case "rating":
+          // Unreviewed products sink to the bottom rather than tying at 0.
+          return (b.rating ?? -1) - (a.rating ?? -1);
+
         default:
           return 0;
       }
@@ -150,6 +154,10 @@ const router = useRouter();
               <option value="za">
                 Name: Z → A
               </option>
+
+              <option value="rating">
+                Top Rated
+              </option>
             </select>
           </div>
 
@@ -180,6 +188,8 @@ const router = useRouter();
                   name={product.name}
                   price={product.price}
                   image={product.image}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
                   onAddToCart={() =>
                     addToCart({
                       id: product._id,

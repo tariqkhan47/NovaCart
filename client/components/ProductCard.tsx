@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
 import { formatPrice } from "../lib/currency";
+import Stars from "./Stars";
 
 type ProductProps = {
   id: string;
   name: string;
   price: number;
   image: string;
+  rating?: number | null;
+  reviewCount?: number;
   onAddToCart: () => void;
 };
 
@@ -17,6 +20,8 @@ export default function ProductCard({
   name,
   price,
   image,
+  rating,
+  reviewCount = 0,
   onAddToCart,
 }: ProductProps) {
   const {
@@ -64,7 +69,21 @@ export default function ProductCard({
         </h3>
       </Link>
 
-      <p className="price text-lg mt-2">{formatPrice(price)}</p>
+      {/* Reserve the row either way so cards keep the same height. */}
+      <div className="mt-2 h-6 flex items-center gap-2">
+        {reviewCount > 0 && rating ? (
+          <>
+            <Stars rating={rating} />
+            <span className="text-muted-soft text-sm">
+              {rating.toFixed(1)} ({reviewCount})
+            </span>
+          </>
+        ) : (
+          <span className="text-muted-soft text-sm">No reviews yet</span>
+        )}
+      </div>
+
+      <p className="price text-lg mt-1">{formatPrice(price)}</p>
 
       <button
         onClick={onAddToCart}

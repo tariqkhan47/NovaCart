@@ -84,5 +84,3 @@ There is deliberately no way to create an admin from the browser.
 - Product images are URLs typed in by the admin; there is no upload.
 - Anyone with an account can review a product; there is no check that they
   actually bought it.
-- Product cards do not show star ratings yet — ratings appear on the product
-  page only.
