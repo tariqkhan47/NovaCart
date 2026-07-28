@@ -8,7 +8,7 @@ export default function AddProductPage() {
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Electronics");
+  const [category, setCategory] = useState("Home Decor");
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState("10");
@@ -56,7 +56,7 @@ export default function AddProductPage() {
 
       setName("");
       setPrice("");
-      setCategory("Electronics");
+      setCategory("Home Decor");
       setImage("");
       setDescription("");
       setStock("10");
@@ -120,10 +120,13 @@ export default function AddProductPage() {
               onChange={(e) => setCategory(e.target.value)}
               className="field"
             >
-              <option>Electronics</option>
+              <option>Home Decor</option>
+              <option>Kitchen</option>
               <option>Fashion</option>
+              <option>Watches</option>
               <option>Accessories</option>
-              <option>Home</option>
+              <option>Kids Items</option>
+              <option>Kids Accessories</option>
             </select>
           </div>
 

@@ -22,9 +22,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "NovaCart — Electronics, Fashion, Home & Accessories",
+  title: "NovaCart — Home Decor, Kitchen, Fashion, Watches & Kids",
   description:
-    "Shop electronics, fashion, home decor and accessories at NovaCart. Cash on Delivery across Pakistan.",
+    "Shop home decor, kitchen, fashion, watches, accessories and kids products at NovaCart. Cash on Delivery across Pakistan.",
 };
 
 export default function RootLayout({

@@ -28,6 +28,14 @@ const router = useRouter();
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("default");
 
+  // The catalog runs to a few hundred products, so show a screenful at a time
+  // instead of making every phone download every image up front.
+  const PAGE_SIZE = 24;
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  // Every filter change makes a fresh list, so it starts from the top again.
+  const showFirstPage = () => setVisible(PAGE_SIZE);
+
   const filteredProducts = products
     .filter((product) => {
       const matchesSearch = product.name
@@ -99,7 +107,10 @@ const router = useRouter();
             type="text"
             placeholder="🔍 Search products..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              showFirstPage();
+            }}
             className="field p-4 shadow-sm"
           />
         </section>
@@ -110,14 +121,20 @@ const router = useRouter();
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
             {[
               "All",
-              "Electronics",
+              "Home Decor",
+              "Kitchen",
               "Fashion",
+              "Watches",
               "Accessories",
-              "Home",
+              "Kids Items",
+              "Kids Accessories",
             ].map((item) => (
               <button
                 key={item}
-                onClick={() => setCategory(item)}
+                onClick={() => {
+                  setCategory(item);
+                  showFirstPage();
+                }}
                 className={`chip ${
                   category === item ? "chip-active" : ""
                 }`}
@@ -130,9 +147,10 @@ const router = useRouter();
           <div className="flex justify-end">
             <select
               value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value)
-              }
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                showFirstPage();
+              }}
               className="field w-auto px-4 py-2"
             >
               <option value="default">
@@ -179,9 +197,10 @@ const router = useRouter();
               No products found.
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-              {filteredProducts.map((product) => (
+              {filteredProducts.slice(0, visible).map((product) => (
                <ProductCard
   key={product._id}
   id={product._id}
@@ -202,6 +221,23 @@ const router = useRouter();
               ))}
 
             </div>
+
+            <div className="text-center mt-10">
+              <p className="text-muted-soft">
+                Showing {Math.min(visible, filteredProducts.length)} of{" "}
+                {filteredProducts.length} products
+              </p>
+
+              {visible < filteredProducts.length && (
+                <button
+                  onClick={() => setVisible((count) => count + PAGE_SIZE)}
+                  className="btn btn-outline btn-lg mt-4"
+                >
+                  Load More
+                </button>
+              )}
+            </div>
+            </>
           )}
 
         </section>
@@ -217,14 +253,20 @@ const router = useRouter();
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {[
-                { icon: "📱", label: "Electronics" },
-                { icon: "👕", label: "Fashion" },
-                { icon: "⌚", label: "Accessories" },
-                { icon: "🏠", label: "Home" },
+                { icon: "🛋️", label: "Home Decor" },
+                { icon: "🍳", label: "Kitchen" },
+                { icon: "👗", label: "Fashion" },
+                { icon: "⌚", label: "Watches" },
+                { icon: "👜", label: "Accessories" },
+                { icon: "🧸", label: "Kids Items" },
+                { icon: "🎒", label: "Kids Accessories" },
               ].map((cat) => (
                 <button
                   key={cat.label}
-                  onClick={() => setCategory(cat.label)}
+                  onClick={() => {
+                    setCategory(cat.label);
+                    showFirstPage();
+                  }}
                   className="card card-hover p-6 sm:p-8 text-center"
                 >
                   <div className="text-4xl sm:text-5xl">{cat.icon}</div>

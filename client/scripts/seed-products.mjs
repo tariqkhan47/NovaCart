@@ -1,9 +1,11 @@
 /**
- * Puts a few starter products in the database.
+ * Loads the store catalog into the database.
  *
  *   node scripts/seed-products.mjs
  *
- * Safe to re-run: it skips any product whose name is already there.
+ * The products come from the HHC dropshipping catalog and live in
+ * hhc-catalog.json. Safe to re-run: it skips any product whose name is
+ * already there.
  */
 import mongoose from "mongoose";
 import { readFileSync } from "node:fs";
@@ -28,69 +30,49 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
-const seed = [
-  {
-    name: "Wireless Headphones",
-    price: 14999,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-    description: "High quality wireless headphones with amazing sound.",
-    stock: 25,
-  },
-  {
-    name: "Smart Watch",
-    price: 22999,
-    category: "Accessories",
-    image:
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-    description: "Modern smartwatch with health tracking features.",
-    stock: 15,
-  },
-  {
-    name: "Gaming Mouse",
-    price: 6499,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500",
-    description: "Fast and accurate gaming mouse with RGB lights.",
-    stock: 40,
-  },
-  {
-    name: "Bluetooth Speaker",
-    price: 18999,
-    category: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500",
-    description: "Portable Bluetooth speaker with deep bass.",
-    stock: 20,
-  },
-];
+const seed = JSON.parse(
+  readFileSync(new URL("./hhc-catalog.json", import.meta.url), "utf8")
+);
 
 await mongoose.connect(process.env.MONGODB_URI);
 
 const products = mongoose.connection.db.collection("products");
 
 let added = 0;
+let skipped = 0;
 
 for (const product of seed) {
   const exists = await products.findOne({ name: product.name });
 
   if (exists) {
-    console.log(`skip  ${product.name} (already there)`);
+    skipped++;
     continue;
   }
 
+  // hhcId is kept in the JSON so prices can be re-synced later, but the
+  // products collection only carries what the Product model declares.
+  const { hhcId, ...fields } = product;
+
   await products.insertOne({
-    ...product,
+    ...fields,
     createdAt: new Date(),
     updatedAt: new Date(),
   });
 
-  console.log(`added ${product.name}`);
   added++;
 }
 
-console.log(`\nDone. ${added} product(s) added.`);
+console.log(`Done. ${added} product(s) added, ${skipped} already there.`);
+
+const counts = await products
+  .aggregate([
+    { $group: { _id: "$category", n: { $sum: 1 } } },
+    { $sort: { _id: 1 } },
+  ])
+  .toArray();
+
+for (const row of counts) {
+  console.log(`  ${String(row.n).padStart(3)}  ${row._id}`);
+}
 
 await mongoose.disconnect();
