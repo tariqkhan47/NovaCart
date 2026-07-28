@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 import { ThemeProvider } from "../context/ThemeContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
@@ -19,8 +22,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "NovaCart",
-  description: "Modern Ecommerce Store",
+  title: "NovaCart — Electronics, Fashion, Home & Accessories",
+  description:
+    "Shop electronics, fashion, home decor and accessories at NovaCart. Cash on Delivery across Pakistan.",
 };
 
 export default function RootLayout({
@@ -43,6 +47,10 @@ export default function RootLayout({
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>
+
+      {/* Both are no-ops until switched on in the Vercel dashboard. */}
+      <Analytics />
+      <SpeedInsights />
     </body>
   </html>
 );
