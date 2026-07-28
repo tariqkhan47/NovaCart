@@ -85,12 +85,12 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="page py-12 px-6">
-      <div className="max-w-3xl mx-auto panel p-8">
+    <main className="page py-12 px-4 sm:px-6">
+      <div className="max-w-3xl mx-auto panel p-5 sm:p-8">
 
         <div className="text-center mb-8">
           <span className="eyebrow">Almost There</span>
-          <h1 className="text-4xl font-bold mt-3">
+          <h1 className="text-3xl sm:text-4xl font-bold mt-3">
             Checkout
           </h1>
         </div>
@@ -133,10 +133,10 @@ export default function CheckoutPage() {
               Payment Method
             </h2>
 
-            <div className="card p-5 flex items-start gap-4">
-              <span className="text-3xl">🚚</span>
+            <div className="card p-4 sm:p-5 flex items-start gap-4">
+              <span className="text-3xl shrink-0">🚚</span>
 
-              <div>
+              <div className="min-w-0">
                 <p className="font-semibold text-foreground">
                   Cash on Delivery
                 </p>
@@ -148,12 +148,12 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="border-t divider pt-6 flex justify-between items-center">
+          <div className="border-t divider pt-6 flex flex-wrap justify-between items-center gap-3">
             <h2 className="text-2xl font-bold">
               Total
             </h2>
 
-            <span className="price text-3xl">
+            <span className="price text-2xl sm:text-3xl">
               {formatPrice(total)}
             </span>
           </div>

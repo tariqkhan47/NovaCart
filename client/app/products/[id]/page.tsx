@@ -54,7 +54,7 @@ export default function ProductDetailPage() {
     <>
       <Navbar cart={cart.length} />
 
-      <main className="page py-12 px-6">
+      <main className="page py-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           {loading ? (
             <p className="text-center text-muted-soft text-xl">Loading...</p>
@@ -71,22 +71,24 @@ export default function ProductDetailPage() {
               </button>
             </div>
           ) : (
-            <div className="panel p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="panel p-5 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="overflow-hidden rounded-2xl surface-muted">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-96 object-cover"
+                  className="w-full h-64 sm:h-96 object-cover"
                   loading="lazy"
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <span className="badge">{product.category}</span>
 
-                <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mt-4 break-words">
+                  {product.name}
+                </h1>
 
-                <p className="price text-3xl mt-4">
+                <p className="price text-2xl sm:text-3xl mt-4">
                   {formatPrice(product.price)}
                 </p>
 

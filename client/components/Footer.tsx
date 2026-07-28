@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="bg-ink-900 text-ink-50 pt-14 pb-8 mt-16">
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 md:grid-cols-3 gap-10">
         <div>
           <h2 className="text-2xl font-bold text-white">
             Nova<span className="text-brand-400">Cart</span>
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-12 pt-6 border-t border-white/10 text-sm text-ink-100/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-12 pt-6 border-t border-white/10 text-sm text-ink-100/60">
         © {new Date().getFullYear()} NovaCart. All rights reserved.
       </div>
     </footer>

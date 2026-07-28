@@ -17,9 +17,9 @@ export default function CartPage() {
   );
 
   return (
-    <main className="page py-10 px-6">
-      <div className="max-w-5xl mx-auto panel p-8">
-        <h1 className="text-4xl font-bold mb-8">
+    <main className="page py-10 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto panel p-5 sm:p-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8">
           🛒 Shopping Cart
         </h1>
 
@@ -39,17 +39,19 @@ export default function CartPage() {
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-6 border-b divider pb-4"
+                  className="flex flex-wrap items-center gap-4 sm:gap-6 border-b divider pb-4"
                 >
                   <img
                     src={item.image}
                     alt={item.name}
                     loading="lazy"
-                    className="w-24 h-24 object-cover rounded-lg"
+                    className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shrink-0"
                   />
 
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold">
+                  {/* min-w-0 lets a long product name wrap instead of forcing
+                      the row wider than the screen. */}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl font-semibold break-words">
                       {item.name}
                     </h2>
 
@@ -88,12 +90,12 @@ export default function CartPage() {
               ))}
             </div>
 
-            <div className="flex justify-between items-center mt-8">
+            <div className="flex flex-wrap justify-between items-center gap-3 mt-8">
               <h3 className="text-2xl font-bold">
                 Total:
               </h3>
 
-              <span className="price text-3xl">
+              <span className="price text-2xl sm:text-3xl">
                 {formatPrice(total)}
               </span>
             </div>

@@ -86,13 +86,13 @@ export default function AdminPage() {
   }));
 
   return (
-    <main className="page p-8">
+    <main className="page p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
 
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
           <div>
             <span className="eyebrow">NovaCart Admin</span>
-            <h1 className="text-4xl font-bold mt-2">
+            <h1 className="text-3xl sm:text-4xl font-bold mt-2">
               📊 Admin Dashboard
             </h1>
           </div>
@@ -111,7 +111,7 @@ export default function AdminPage() {
 
         {/* Stats */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 
   {[
     { label: "📦 Products", value: productCount, tone: "text-brand-600" },
@@ -126,9 +126,10 @@ export default function AdminPage() {
       tone: "text-brand-600",
     },
   ].map((stat) => (
-    <div key={stat.label} className="card card-hover p-6">
-      <h2 className="text-lg font-semibold">{stat.label}</h2>
-      <p className={`text-4xl font-bold mt-3 ${stat.tone}`}>
+    <div key={stat.label} className="card card-hover p-4 sm:p-6">
+      <h2 className="text-base sm:text-lg font-semibold">{stat.label}</h2>
+      {/* break-words keeps a long revenue figure inside its card on a phone. */}
+      <p className={`text-2xl sm:text-3xl lg:text-4xl font-bold mt-3 break-words ${stat.tone}`}>
         {stat.value}
       </p>
     </div>
@@ -138,9 +139,9 @@ export default function AdminPage() {
 
         {/* Chart */}
 
-        <div className="panel p-6 mt-10">
+        <div className="panel p-4 sm:p-6 mt-10">
 
-          <h2 className="text-2xl font-bold mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6">
             📈 Sales Analytics
           </h2>
 
@@ -165,34 +166,34 @@ export default function AdminPage() {
 
         {/* Actions */}
 
-        <div className="panel p-6 mt-10">
+        <div className="panel p-4 sm:p-6 mt-10">
 
-          <h2 className="text-2xl font-bold mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6">
             ⚙️ Admin Actions
           </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
 
             <Link href="/admin/add-product">
-              <button className="btn btn-primary btn-block py-6">
+              <button className="btn btn-primary btn-block py-4 sm:py-6 text-sm sm:text-base">
                 ➕ Add Product
               </button>
             </Link>
 
             <Link href="/admin/edit-product">
-              <button className="btn btn-dark btn-block py-6">
+              <button className="btn btn-dark btn-block py-4 sm:py-6 text-sm sm:text-base">
                 ✏️ Edit Product
               </button>
             </Link>
 
             <Link href="/admin/delete-product">
-              <button className="btn btn-danger btn-block py-6">
+              <button className="btn btn-danger btn-block py-4 sm:py-6 text-sm sm:text-base">
                 🗑 Delete Product
               </button>
             </Link>
 
             <Link href="/admin/orders">
-              <button className="btn btn-outline btn-block py-6">
+              <button className="btn btn-outline btn-block py-4 sm:py-6 text-sm sm:text-base">
                 📦 View Orders
               </button>
             </Link>

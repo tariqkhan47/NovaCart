@@ -83,7 +83,7 @@ export default function ProductReviews({
   }
 
   return (
-    <section className="panel p-8 mt-8">
+    <section className="panel p-5 sm:p-8 mt-8">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <h2 className="section-title text-2xl">Customer Reviews</h2>
 
@@ -162,16 +162,16 @@ export default function ProductReviews({
           {reviews.map((review) => (
             <div key={review._id} className="border-t divider pt-5">
               <div className="flex items-center justify-between gap-4">
-                <h3 className="font-bold">{review.name}</h3>
+                <h3 className="font-bold min-w-0 break-words">{review.name}</h3>
 
-                <span className="text-muted-soft text-sm">
+                <span className="text-muted-soft text-sm whitespace-nowrap">
                   {new Date(review.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
               <Stars rating={review.rating} />
 
-              <p className="mt-2 text-muted-soft">{review.comment}</p>
+              <p className="mt-2 text-muted-soft break-words">{review.comment}</p>
             </div>
           ))}
         </div>

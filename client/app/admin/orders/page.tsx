@@ -55,20 +55,20 @@ export default function AdminOrdersPage() {
     .reduce((sum, order) => sum + order.total, 0);
 
   return (
-    <main className="page p-8">
+    <main className="page p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
 
         <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
           <div>
             <span className="eyebrow">NovaCart Admin</span>
-            <h1 className="text-4xl font-bold mt-2">
+            <h1 className="text-3xl sm:text-4xl font-bold mt-2">
               📋 Customer Orders
             </h1>
           </div>
 
-          <div className="text-right">
+          <div className="sm:text-right">
             <p className="text-muted-soft text-sm">Revenue (excl. cancelled)</p>
-            <p className="price text-3xl">{formatPrice(revenue)}</p>
+            <p className="price text-2xl sm:text-3xl">{formatPrice(revenue)}</p>
           </div>
         </div>
 
@@ -77,20 +77,20 @@ export default function AdminOrdersPage() {
         )}
 
         {loading ? (
-          <div className="panel p-8 text-center text-muted-soft text-xl">
+          <div className="panel p-5 sm:p-8 text-center text-muted-soft text-xl">
             Loading...
           </div>
         ) : orders.length === 0 ? (
-          <div className="panel p-8 text-center text-muted-soft text-xl">
+          <div className="panel p-5 sm:p-8 text-center text-muted-soft text-xl">
             No orders yet.
           </div>
         ) : (
           <div className="space-y-6">
             {orders.map((order) => (
-              <div key={order._id} className="card p-6">
+              <div key={order._id} className="card p-4 sm:p-6">
 
                 <div className="flex flex-wrap justify-between items-start gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <h2 className="font-bold text-xl">
                       Order #{order._id.slice(-6).toUpperCase()}
                     </h2>
@@ -102,15 +102,15 @@ export default function AdminOrdersPage() {
                     <p className="mt-3 font-semibold">
                       {order.customer.name}
                     </p>
-                    <p className="text-muted-soft text-sm">
+                    <p className="text-muted-soft text-sm break-words">
                       {order.customer.phone} · {order.customer.email}
                     </p>
-                    <p className="text-muted-soft text-sm max-w-md">
+                    <p className="text-muted-soft text-sm max-w-md break-words">
                       {order.customer.address}
                     </p>
                   </div>
 
-                  <div className="text-right">
+                  <div className="sm:text-right">
                     <p className="price text-2xl">
                       {formatPrice(order.total)}
                     </p>
@@ -142,13 +142,13 @@ export default function AdminOrdersPage() {
                   {order.items.map((item, index) => (
                     <div
                       key={`${order._id}-${index}`}
-                      className="flex justify-between py-2"
+                      className="flex justify-between gap-3 py-2"
                     >
-                      <span>
+                      <span className="min-w-0 break-words">
                         {item.name} × {item.quantity}
                       </span>
 
-                      <span>
+                      <span className="whitespace-nowrap">
                         {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>

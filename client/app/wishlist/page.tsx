@@ -14,10 +14,10 @@ export default function WishlistPage() {
   const { addToCart } = useCart();
 
   return (
-    <main className="page py-10 px-6">
-      <div className="max-w-6xl mx-auto panel p-8">
+    <main className="page py-10 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto panel p-5 sm:p-8">
 
-        <h1 className="text-4xl font-bold mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8">
           ❤️ My Wishlist
         </h1>
 
@@ -40,33 +40,34 @@ export default function WishlistPage() {
 
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
 
             {wishlist.map((item) => (
 
               <div
                 key={item.id}
-                className="card card-hover p-5 flex gap-6"
+                className="card card-hover p-4 sm:p-5 flex gap-4 sm:gap-6"
               >
 
                 <img
                   src={item.image}
                   alt={item.name}
                   loading="lazy"
-                  className="w-40 h-40 rounded-2xl object-cover surface-muted"
+                  className="w-24 h-24 sm:w-40 sm:h-40 shrink-0 rounded-2xl object-cover surface-muted"
                 />
 
-                <div className="flex-1">
+                {/* min-w-0 so a long name wraps rather than widening the card. */}
+                <div className="flex-1 min-w-0">
 
-                  <h2 className="text-2xl font-bold">
+                  <h2 className="text-lg sm:text-2xl font-bold break-words">
                     {item.name}
                   </h2>
 
-                  <p className="price text-xl mt-3">
+                  <p className="price text-lg sm:text-xl mt-2 sm:mt-3">
                     {formatPrice(item.price)}
                   </p>
 
-                  <div className="flex gap-3 mt-8">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-8">
 
                     <button
                       onClick={() =>

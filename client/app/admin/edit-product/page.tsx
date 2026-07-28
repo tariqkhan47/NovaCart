@@ -105,11 +105,11 @@ export default function EditProductPage() {
   }
 
   return (
-    <main className="page py-12 px-6">
+    <main className="page py-12 px-4 sm:px-6">
 
       <div className="max-w-6xl mx-auto">
 
-        <h1 className="text-4xl font-bold mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8">
           ✏️ Edit Products
         </h1>
 
@@ -117,15 +117,15 @@ export default function EditProductPage() {
           <div className="card p-4 mb-6 text-success">✅ {success}</div>
         )}
 
-        <div className="panel p-6 mb-10">
+        <div className="panel p-4 sm:p-6 mb-10">
 
           {products.map((product) => (
             <div
               key={product._id}
-              className="flex justify-between items-center border-b divider py-4"
+              className="flex flex-wrap justify-between items-center gap-3 border-b divider py-4"
             >
-              <div>
-                <h2 className="font-bold">
+              <div className="min-w-0">
+                <h2 className="font-bold break-words">
                   {product.name}
                 </h2>
 
@@ -149,7 +149,7 @@ export default function EditProductPage() {
                 {selectedProduct && (
           <form
             onSubmit={handleUpdate}
-            className="panel p-8 space-y-5"
+            className="panel p-5 sm:p-8 space-y-5"
           >
             <h2 className="text-2xl font-bold">
               Update Product

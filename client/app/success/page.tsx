@@ -4,8 +4,8 @@ import Link from "next/link";
 
 export default function SuccessPage() {
   return (
-    <main className="page flex items-center justify-center px-6">
-      <div className="panel p-10 text-center max-w-lg">
+    <main className="page flex items-center justify-center px-4 sm:px-6">
+      <div className="panel p-6 sm:p-10 text-center max-w-lg">
         <h1 className="text-5xl mb-4">✅</h1>
 
         <h2 className="text-3xl font-bold mb-4">

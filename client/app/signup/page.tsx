@@ -58,8 +58,8 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="page flex items-center justify-center px-6">
-      <div className="panel p-8 w-full max-w-md">
+    <main className="page flex items-center justify-center px-4 sm:px-6">
+      <div className="panel p-5 sm:p-8 w-full max-w-md">
         <div className="text-center mb-7">
           <span className="eyebrow">Join NovaCart</span>
           <h1 className="text-3xl font-bold mt-3">

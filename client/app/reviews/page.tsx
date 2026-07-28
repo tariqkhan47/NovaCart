@@ -34,12 +34,12 @@ export default function ReviewsPage() {
   }, []);
 
   return (
-    <main className="page py-10 px-6">
+    <main className="page py-10 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
 
         <div className="text-center mb-10">
           <span className="eyebrow">What Shoppers Say</span>
-          <h1 className="text-4xl font-bold mt-3">
+          <h1 className="text-3xl sm:text-4xl font-bold mt-3">
             ⭐ Customer Reviews
           </h1>
           <p className="text-muted-soft mt-3">
@@ -48,15 +48,15 @@ export default function ReviewsPage() {
         </div>
 
         {loading ? (
-          <div className="panel p-8 text-center text-muted-soft text-xl">
+          <div className="panel p-5 sm:p-8 text-center text-muted-soft text-xl">
             Loading...
           </div>
         ) : error ? (
-          <div className="panel p-8 text-center text-danger text-xl">
+          <div className="panel p-5 sm:p-8 text-center text-danger text-xl">
             {error}
           </div>
         ) : reviews.length === 0 ? (
-          <div className="panel p-10 text-center">
+          <div className="panel p-6 sm:p-10 text-center">
             <p className="text-muted-soft text-xl mb-6">
               No reviews yet.
             </p>
@@ -70,32 +70,34 @@ export default function ReviewsPage() {
         ) : (
           <div className="space-y-5">
             {reviews.map((review) => (
-              <div key={review._id} className="card p-6">
+              <div key={review._id} className="card p-4 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-lg font-bold">{review.name}</h2>
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-bold break-words">{review.name}</h2>
                     <Stars rating={review.rating} />
                   </div>
 
                   {review.product && (
                     <Link
                       href={`/products/${review.product._id}`}
-                      className="flex items-center gap-3 link-brand"
+                      className="flex items-center gap-3 link-brand min-w-0"
                     >
                       {review.product.image && (
                         <img
                           src={review.product.image}
                           alt={review.product.name}
                           loading="lazy"
-                          className="w-12 h-12 rounded-lg object-cover"
+                          className="w-12 h-12 shrink-0 rounded-lg object-cover"
                         />
                       )}
-                      <span className="text-sm">{review.product.name}</span>
+                      <span className="text-sm break-words">
+                        {review.product.name}
+                      </span>
                     </Link>
                   )}
                 </div>
 
-                <p className="mt-3 text-muted-soft">{review.comment}</p>
+                <p className="mt-3 text-muted-soft break-words">{review.comment}</p>
 
                 <p className="text-muted-soft text-xs mt-3">
                   {new Date(review.createdAt).toLocaleDateString()}

@@ -71,19 +71,19 @@ const router = useRouter();
       <main className="page">
 
         {/* Hero Section */}
-        <section className="hero py-24">
+        <section className="hero py-16 sm:py-24">
           <div className="hero-pattern" />
 
-          <div className="relative max-w-7xl mx-auto px-6 text-center">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
             <span className="eyebrow text-brand-300">
               Quality · Value · Fast Delivery
             </span>
 
-            <h1 className="text-5xl md:text-6xl font-bold mt-4 mb-5">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mt-4 mb-5">
               Welcome to Nova<span className="text-brand-400">Cart</span>
             </h1>
 
-            <p className="text-lg text-brand-50/80 max-w-2xl mx-auto mb-9">
+            <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto mb-9">
               Discover the best products at the best prices.
             </p>
 
@@ -94,7 +94,7 @@ const router = useRouter();
         </section>
 
         {/* Search */}
-        <section className="max-w-7xl mx-auto px-6 mt-12">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-12">
           <input
             type="text"
             placeholder="🔍 Search products..."
@@ -105,9 +105,9 @@ const router = useRouter();
         </section>
 
         {/* Category + Sorting */}
-        <section className="max-w-7xl mx-auto px-6 mt-8">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
 
-          <div className="flex flex-wrap justify-center gap-4 mb-6">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
             {[
               "All",
               "Electronics",
@@ -165,11 +165,11 @@ const router = useRouter();
 
         {/* Featured Products */}
 
-        <section className="max-w-7xl mx-auto py-12 px-6">
+        <section className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
 
           <div className="text-center mb-10">
             <span className="eyebrow">Our Collection</span>
-            <h2 className="section-title text-4xl mt-3">
+            <h2 className="section-title text-3xl sm:text-4xl mt-3">
               Featured Products
             </h2>
           </div>
@@ -179,7 +179,7 @@ const router = useRouter();
               No products found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
               {filteredProducts.map((product) => (
                <ProductCard
@@ -207,15 +207,15 @@ const router = useRouter();
         </section>
                 {/* Categories */}
         <section className="surface-muted py-16 border-y border-border">
-          <div className="max-w-7xl mx-auto px-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10">
               <span className="eyebrow">Browse By</span>
-              <h2 className="section-title text-4xl mt-3">
+              <h2 className="section-title text-3xl sm:text-4xl mt-3">
                 Categories
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {[
                 { icon: "📱", label: "Electronics" },
                 { icon: "👕", label: "Fashion" },
@@ -225,9 +225,9 @@ const router = useRouter();
                 <button
                   key={cat.label}
                   onClick={() => setCategory(cat.label)}
-                  className="card card-hover p-8 text-center"
+                  className="card card-hover p-6 sm:p-8 text-center"
                 >
-                  <div className="text-5xl">{cat.icon}</div>
+                  <div className="text-4xl sm:text-5xl">{cat.icon}</div>
                   <h3 className="mt-4 font-semibold text-foreground">
                     {cat.label}
                   </h3>

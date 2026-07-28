@@ -68,12 +68,12 @@ export default function AddProductPage() {
   };
 
   return (
-    <main className="page py-10 px-6">
-      <div className="max-w-3xl mx-auto panel p-8">
+    <main className="page py-10 px-4 sm:px-6">
+      <div className="max-w-3xl mx-auto panel p-5 sm:p-8">
 
         <div className="text-center mb-8">
           <span className="eyebrow">Catalogue</span>
-          <h1 className="text-4xl font-bold mt-3">
+          <h1 className="text-3xl sm:text-4xl font-bold mt-3">
             ➕ Add New Product
           </h1>
         </div>

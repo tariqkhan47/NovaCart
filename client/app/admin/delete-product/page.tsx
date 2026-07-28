@@ -75,10 +75,10 @@ export default function DeleteProductPage() {
   }
 
   return (
-    <main className="page p-10">
+    <main className="page p-4 sm:p-10">
       <div className="max-w-5xl mx-auto">
 
-        <h1 className="text-4xl font-bold text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8">
           🗑 Delete Products
         </h1>
 
@@ -99,10 +99,10 @@ export default function DeleteProductPage() {
             {products.map((product) => (
               <div
                 key={product._id}
-                className="card flex justify-between items-center p-4"
+                className="card flex flex-wrap justify-between items-center gap-3 p-4"
               >
-                <div>
-                  <h2 className="text-xl font-bold">
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold break-words">
                     {product.name}
                   </h2>
 

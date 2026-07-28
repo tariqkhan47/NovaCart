@@ -87,6 +87,13 @@
 }
 
 @layer base {
+  html {
+    /* Safety net: one stray wide element should not let the whole page slide
+       sideways on a phone. `clip` rather than `hidden` on purpose — `hidden`
+       turns this into a scroll container and breaks the sticky navbar. */
+    overflow-x: clip;
+  }
+
   body {
     background: var(--background);
     color: var(--foreground);
@@ -114,6 +121,9 @@
   /* Page shell ------------------------------------------------- */
   .page {
     min-height: 100vh;
+    /* dvh tracks the mobile browser bar as it hides, so the page does not
+       jump the moment you start scrolling. Falls back to vh above. */
+    min-height: 100dvh;
     background: var(--background);
     color: var(--foreground);
   }

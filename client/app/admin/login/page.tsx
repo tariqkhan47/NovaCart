@@ -71,8 +71,8 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <main className="page flex items-center justify-center px-6">
-      <div className="panel p-8 w-full max-w-md">
+    <main className="page flex items-center justify-center px-4 sm:px-6">
+      <div className="panel p-5 sm:p-8 w-full max-w-md">
 
         <div className="text-center mb-8">
           <span className="eyebrow">Restricted Area</span>
