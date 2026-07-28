@@ -1,9 +1,14 @@
 import Link from "next/link";
+import NewsletterSignup from "./NewsletterSignup";
 import { CONTACT_LINKS, STORE } from "../lib/store";
 
 export default function Footer() {
   return (
     <footer className="bg-ink-900 text-ink-50 pt-14 pb-8 mt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12">
+        <NewsletterSignup />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 md:grid-cols-3 gap-10">
         <div>
           <h2 className="text-2xl font-bold text-white">

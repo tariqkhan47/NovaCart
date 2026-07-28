@@ -26,10 +26,11 @@ const SubscriberSchema = new Schema(
     name: { type: String, trim: true },
     phone: { type: String, trim: true },
 
-    // How they joined the list. Only orders sign people up today.
+    // How they joined the list: by ordering, by using the footer signup box,
+    // or added by hand.
     source: {
       type: String,
-      enum: ["order", "manual"],
+      enum: ["order", "newsletter", "manual"],
       default: "order",
     },
 
