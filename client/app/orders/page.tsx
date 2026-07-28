@@ -99,6 +99,16 @@ export default function OrdersPage() {
                       </span>
                     </div>
                   ))}
+
+                  {order.deliveryCharge ? (
+                    <div className="flex justify-between gap-3 py-2 text-muted-soft">
+                      <span>Delivery</span>
+
+                      <span className="whitespace-nowrap">
+                        {formatPrice(order.deliveryCharge)}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
                 <p className="text-muted-soft text-sm mt-4 break-words">

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../lib/currency";
+import { DELIVERY_CHARGE } from "../../lib/delivery";
 
 export default function CartPage() {
   const {
@@ -11,10 +12,12 @@ export default function CartPage() {
     decreaseQuantity,
   } = useCart();
 
-  const total = cart.reduce(
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const total = subtotal + DELIVERY_CHARGE;
 
   return (
     <main className="page py-10 px-4 sm:px-6">
@@ -90,14 +93,37 @@ export default function CartPage() {
               ))}
             </div>
 
-            <div className="flex flex-wrap justify-between items-center gap-3 mt-8">
-              <h3 className="text-2xl font-bold">
-                Total:
-              </h3>
+            <div className="mt-8 space-y-3">
+              <div className="flex justify-between items-center gap-3">
+                <span className="text-muted-soft">Subtotal</span>
 
-              <span className="price text-2xl sm:text-3xl">
-                {formatPrice(total)}
-              </span>
+                <span className="font-semibold">
+                  {formatPrice(subtotal)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-start gap-3">
+                <span className="text-muted-soft">
+                  Delivery
+                  <span className="block text-sm">
+                    Flat rate, all over Pakistan
+                  </span>
+                </span>
+
+                <span className="font-semibold whitespace-nowrap">
+                  {formatPrice(DELIVERY_CHARGE)}
+                </span>
+              </div>
+
+              <div className="border-t divider pt-4 flex flex-wrap justify-between items-center gap-3">
+                <h3 className="text-2xl font-bold">
+                  Total:
+                </h3>
+
+                <span className="price text-2xl sm:text-3xl">
+                  {formatPrice(total)}
+                </span>
+              </div>
             </div>
 
             <Link href="/checkout">

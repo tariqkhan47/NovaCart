@@ -43,6 +43,11 @@ const OrderSchema = new Schema(
       },
     },
 
+    // Copied in at order time, like the item prices above, so an old order
+    // still adds up if the delivery rate changes later.
+    deliveryCharge: { type: Number, required: true, default: 0 },
+
+    // Items plus delivery — what the customer hands to the courier.
     total: { type: Number, required: true },
 
     customer: {

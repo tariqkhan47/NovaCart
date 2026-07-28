@@ -19,6 +19,8 @@ export type OrderItem = {
 export type Order = {
   _id: string;
   items: OrderItem[];
+  // Missing on orders placed before delivery charges existed.
+  deliveryCharge?: number;
   total: number;
   customer: {
     name: string;

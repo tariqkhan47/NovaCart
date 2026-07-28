@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 import { getSessionFromRequest, requireUser } from "@/lib/auth";
+import { DELIVERY_CHARGE } from "@/lib/delivery";
 
 // LIST ORDERS — admins see every order, customers see only their own.
 export async function GET(req: NextRequest) {
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
     }
 
     const orderItems = [];
-    let total = 0;
+    let subtotal = 0;
 
     for (const item of items) {
       const productId = String(item.productId ?? "");
@@ -107,7 +108,7 @@ export async function POST(req: NextRequest) {
       reserved.push({ id: productId, quantity });
 
       // Price comes from the database, never from the browser.
-      total += claimed.price * quantity;
+      subtotal += claimed.price * quantity;
 
       orderItems.push({
         product: claimed._id,
@@ -121,7 +122,8 @@ export async function POST(req: NextRequest) {
     const order = await Order.create({
       user: session.userId,
       items: orderItems,
-      total,
+      deliveryCharge: DELIVERY_CHARGE,
+      total: subtotal + DELIVERY_CHARGE,
       customer: { name, email, phone, address },
       paymentMethod: "cod",
       status: "Pending",

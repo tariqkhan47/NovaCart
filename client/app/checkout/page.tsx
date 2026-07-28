@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { formatPrice } from "../../lib/currency";
+import { DELIVERY_CHARGE } from "../../lib/delivery";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -31,10 +32,14 @@ export default function CheckoutPage() {
     }
   }, [loading, user, router]);
 
-  const total = cart.reduce(
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  // An empty cart is not an order, so it should not be quoted a delivery fee.
+  const delivery = cart.length > 0 ? DELIVERY_CHARGE : 0;
+  const total = subtotal + delivery;
 
   async function handleOrder() {
     setError("");
@@ -148,14 +153,37 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="border-t divider pt-6 flex flex-wrap justify-between items-center gap-3">
-            <h2 className="text-2xl font-bold">
-              Total
-            </h2>
+          <div className="border-t divider pt-6 space-y-3">
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-muted-soft">Subtotal</span>
 
-            <span className="price text-2xl sm:text-3xl">
-              {formatPrice(total)}
-            </span>
+              <span className="font-semibold">
+                {formatPrice(subtotal)}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-start gap-3">
+              <span className="text-muted-soft">
+                Delivery
+                <span className="block text-sm">
+                  Flat rate, all over Pakistan
+                </span>
+              </span>
+
+              <span className="font-semibold whitespace-nowrap">
+                {formatPrice(delivery)}
+              </span>
+            </div>
+
+            <div className="border-t divider pt-4 flex flex-wrap justify-between items-center gap-3">
+              <h2 className="text-2xl font-bold">
+                Total
+              </h2>
+
+              <span className="price text-2xl sm:text-3xl">
+                {formatPrice(total)}
+              </span>
+            </div>
           </div>
 
           {error && (
