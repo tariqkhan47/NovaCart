@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
+import Subscriber from "@/models/Subscriber";
 import { getSessionFromRequest, requireUser } from "@/lib/auth";
 import { DELIVERY_CHARGE } from "@/lib/delivery";
 
@@ -128,6 +129,24 @@ export async function POST(req: NextRequest) {
       paymentMethod: "cod",
       status: "Pending",
     });
+
+    // Ordering signs the customer up for the mailing list. One row per email,
+    // so a repeat customer just has their details refreshed and their order
+    // count bumped. The order is already placed at this point, so a failure
+    // here is logged and swallowed rather than handed back to the shopper.
+    try {
+      await Subscriber.updateOne(
+        { email: String(email).trim().toLowerCase() },
+        {
+          $set: { name, phone },
+          $setOnInsert: { source: "order", active: true },
+          $inc: { orderCount: 1 },
+        },
+        { upsert: true }
+      );
+    } catch (error) {
+      console.error("SUBSCRIBE ON ORDER ERROR:", error);
+    }
 
     return NextResponse.json(order, { status: 201 });
   } catch (error) {

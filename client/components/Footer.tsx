@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { CONTACT_LINKS, STORE } from "../lib/store";
+
 export default function Footer() {
   return (
     <footer className="bg-ink-900 text-ink-50 pt-14 pb-8 mt-16">
@@ -14,25 +17,74 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3 text-white">Quick Links</h3>
           <ul className="space-y-2 text-ink-100/80">
-            <li><a href="#" className="hover:text-brand-400 transition">Home</a></li>
-            <li><a href="#" className="hover:text-brand-400 transition">Products</a></li>
-            <li><a href="#" className="hover:text-brand-400 transition">Categories</a></li>
-            <li><a href="#" className="hover:text-brand-400 transition">Contact</a></li>
+            <li>
+              <Link href="/" className="hover:text-brand-400 transition">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/#products" className="hover:text-brand-400 transition">
+                Products
+              </Link>
+            </li>
+            <li>
+              <Link href="/category" className="hover:text-brand-400 transition">
+                Categories
+              </Link>
+            </li>
+            <li>
+              <a
+                href={CONTACT_LINKS.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-brand-400 transition"
+              >
+                Contact
+              </a>
+            </li>
           </ul>
         </div>
 
         <div>
           <h3 className="font-semibold mb-3 text-white">Contact</h3>
+
           <div className="space-y-2 text-ink-100/80">
-            <p>info@novacart.com</p>
-            <p>+92 300 1234567</p>
-            <p>Pakistan</p>
+            <p>
+              <a
+                href={CONTACT_LINKS.email}
+                className="hover:text-brand-400 transition break-words"
+              >
+                {STORE.email}
+              </a>
+            </p>
+
+            <p>
+              <a
+                href={CONTACT_LINKS.phone}
+                className="hover:text-brand-400 transition"
+              >
+                {STORE.phone}
+              </a>
+            </p>
+
+            <p>{STORE.country}</p>
           </div>
+
+          {/* Same number as above — most customers here would rather message
+              than call, so give it its own button. */}
+          <a
+            href={CONTACT_LINKS.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary btn-sm mt-4"
+          >
+            💬 Chat on WhatsApp
+          </a>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-12 pt-6 border-t border-white/10 text-sm text-ink-100/60">
-        © {new Date().getFullYear()} NovaCart. All rights reserved.
+        © {new Date().getFullYear()} {STORE.name}. All rights reserved.
       </div>
     </footer>
   );

@@ -28,6 +28,7 @@ export default function AdminPage() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [productCount, setProductCount] = useState(0);
+  const [subscriberCount, setSubscriberCount] = useState(0);
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -47,6 +48,11 @@ export default function AdminPage() {
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setProductCount(data.length))
       .catch(() => setProductCount(0));
+
+    fetch("/api/subscribers")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setSubscriberCount(data.length))
+      .catch(() => setSubscriberCount(0));
   }, [isAdmin]);
 
   if (loading || !isAdmin) return null;
@@ -120,6 +126,7 @@ export default function AdminPage() {
     { label: "✅ Delivered", value: deliveredOrders, tone: "text-success" },
     { label: "🛒 Cart", value: cart.length, tone: "text-brand-500" },
     { label: "❤️ Wishlist", value: wishlist.length, tone: "text-danger" },
+    { label: "📬 Subscribers", value: subscriberCount, tone: "text-brand-600" },
     {
       label: "💰 Revenue",
       value: formatPrice(totalRevenue),
@@ -195,6 +202,12 @@ export default function AdminPage() {
             <Link href="/admin/orders">
               <button className="btn btn-outline btn-block py-4 sm:py-6 text-sm sm:text-base">
                 📦 View Orders
+              </button>
+            </Link>
+
+            <Link href="/admin/subscribers">
+              <button className="btn btn-outline btn-block py-4 sm:py-6 text-sm sm:text-base">
+                📬 Subscribers
               </button>
             </Link>
 

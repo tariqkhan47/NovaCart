@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useWishlist } from "../context/WishlistContext";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { CONTACT_LINKS } from "../lib/store";
 
 type NavbarProps = {
   cart: number;
@@ -37,7 +38,7 @@ export default function Navbar({ cart }: NavbarProps) {
         Home
       </Link>
 
-      <Link href="/" className="nav-link py-1 md:py-0" onClick={close}>
+      <Link href="/#products" className="nav-link py-1 md:py-0" onClick={close}>
         Products
       </Link>
 
@@ -45,7 +46,13 @@ export default function Navbar({ cart }: NavbarProps) {
         Categories
       </Link>
 
-      <a href="#" className="nav-link py-1 md:py-0" onClick={close}>
+      <a
+        href={CONTACT_LINKS.whatsapp}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="nav-link py-1 md:py-0"
+        onClick={close}
+      >
         Contact
       </a>
 

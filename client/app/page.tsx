@@ -278,7 +278,7 @@ const router = useRouter();
 
         {/* Featured Products */}
 
-        <section className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
+        <section id="products" className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
 
           <div className="text-center mb-10">
             <span className="eyebrow">Our Collection</span>
