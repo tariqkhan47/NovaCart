@@ -167,6 +167,7 @@ export default function CategoryView({ category }: { category: Category }) {
                     id={product._id}
                     name={product.name}
                     price={product.price}
+                    compareAtPrice={product.compareAtPrice}
                     image={product.image}
                     rating={product.rating}
                     reviewCount={product.reviewCount}

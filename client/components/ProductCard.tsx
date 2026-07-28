@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
-import { formatPrice } from "../lib/currency";
-import Stars from "./Stars";
+import PriceTag from "./PriceTag";
+import RatingScore from "./RatingScore";
 
 type ProductProps = {
   id: string;
   name: string;
   price: number;
+  compareAtPrice?: number | null;
   image: string;
   rating?: number | null;
   reviewCount?: number;
@@ -19,6 +20,7 @@ export default function ProductCard({
   id,
   name,
   price,
+  compareAtPrice,
   image,
   rating,
   reviewCount = 0,
@@ -35,7 +37,11 @@ export default function ProductCard({
   );
 
   return (
-    <div className="card card-hover p-4 relative overflow-hidden">
+    // A column with the button pushed to the bottom, so a card with a rating
+    // and one without still line their buttons up across a row. Reserving a
+    // blank strip for the missing rating would do the same, but every card in
+    // an unreviewed catalog would carry the gap.
+    <div className="card card-hover p-4 relative overflow-hidden flex flex-col h-full">
 
       {/* Wishlist Button */}
       <button
@@ -69,28 +75,23 @@ export default function ProductCard({
         </h3>
       </Link>
 
-      {/* Reserve the row either way so cards keep the same height. */}
-      <div className="mt-2 h-6 flex items-center gap-2">
-        {reviewCount > 0 && rating ? (
-          <>
-            <Stars rating={rating} />
-            <span className="text-muted-soft text-sm">
-              {rating.toFixed(1)} ({reviewCount})
-            </span>
-          </>
-        ) : (
-          <span className="text-muted-soft text-sm">No reviews yet</span>
-        )}
+      <PriceTag price={price} compareAtPrice={compareAtPrice} className="mt-3" />
+
+      {/* Renders nothing until the product has been reviewed. */}
+      <RatingScore
+        rating={rating}
+        reviewCount={reviewCount}
+        className="mt-2"
+      />
+
+      <div className="mt-auto pt-4">
+        <button
+          onClick={onAddToCart}
+          className="btn btn-primary btn-block"
+        >
+          Add to Cart
+        </button>
       </div>
-
-      <p className="price text-lg mt-1">{formatPrice(price)}</p>
-
-      <button
-        onClick={onAddToCart}
-        className="btn btn-primary btn-block mt-4"
-      >
-        Add to Cart
-      </button>
 
     </div>
   );

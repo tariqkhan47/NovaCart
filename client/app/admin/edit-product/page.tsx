@@ -9,9 +9,12 @@ type Product = {
   _id: string;
   name: string;
   price: number;
+  compareAtPrice?: number;
   category: string;
   image: string;
   description: string;
+  detailHtml?: string;
+  seoDescription?: string;
   stock: number;
   featured?: boolean;
 };
@@ -25,10 +28,13 @@ export default function EditProductPage() {
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [compareAtPrice, setCompareAtPrice] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState("");
   const [description, setDescription] =
     useState("");
+  const [detailHtml, setDetailHtml] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
   const [stock, setStock] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
 
@@ -50,9 +56,12 @@ export default function EditProductPage() {
 
     setName(product.name);
     setPrice(product.price.toString());
+    setCompareAtPrice(product.compareAtPrice?.toString() ?? "");
     setCategory(product.category);
     setImage(product.image);
     setDescription(product.description);
+    setDetailHtml(product.detailHtml ?? "");
+    setSeoDescription(product.seoDescription ?? "");
     setStock(String(product.stock ?? 0));
     setIsFeatured(Boolean(product.featured));
     setError("");
@@ -79,9 +88,14 @@ export default function EditProductPage() {
         body: JSON.stringify({
           name,
           price: Number(price),
+          // Left blank means no crossed-out price; the API drops anything that
+          // is not genuinely above the selling price.
+          compareAtPrice: compareAtPrice === "" ? null : Number(compareAtPrice),
           category,
           image,
           description,
+          detailHtml,
+          seoDescription,
           stock: Number(stock),
           featured: isFeatured,
         }),
@@ -176,6 +190,23 @@ export default function EditProductPage() {
               className="field"
             />
 
+            <div>
+              <input
+                type="number"
+                min={0}
+                placeholder="Was price (optional)"
+                value={compareAtPrice}
+                onChange={(e) => setCompareAtPrice(e.target.value)}
+                className="field"
+              />
+
+              <p className="text-muted-soft text-sm mt-2">
+                Shown crossed out beside the price. Only fill this in with a
+                price this product was actually sold at — an invented one is a
+                false discount claim. Leave blank for no offer.
+              </p>
+            </div>
+
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -217,6 +248,40 @@ export default function EditProductPage() {
               onChange={(e) => setDescription(e.target.value)}
               className="field h-32"
             />
+
+            <div>
+              <textarea
+                placeholder="Full description, HTML (optional)"
+                value={detailHtml}
+                onChange={(e) => setDetailHtml(e.target.value)}
+                className="field h-48 font-mono text-sm"
+              />
+
+              <p className="text-muted-soft text-sm mt-2">
+                The long write-up shown further down the product page, with its
+                photos. Imported from the supplier by{" "}
+                <code>scripts/hhc-details.mjs</code>. HTML is allowed, but it is
+                cleaned on save: scripts, links and styling are stripped, and
+                only images served over https are kept. Leave blank to drop the
+                section.
+              </p>
+            </div>
+
+            <div>
+              <textarea
+                placeholder="SEO description (optional)"
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+                maxLength={200}
+                className="field h-24"
+              />
+
+              <p className="text-muted-soft text-sm mt-2">
+                The snippet under the link in Google. {seoDescription.length}/155
+                characters — anything past that is cut off. Leave blank to build
+                one from the product&apos;s own details.
+              </p>
+            </div>
 
             <label className="flex items-center gap-3 font-semibold">
               <input

@@ -9,9 +9,12 @@ export default function AddProductPage() {
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [compareAtPrice, setCompareAtPrice] = useState("");
   const [category, setCategory] = useState(CATEGORY_NAMES[0]);
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
+  const [detailHtml, setDetailHtml] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
   const [stock, setStock] = useState("10");
   const [isFeatured, setIsFeatured] = useState(false);
 
@@ -34,9 +37,14 @@ export default function AddProductPage() {
         body: JSON.stringify({
           name,
           price: Number(price),
+          // Left blank means no crossed-out price; the API drops anything that
+          // is not genuinely above the selling price.
+          compareAtPrice: compareAtPrice === "" ? null : Number(compareAtPrice),
           category,
           image,
           description,
+          detailHtml,
+          seoDescription,
           stock: Number(stock),
           featured: isFeatured,
         }),
@@ -59,9 +67,12 @@ export default function AddProductPage() {
 
       setName("");
       setPrice("");
+      setCompareAtPrice("");
       setCategory("Home Decor");
       setImage("");
       setDescription("");
+      setDetailHtml("");
+      setSeoDescription("");
       setStock("10");
     } catch {
       setError("Something went wrong. Please try again.");
@@ -111,6 +122,27 @@ export default function AddProductPage() {
               className="field"
               required
             />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">
+              Was Price <span className="text-muted-soft font-normal">(optional)</span>
+            </label>
+
+            <input
+              type="number"
+              min={0}
+              placeholder="Leave blank if not on offer"
+              value={compareAtPrice}
+              onChange={(e) => setCompareAtPrice(e.target.value)}
+              className="field"
+            />
+
+            <p className="text-muted-soft text-sm mt-2">
+              Shown crossed out beside the price. Only fill this in with a price
+              this product was actually sold at — an invented one is a false
+              discount claim.
+            </p>
           </div>
 
           <div>
@@ -175,6 +207,50 @@ export default function AddProductPage() {
               className="field"
               required
             />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">
+              Full Description{" "}
+              <span className="text-muted-soft font-normal">(optional)</span>
+            </label>
+
+            <textarea
+              rows={10}
+              placeholder="<p>The long write-up, with its photos…</p>"
+              value={detailHtml}
+              onChange={(e) => setDetailHtml(e.target.value)}
+              className="field font-mono text-sm"
+            />
+
+            <p className="text-muted-soft text-sm mt-2">
+              Shown further down the product page, below the price. HTML is
+              allowed, but it is cleaned on save: scripts, links and styling are
+              stripped, and only images served over https are kept. Leave blank
+              to drop the section.
+            </p>
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">
+              SEO Description{" "}
+              <span className="text-muted-soft font-normal">(optional)</span>
+            </label>
+
+            <textarea
+              rows={3}
+              maxLength={200}
+              placeholder="The snippet Google shows under the link"
+              value={seoDescription}
+              onChange={(e) => setSeoDescription(e.target.value)}
+              className="field"
+            />
+
+            <p className="text-muted-soft text-sm mt-2">
+              {seoDescription.length}/155 characters — anything past that is cut
+              off in search results. Leave blank to build one from the
+              product&apos;s own details.
+            </p>
           </div>
 
           <label className="flex items-center gap-3 font-semibold">

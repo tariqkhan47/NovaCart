@@ -7,17 +7,22 @@ import { slugifyCategory } from "../../../lib/categories";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { useCart } from "../../../context/CartContext";
-import { formatPrice } from "../../../lib/currency";
+import PriceTag from "../../../components/PriceTag";
+import RatingScore from "../../../components/RatingScore";
 import ProductReviews from "../../../components/ProductReviews";
 
 type Product = {
   _id: string;
   name: string;
   price: number;
+  compareAtPrice?: number;
   category: string;
   image: string;
   description: string;
+  detailHtml?: string;
   stock: number;
+  rating: number | null;
+  reviewCount: number;
 };
 
 export default function ProductDetailPage() {
@@ -95,9 +100,28 @@ export default function ProductDetailPage() {
                   {product.name}
                 </h1>
 
-                <p className="price text-2xl sm:text-3xl mt-4">
-                  {formatPrice(product.price)}
-                </p>
+                <PriceTag
+                  price={product.price}
+                  compareAtPrice={product.compareAtPrice}
+                  size="lg"
+                  className="mt-4"
+                />
+
+                {/* Under the price, where a shopper looks next once they know
+                    what it costs. Links down to the reviews it came from, and
+                    the whole row is dropped until there are some. */}
+                {product.reviewCount > 0 && product.rating && (
+                  <a
+                    href="#reviews"
+                    className="mt-3 block w-fit rounded-lg transition hover:opacity-80"
+                  >
+                    <RatingScore
+                      rating={product.rating}
+                      reviewCount={product.reviewCount}
+                      size="lg"
+                    />
+                  </a>
+                )}
 
                 <p className="text-muted-soft mt-4">{product.description}</p>
 
@@ -125,7 +149,33 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {product && <ProductReviews productId={product._id} />}
+          {/* The supplier's full write-up, with the feature photos that came
+              with it. Dropped entirely for products that have not been through
+              the description import, rather than showing an empty heading.
+
+              Safe to inject: detailHtml is sanitized by lib/rich-text.mjs on
+              the way into the database, so what is stored is already stripped
+              of scripts, event handlers and every attribute bar an image's
+              src and alt. Nothing here trusts markup that arrives at render
+              time. */}
+          {product?.detailHtml && (
+            <section className="panel p-5 sm:p-8 mt-8">
+              <h2 className="section-title text-xl sm:text-2xl mb-5">
+                Product Details
+              </h2>
+
+              <div
+                className="rich-text"
+                dangerouslySetInnerHTML={{ __html: product.detailHtml }}
+              />
+            </section>
+          )}
+
+          {product && (
+            <div id="reviews" className="scroll-mt-24">
+              <ProductReviews productId={product._id} />
+            </div>
+          )}
         </div>
       </main>
 

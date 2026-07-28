@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { requireAdmin } from "@/lib/auth";
+import { normalizeComparePrice } from "@/lib/seo";
+import { normalizeDetailHtml } from "@/lib/rich-text.mjs";
 
 // GET Single Product
 export async function GET(
@@ -21,7 +23,27 @@ export async function GET(
       );
     }
 
-    const product = await Product.findById(id);
+    // Same shape the list endpoint returns, so the detail page can show the
+    // rating widget without a second round trip for the reviews.
+    const [product] = await Product.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "product",
+          as: "reviews",
+        },
+      },
+      {
+        $addFields: {
+          // null when a product has no reviews yet
+          rating: { $avg: "$reviews.rating" },
+          reviewCount: { $size: "$reviews" },
+        },
+      },
+      { $project: { reviews: 0 } },
+    ]);
 
     if (!product) {
       return NextResponse.json(
@@ -62,17 +84,34 @@ export async function PUT(
       );
     }
 
-    const { name, price, category, image, description, stock, featured } =
-      await req.json();
+    const {
+      name,
+      price,
+      compareAtPrice,
+      category,
+      image,
+      description,
+      detailHtml,
+      seoDescription,
+      stock,
+      featured,
+    } = await req.json();
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
         name,
         price,
+        // An empty box on the form clears the crossed-out price rather than
+        // storing a 0, which would read as a 100% discount.
+        compareAtPrice: normalizeComparePrice(compareAtPrice, price),
         category,
         image,
         description,
+        // Cleaned here rather than at render time, so nothing reaches the
+        // database with a script in it — see lib/rich-text.mjs.
+        detailHtml: normalizeDetailHtml(detailHtml),
+        seoDescription: seoDescription?.trim() || undefined,
         stock,
         featured: Boolean(featured),
       },

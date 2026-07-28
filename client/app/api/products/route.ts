@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { requireAdmin } from "@/lib/auth";
+import { normalizeComparePrice } from "@/lib/seo";
+import { normalizeDetailHtml } from "@/lib/rich-text.mjs";
 
 // GET ALL PRODUCTS, each with its average rating and review count.
 // Done as one aggregation rather than a query per product.
@@ -59,16 +61,32 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const { name, price, category, image, description, stock, featured } =
-      await req.json();
+    const {
+      name,
+      price,
+      compareAtPrice,
+      category,
+      image,
+      description,
+      detailHtml,
+      seoDescription,
+      stock,
+      featured,
+    } = await req.json();
 
     // Only accept known fields, so a caller cannot inject their own.
     const product = await Product.create({
       name,
       price,
+      // Dropped unless it is genuinely above the selling price — see lib/seo.ts.
+      compareAtPrice: normalizeComparePrice(compareAtPrice, price),
       category,
       image,
       description,
+      // Cleaned here rather than at render time, so nothing reaches the
+      // database with a script in it — see lib/rich-text.mjs.
+      detailHtml: normalizeDetailHtml(detailHtml),
+      seoDescription: seoDescription?.trim() || undefined,
       stock,
       featured: Boolean(featured),
     });

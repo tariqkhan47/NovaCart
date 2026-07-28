@@ -288,6 +288,135 @@
     border-color: var(--border);
   }
 
+  /* Supplier copy ----------------------------------------------- */
+  /* The long product description, which arrives as HTML written on the
+     supplier's portal — see lib/rich-text.mjs. Everything in it is styled from
+     here by element, because the markup carries no classes of its own: the
+     sanitizer strips every attribute bar an image's src and alt, so a stray
+     inline style cannot break the page layout either. */
+  .rich-text {
+    color: var(--foreground);
+    line-height: 1.75;
+  }
+
+  .rich-text > :first-child {
+    margin-top: 0;
+  }
+
+  .rich-text > :last-child {
+    margin-bottom: 0;
+  }
+
+  .rich-text p {
+    margin: 0 0 1rem;
+  }
+
+  .rich-text h2,
+  .rich-text h3,
+  .rich-text h4,
+  .rich-text h5,
+  .rich-text h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .rich-text h2 {
+    font-size: 1.4rem;
+  }
+
+  .rich-text h3 {
+    font-size: 1.2rem;
+  }
+
+  .rich-text h4,
+  .rich-text h5,
+  .rich-text h6 {
+    font-size: 1.05rem;
+  }
+
+  .rich-text ul,
+  .rich-text ol {
+    margin: 0 0 1rem;
+    padding-left: 1.35rem;
+  }
+
+  .rich-text ul {
+    list-style: disc;
+  }
+
+  .rich-text ol {
+    list-style: decimal;
+  }
+
+  .rich-text li {
+    margin-bottom: 0.4rem;
+  }
+
+  .rich-text li::marker {
+    color: var(--primary);
+  }
+
+  .rich-text strong,
+  .rich-text b {
+    font-weight: 700;
+  }
+
+  .rich-text hr {
+    margin: 1.75rem 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  /* The feature photos. Suppliers author these at whatever width their own
+     page happened to be, so the width is taken back here — otherwise a 1200px
+     graphic pushes the product page sideways on a phone. */
+  .rich-text img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 16px;
+    background: var(--surface-alt);
+  }
+
+  .rich-text figure {
+    margin: 1.5rem 0;
+  }
+
+  .rich-text figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  /* Spec tables are common in this copy and are the one thing that genuinely
+     will not fit a phone, so they scroll inside their own box rather than
+     widening the page. */
+  .rich-text table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 0 0 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .rich-text th,
+  .rich-text td {
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.85rem;
+    text-align: left;
+  }
+
+  .rich-text th {
+    background: var(--surface-alt);
+    font-weight: 700;
+  }
+
   /* Form controls ---------------------------------------------- */
   .field {
     width: 100%;
