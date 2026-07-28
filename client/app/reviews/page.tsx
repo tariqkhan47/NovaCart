@@ -1,129 +1,109 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import Stars from "../../components/Stars";
 
 type Review = {
-  id: number;
+  _id: string;
   name: string;
   rating: number;
   comment: string;
+  createdAt: string;
+  product: {
+    _id: string;
+    name: string;
+    image?: string;
+  } | null;
 };
 
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      name: "Ali",
-      rating: 5,
-      comment: "Amazing product. Highly recommended!",
-    },
-    {
-      id: 2,
-      name: "Ahmed",
-      rating: 4,
-      comment: "Very good quality and fast delivery.",
-    },
-  ]);
-
-  const [name, setName] = useState("");
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  function addReview() {
-    setError("");
-
-    if (!name || !comment) {
-      setError("Please fill in your name and review.");
-      return;
-    }
-
-    const newReview: Review = {
-      id: Date.now(),
-      name,
-      rating,
-      comment,
-    };
-
-    setReviews([newReview, ...reviews]);
-
-    setName("");
-    setRating(5);
-    setComment("");
-  }
+  useEffect(() => {
+    fetch("/api/reviews")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Could not load reviews");
+        return res.json();
+      })
+      .then(setReviews)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <main className="page py-10 px-6">
-      <div className="max-w-4xl mx-auto panel p-8">
+      <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-4xl font-bold mb-8">
-          ⭐ Product Reviews
-        </h1>
-
-        <div className="space-y-4 mb-10">
-
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="field"
-          />
-
-          <select
-            value={rating}
-            onChange={(e) => setRating(Number(e.target.value))}
-            className="field"
-          >
-            <option value={5}>⭐⭐⭐⭐⭐</option>
-            <option value={4}>⭐⭐⭐⭐</option>
-            <option value={3}>⭐⭐⭐</option>
-            <option value={2}>⭐⭐</option>
-            <option value={1}>⭐</option>
-          </select>
-
-          <textarea
-            placeholder="Write your review..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="field h-32"
-          />
-
-          {error && (
-            <p className="text-danger text-sm">{error}</p>
-          )}
-
-          <button
-            onClick={addReview}
-            className="btn btn-primary"
-          >
-            Submit Review
-          </button>
-
+        <div className="text-center mb-10">
+          <span className="eyebrow">What Shoppers Say</span>
+          <h1 className="text-4xl font-bold mt-3">
+            ⭐ Customer Reviews
+          </h1>
+          <p className="text-muted-soft mt-3">
+            Reviews are written on each product&apos;s page.
+          </p>
         </div>
 
-        <div className="space-y-6">
+        {loading ? (
+          <div className="panel p-8 text-center text-muted-soft text-xl">
+            Loading...
+          </div>
+        ) : error ? (
+          <div className="panel p-8 text-center text-danger text-xl">
+            {error}
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="panel p-10 text-center">
+            <p className="text-muted-soft text-xl mb-6">
+              No reviews yet.
+            </p>
 
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className="card p-5"
-            >
-              <h2 className="text-xl font-bold">
-                {review.name}
-              </h2>
+            <Link href="/">
+              <button className="btn btn-primary btn-lg">
+                Browse Products
+              </button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {reviews.map((review) => (
+              <div key={review._id} className="card p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold">{review.name}</h2>
+                    <Stars rating={review.rating} />
+                  </div>
 
-              <p className="text-brand-500 text-lg">
-                {"⭐".repeat(review.rating)}
-              </p>
+                  {review.product && (
+                    <Link
+                      href={`/products/${review.product._id}`}
+                      className="flex items-center gap-3 link-brand"
+                    >
+                      {review.product.image && (
+                        <img
+                          src={review.product.image}
+                          alt={review.product.name}
+                          loading="lazy"
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                      )}
+                      <span className="text-sm">{review.product.name}</span>
+                    </Link>
+                  )}
+                </div>
 
-              <p className="mt-3 text-muted-soft">
-                {review.comment}
-              </p>
-            </div>
-          ))}
+                <p className="mt-3 text-muted-soft">{review.comment}</p>
 
-        </div>
+                <p className="text-muted-soft text-xs mt-3">
+                  {new Date(review.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </main>

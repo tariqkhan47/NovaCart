@@ -74,9 +74,15 @@ There is deliberately no way to create an admin from the browser.
   browser sends only product ids and quantities.
 - **Stock** is claimed with a conditional atomic update and rolled back if any
   line item fails, so the shop cannot oversell.
+- **Reviews** require a login, and the reviewer's name is taken from the
+  session rather than the request body, so nobody can post under someone
+  else's name. A unique index on `(product, user)` allows one review each.
 
 ## Known limitations
 
 - Cash on Delivery only. No online payment is wired up.
 - Product images are URLs typed in by the admin; there is no upload.
-- Reviews on `/reviews` are local component state and are not saved anywhere.
+- Anyone with an account can review a product; there is no check that they
+  actually bought it.
+- Product cards do not show star ratings yet — ratings appear on the product
+  page only.

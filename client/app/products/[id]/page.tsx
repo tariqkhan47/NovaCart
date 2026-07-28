@@ -6,6 +6,7 @@ import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { useCart } from "../../../context/CartContext";
 import { formatPrice } from "../../../lib/currency";
+import ProductReviews from "../../../components/ProductReviews";
 
 type Product = {
   _id: string;
@@ -114,6 +115,8 @@ export default function ProductDetailPage() {
               </div>
             </div>
           )}
+
+          {product && <ProductReviews productId={product._id} />}
         </div>
       </main>
 
