@@ -49,9 +49,11 @@ for (const product of seed) {
     continue;
   }
 
-  // hhcId is kept in the JSON so prices can be re-synced later, but the
-  // products collection only carries what the Product model declares.
-  const { hhcId, ...fields } = product;
+  // hhcId and costPrice are kept in the JSON — one so prices can be re-synced
+  // later, the other so the markup is never applied twice. Neither belongs in
+  // the database: the products API is public, and the wholesale price is
+  // nobody's business but the shop's.
+  const { hhcId, costPrice, ...fields } = product;
 
   await products.insertOne({
     ...fields,
