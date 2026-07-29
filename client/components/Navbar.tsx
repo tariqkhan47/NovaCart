@@ -30,7 +30,7 @@ export default function Navbar({ cart }: NavbarProps) {
     router.refresh();
   }
 
-  // Rendered twice — as a row on desktop and stacked in the drop-down on
+  // Rendered twice — as its own row on desktop and stacked in the drop-down on
   // phones — so every button is full width below md and shrinks back after.
   const menu = (
     <>
@@ -119,17 +119,18 @@ export default function Navbar({ cart }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+      {/* Two rows on desktop rather than one. Signed in as an admin the menu
+          runs to nine items, which no single line holds at this font size —
+          squeezed onto one it wrapped, and the stray "Logout" hanging under
+          the logo looked like a mistake. Given the row breaks either way, it
+          may as well break somewhere deliberate. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
 
         <Link href="/" onClick={close}>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Nova<span className="text-primary">Cart</span>
           </h1>
         </Link>
-
-        <div className="hidden md:flex flex-wrap items-center gap-x-5 gap-y-3">
-          {menu}
-        </div>
 
         {/* Cart stays out of the drop-down: in a shop it should always be
             one tap away, never behind a menu. */}
@@ -150,6 +151,15 @@ export default function Navbar({ cart }: NavbarProps) {
           </button>
         </div>
 
+      </div>
+
+      {/* The links, centred on their own line under the logo. Still wraps if it
+          has to — a narrow laptop or a longer name should push a button onto a
+          third line rather than off the edge. */}
+      <div className="hidden md:block border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          {menu}
+        </div>
       </div>
 
       {open && (

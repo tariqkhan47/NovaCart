@@ -144,7 +144,11 @@ const router = useRouter();
       <main className="page">
 
         {/* Hero Section */}
-        <section className="hero py-16 sm:py-24">
+        {/* Kept shorter than it was: the nav now takes two rows, and between
+            them the "Shop Now" button was being pushed under the fold on a
+            laptop — the one thing on this screen that has to be visible
+            without scrolling. */}
+        <section className="hero py-12 sm:py-16">
           <div className="hero-pattern" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
@@ -152,11 +156,16 @@ const router = useRouter();
               Quality · Value · Fast Delivery
             </span>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mt-4 mb-5">
+            {/* One line from sm up, where it comfortably fits — a break there
+                lands between "Nova" and "Cart" and splits the shop's own name
+                in half. Left to wrap on a phone, where 36px type across
+                nineteen characters does not fit a 360px screen and forcing it
+                would push the heading off the side. */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mt-3 mb-4 sm:whitespace-nowrap">
               Welcome to Nova<span className="text-brand-400">Cart</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto mb-9">
+            <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto mb-7">
               Discover the best products at the best prices.
             </p>
 
