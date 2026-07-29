@@ -8,7 +8,7 @@ import { productProse, shortName, truncate } from "./product-copy.mjs";
 
 export { shortName };
 
-export const SITE_NAME = "NovaCart";
+export const SITE_NAME = "Arsalah";
 
 // Canonical URLs and structured data need absolute URLs, and Google ignores
 // both if the host is wrong. Vercel sets VERCEL_PROJECT_PRODUCTION_URL on every
@@ -63,7 +63,7 @@ export function seoDescriptionFor(product: SeoProduct) {
 
   const availability =
     product.stock === 0
-      ? "Currently out of stock at NovaCart."
+      ? `Currently out of stock at ${SITE_NAME}.`
       : `Buy online at ${formatPrice(product.price)} with Cash on Delivery across Pakistan.`;
 
   return truncate(`${opening} ${availability}`, MAX_DESCRIPTION);

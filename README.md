@@ -1,4 +1,4 @@
-# NovaCart
+# Arsalah
 
 An e-commerce store built with Next.js 16, MongoDB and Tailwind CSS v4.
 Electronics, fashion, home decor and accessories, with Cash on Delivery

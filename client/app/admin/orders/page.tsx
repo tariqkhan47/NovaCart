@@ -60,7 +60,7 @@ export default function AdminOrdersPage() {
 
         <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
           <div>
-            <span className="eyebrow">NovaCart Admin</span>
+            <span className="eyebrow">Arsalah Admin</span>
             <h1 className="text-3xl sm:text-4xl font-bold mt-2">
               📋 Customer Orders
             </h1>

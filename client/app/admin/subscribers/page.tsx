@@ -82,7 +82,7 @@ export default function AdminSubscribersPage() {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = `novacart-subscribers-${new Date()
+    link.download = `arsalah-subscribers-${new Date()
       .toISOString()
       .slice(0, 10)}.csv`;
     link.click();
@@ -96,7 +96,7 @@ export default function AdminSubscribersPage() {
 
         <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
           <div>
-            <span className="eyebrow">NovaCart Admin</span>
+            <span className="eyebrow">Arsalah Admin</span>
             <h1 className="text-3xl sm:text-4xl font-bold mt-2">
               📬 Subscribers
             </h1>

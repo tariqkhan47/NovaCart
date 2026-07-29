@@ -5,7 +5,7 @@
  * (order emails, invoices) all quote the same address and number.
  */
 export const STORE = {
-  name: "NovaCart",
+  name: "Arsalah",
 
   email: "aslitariq6@gmail.com",
 

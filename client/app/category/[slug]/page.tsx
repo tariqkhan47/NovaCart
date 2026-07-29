@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = getCategoryBySlug(slug);
 
   if (!category) {
-    return { title: "Collection not found — NovaCart" };
+    return { title: "Collection not found — Arsalah" };
   }
 
   return {
-    title: `${category.name} — NovaCart`,
+    title: `${category.name} — Arsalah`,
     description: category.tagline,
   };
 }

@@ -13,7 +13,7 @@ export default function SuccessPage() {
         </h2>
 
         <p className="text-muted-soft mb-8">
-          Thank you for shopping with NovaCart.
+          Thank you for shopping with Arsalah.
           Your order has been received successfully.
         </p>
 

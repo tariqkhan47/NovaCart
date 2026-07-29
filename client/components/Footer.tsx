@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 md:grid-cols-3 gap-10">
         <div>
           <h2 className="text-2xl font-bold text-white">
-            Nova<span className="text-brand-400">Cart</span>
+            Arsalah
           </h2>
           <p className="mt-3 text-ink-100/80">
             Your one-stop shop for quality products.

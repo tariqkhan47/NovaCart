@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import UnsubscribeView from "./UnsubscribeView";
 
 export const metadata: Metadata = {
-  title: "Unsubscribe — NovaCart",
-  description: "Stop marketing emails from NovaCart.",
+  title: "Unsubscribe — Arsalah",
+  description: "Stop marketing emails from Arsalah.",
   // Nothing here is worth indexing, and the token should stay out of search.
   robots: { index: false, follow: false },
 };

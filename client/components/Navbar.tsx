@@ -140,7 +140,7 @@ export default function Navbar({ cart }: NavbarProps) {
 
         <Link href="/" className="shrink-0" onClick={close}>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Nova<span className="text-primary">Cart</span>
+            Arsalah
           </h1>
         </Link>
 

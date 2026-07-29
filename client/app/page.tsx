@@ -156,13 +156,12 @@ const router = useRouter();
               Quality · Value · Fast Delivery
             </span>
 
-            {/* One line from sm up, where it comfortably fits — a break there
-                lands between "Nova" and "Cart" and splits the shop's own name
-                in half. Left to wrap on a phone, where 36px type across
-                nineteen characters does not fit a 360px screen and forcing it
-                would push the heading off the side. */}
+            {/* One line from sm up, where it comfortably fits. Left to wrap on
+                a phone, where 36px type across eighteen characters does not fit
+                a 360px screen and forcing it would push the heading off the
+                side; there it breaks before the name rather than inside it. */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mt-3 mb-4 sm:whitespace-nowrap">
-              Welcome to Nova<span className="text-brand-400">Cart</span>
+              Welcome to Arsalah
             </h1>
 
             <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto mb-7">

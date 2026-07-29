@@ -85,7 +85,7 @@ class Gone extends Error {}
 /** Fetch, resize, re-encode. Returns null for anything that is not an image. */
 async function repack(url) {
   const res = await fetch(url, {
-    headers: { "User-Agent": "NovaCart image migration" },
+    headers: { "User-Agent": "Arsalah image migration" },
   });
 
   // 403 and 404 are the supplier having deleted or locked the file. A 5xx or a
