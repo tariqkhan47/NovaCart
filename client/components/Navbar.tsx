@@ -14,11 +14,15 @@ type NavbarProps = {
 
 // The first Kalima — La ilaha illallah Muhammadur Rasulullah.
 //
+// Set the way it is printed in the subcontinent, which is what the shop was
+// asked for: madd on the alif of لَآ, shadda on the ra of رَّسُولُ, and the
+// name of Allah with its shadda and superscript alef.
+//
 // Held in a constant because it is rendered twice below, once for the top row
-// and once for phones, and the two must never drift apart. Every vowel mark in
-// it is deliberate; an editor or a find-and-replace that strips them changes
-// what the line says, so leave the string alone.
-const KALIMA = "لَا إِلٰهَ إِلَّا اللهُ مُحَمَّدٌ رَسُولُ اللهِ";
+// and once for phones, and the two must never drift apart. Every mark in it is
+// deliberate — a find-and-replace or an editor that "tidies" Unicode changes
+// what the line says. Leave the string alone.
+const KALIMA = "لَآ إِلٰهَ إِلَّا اللّٰهُ مُحَمَّدٌ رَّسُوْلُ اللّٰهِ";
 
 export default function Navbar({ cart }: NavbarProps) {
   const { wishlist } = useWishlist();
