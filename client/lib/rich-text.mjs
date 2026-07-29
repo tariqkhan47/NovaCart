@@ -26,6 +26,16 @@ const ALLOWED_TAGS = new Set([
 // Elements with no closing tag, which have to be emitted self-closed.
 const VOID_TAGS = new Set(["br", "hr", "img"]);
 
+// WordPress media shortcodes, which are not markup and so survive tag
+// stripping untouched — the supplier's copy carries things like
+// [video width="1280" mp4="https://.../clip.mp4"][/video], and left in they
+// print on the product page as that literal text.
+//
+// Only the media ones are listed. A blanket [..] strip would eat "[Pack of 2]"
+// and the rest of the bracketed notes suppliers put in real sentences.
+const SHORTCODES =
+  /\[(video|audio|embed|playlist|gallery|caption|vc_[a-z_]+)\b[^\]]*\](?:[\s\S]*?\[\/\1\])?/gi;
+
 // Tags whose *contents* have to go too. Stripping just the <script> leaves the
 // code behind as text, which is fine in a paragraph but not once a later edit
 // puts it back inside markup.
@@ -66,6 +76,7 @@ function imageAlt(attributes) {
 export function sanitizeHtml(html) {
   return String(html ?? "")
     .replace(STRIP_WITH_CONTENT, "")
+    .replace(SHORTCODES, "")
     // Comments can hide markup that some parsers still act on.
     .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g, (whole, rawTag, attributes) => {
@@ -96,6 +107,20 @@ export function sanitizeHtml(html) {
     .replace(/(\s*<br \/>\s*){3,}/gi, "<br /><br />")
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/**
+ * The same text with any WordPress media shortcodes taken out.
+ *
+ * Exposed separately from sanitizeHtml for the plain-text fields — the short
+ * description beside the price is not HTML, and running the tag stripper over
+ * it would quietly eat anything a supplier wrote in angle brackets.
+ */
+export function stripShortcodes(text) {
+  return String(text ?? "")
+    .replace(SHORTCODES, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
