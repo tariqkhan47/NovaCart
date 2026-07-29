@@ -75,11 +75,25 @@ function blobKey(url) {
   return `products/${createHash("sha1").update(url).digest("hex")}.webp`;
 }
 
+/**
+ * Thrown for a source the supplier will never serve again, as opposed to one
+ * that happened to fail this minute. The difference decides whether the photo
+ * is dropped from the page or left alone to be retried on the next run.
+ */
+class Gone extends Error {}
+
 /** Fetch, resize, re-encode. Returns null for anything that is not an image. */
 async function repack(url) {
   const res = await fetch(url, {
     headers: { "User-Agent": "NovaCart image migration" },
   });
+
+  // 403 and 404 are the supplier having deleted or locked the file. A 5xx or a
+  // dropped connection is their bad afternoon, and the picture is probably
+  // still there tomorrow.
+  if (res.status >= 400 && res.status < 500) {
+    throw new Gone(`${res.status} ${res.statusText}`);
+  }
 
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 
@@ -184,6 +198,11 @@ let bytesBefore = 0;
 let bytesAfter = 0;
 const failed = [];
 
+// Sources the supplier no longer serves. Their <img> tags come out of the copy
+// rather than being left pointing at a 403 — a broken-image icon in the middle
+// of a write-up reads as a broken shop.
+const gone = new Set();
+
 const moved = await pooled(wanted, async (url) => {
   const key = blobKey(url);
   const already = uploaded.get(key);
@@ -197,6 +216,9 @@ const moved = await pooled(wanted, async (url) => {
     const packed = await repack(url);
 
     if (!packed) {
+      // Whatever the supplier is serving here, it is not a picture, and it
+      // never will be.
+      gone.add(url);
       failed.push(`${url} (not an image)`);
       return null;
     }
@@ -222,6 +244,7 @@ const moved = await pooled(wanted, async (url) => {
 
     return [url, blob.url];
   } catch (error) {
+    if (error instanceof Gone) gone.add(url);
     failed.push(`${url} (${error.message})`);
     return null;
   }
@@ -256,14 +279,25 @@ if (!apply) {
   process.exit(0);
 }
 
-/** Every supplier URL in a string swapped for its replacement. */
-const repoint = (text) =>
-  typeof text === "string" && urlMap.has(text)
-    ? urlMap.get(text)
-    : String(text ?? "").replace(
-        /https:\/\/hhcnewapp\.[^\s"'<>]+/g,
-        (url) => urlMap.get(url) ?? url
-      );
+/**
+ * Every supplier URL in a string swapped for its replacement, and any <img>
+ * whose source the supplier has deleted taken out altogether.
+ */
+const repoint = (text) => {
+  if (typeof text === "string" && urlMap.has(text)) return urlMap.get(text);
+
+  return String(text ?? "")
+    .replace(/<img\b[^>]*>/gi, (tag) => {
+      const src = tag.match(/src="([^"]*)"/i)?.[1];
+      return src && gone.has(src) ? "" : tag;
+    })
+    // Any host, not just the supplier's. Their write-ups embed photos
+    // hotlinked straight from AliExpress, IndiaMART and Daraz — matching only
+    // hhcnewapp left those uploaded but still referenced at the original site,
+    // so every run re-fetched the same ones and the shop stayed dependent on
+    // three more servers it does not own.
+    .replace(/https?:\/\/[^\s"'<>]+/g, (url) => urlMap.get(url) ?? url);
+};
 
 writeFileSync(
   catalogPath,
@@ -322,18 +356,19 @@ if (updates.length === 0) {
 }
 
 // What is still hotlinked, if anything — the number that matters, since one
-// missed URL is one picture that can still vanish.
+// missed URL is one picture that can still vanish. Counted as "anything not on
+// the shop's own storage" rather than "anything at the supplier", because the
+// supplier's copy embeds photos from other people's sites too.
+const OFF_SITE = /https?:\/\/(?!7fj8qkja1bicwaar\.public\.blob\.vercel-storage\.com)/;
+
 const stragglers = await products.countDocuments({
-  $or: [
-    { image: /hhcnewapp\./ },
-    { detailHtml: /hhcnewapp\./ },
-  ],
+  $or: [{ image: OFF_SITE }, { detailHtml: OFF_SITE }],
 });
 
 console.log(
   stragglers === 0
-    ? "No product still points at the supplier's CDN."
-    : `${stragglers} product(s) still point at the supplier's CDN.`
+    ? "No product loads a photo from anyone else's server."
+    : `${stragglers} product(s) still load a photo from someone else's server.`
 );
 
 await mongoose.disconnect();

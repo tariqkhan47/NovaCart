@@ -11,6 +11,7 @@
  */
 import mongoose from "mongoose";
 import { readFileSync } from "node:fs";
+import { classify } from "../lib/classify-product.mjs";
 
 function loadEnv() {
   try {
@@ -41,60 +42,6 @@ const catalog = JSON.parse(
 const catalogByName = new Map(
   catalog.map((product) => [product.name.trim(), product.category])
 );
-
-// First rule that matches wins, so the specific patterns come before the
-// broad ones ("smart watch" before "watch", "water bottle" before "bottle").
-const rules = [
-  [/smart\s*watch|smartwatch|fitness tracker|bluetooth call/i, "Smart Watches"],
-  [/\bwatch(es)?\b|wrist ?watch|timepiece/i, "Watches"],
-  [
-    /perfume|parfum|fragrance|eau de|cologne|lip balm|lipstick|makeup|toothpaste|shampoo|soap|skin care|lotion/i,
-    "Fragrances & Beauty",
-  ],
-  [
-    /tumbler|water bottle|drinking bottle|thermos|travel mug|sipper|straw|flask|drinkware/i,
-    "Drinkware",
-  ],
-  [
-    /backpack|sling bag|handbag|shoulder bag|wallet|luggage|suitcase|passport|pouch|carry case|camping chair|folding stool/i,
-    "Bags & Travel",
-  ],
-  [
-    /earbud|earphone|headphone|airpods|power ?bank|phone holder|phone (mount|bracket)|charger|led light|flash ?light|head ?lamp|torch|camping (bulb|lamp)|emergency light|\bfan\b|speaker|usb/i,
-    "Gadgets & Electronics",
-  ],
-  [
-    /baby|infant|toddler|feeder|nappy|diaper|play mat|kids chair|pram|stroller/i,
-    "Baby & Kids",
-  ],
-  [
-    /workbook|tracing|alphabet|phonics|abc|stationery|pencil|\bpen\b|notebook|geometry|coloring book|colouring book|painting book|learning (toy|book|tablet)|puzzle board|educational/i,
-    "Learning & Stationery",
-  ],
-  [
-    /\btoy\b|toys|plush|doll|rc car|remote control|building block|board game|puzzle|bubble|fidget|keychain toy/i,
-    "Toys & Games",
-  ],
-  [
-    /bracelet|necklace|pendant|bangle|earring|ring\b|jewel|belt\b|\bbra\b|brassiere|keychain|charm|scarf|\bsuit\b/i,
-    "Fashion & Jewelry",
-  ],
-  [
-    /kitchen|cookware|sauce ?pan|chopper|slicer|grater|knife|ice cube|mixing bowl|blender|whisk|spice|measuring (cup|spoon)|sink|jar opener|food (processor|storage)/i,
-    "Kitchen",
-  ],
-  [
-    /decor|showpiece|wall art|photo tile|candle|vase|ornament|night lamp|night light|projector|diffuser|ashtray|tissue box|frame/i,
-    "Home Decor",
-  ],
-];
-
-function classify(name) {
-  for (const [pattern, category] of rules) {
-    if (pattern.test(name)) return category;
-  }
-  return null;
-}
 
 await mongoose.connect(process.env.MONGODB_URI);
 

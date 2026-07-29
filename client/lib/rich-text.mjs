@@ -33,8 +33,16 @@ const VOID_TAGS = new Set(["br", "hr", "img"]);
 //
 // Only the media ones are listed. A blanket [..] strip would eat "[Pack of 2]"
 // and the rest of the bracketed notes suppliers put in real sentences.
+// The closing ] is optional and the run stops at a <, because the supplier's
+// copy contains shortcodes that were never closed:
+//
+//   [video width="640" mp4="https://.../2023/12/ <img src="...">
+//
+// Requiring the ] left that printing on the page as text. Stopping at the <
+// is what keeps an unterminated one from swallowing the markup after it, which
+// on that product was every photo in the write-up.
 const SHORTCODES =
-  /\[(video|audio|embed|playlist|gallery|caption|vc_[a-z_]+)\b[^\]]*\](?:[\s\S]*?\[\/\1\])?/gi;
+  /\[(video|audio|embed|playlist|gallery|caption|vc_[a-z_]+)\b[^\]<]*\]?(?:[\s\S]*?\[\/\1\])?/gi;
 
 // Tags whose *contents* have to go too. Stripping just the <script> leaves the
 // code behind as text, which is fine in a paragraph but not once a later edit
