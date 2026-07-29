@@ -12,6 +12,14 @@ type NavbarProps = {
   cart: number;
 };
 
+// The first Kalima — La ilaha illallah Muhammadur Rasulullah.
+//
+// Held in a constant because it is rendered twice below, once for the top row
+// and once for phones, and the two must never drift apart. Every vowel mark in
+// it is deliberate; an editor or a find-and-replace that strips them changes
+// what the line says, so leave the string alone.
+const KALIMA = "لَا إِلٰهَ إِلَّا اللهُ مُحَمَّدٌ رَسُولُ اللهِ";
+
 export default function Navbar({ cart }: NavbarProps) {
   const { wishlist } = useWishlist();
   const { theme, toggleTheme } = useTheme();
@@ -126,11 +134,19 @@ export default function Navbar({ cart }: NavbarProps) {
           may as well break somewhere deliberate. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
 
-        <Link href="/" onClick={close}>
+        <Link href="/" className="shrink-0" onClick={close}>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Nova<span className="text-primary">Cart</span>
           </h1>
         </Link>
+
+        {/* Centred in what is left between the logo and the cart. Hidden below
+            md and shown on its own line instead: on a 360px phone that gap is
+            about 45px wide, and no size the kalima could be shrunk to would be
+            both legible and inside it. */}
+        <p className="kalima hidden md:block" lang="ar" dir="rtl">
+          {KALIMA}
+        </p>
 
         {/* Cart stays out of the drop-down: in a shop it should always be
             one tap away, never behind a menu. */}
@@ -152,6 +168,16 @@ export default function Navbar({ cart }: NavbarProps) {
         </div>
 
       </div>
+
+      {/* The phone's copy of it, full width so it has the room the top row
+          cannot give it. */}
+      <p
+        className="kalima md:hidden border-t border-border py-1 text-center"
+        lang="ar"
+        dir="rtl"
+      >
+        {KALIMA}
+      </p>
 
       {/* The links, centred on their own line under the logo. Still wraps if it
           has to — a narrow laptop or a longer name should push a button onto a

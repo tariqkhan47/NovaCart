@@ -1,6 +1,6 @@
 import { AuthProvider } from "../context/AuthContext";
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Amiri, Inter, Poppins } from "next/font/google";
 import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
@@ -21,6 +21,17 @@ const poppins = Poppins({
   subsets: ["latin"],
 });
 
+// For the kalima in the header. Neither Inter nor Poppins carries Arabic
+// glyphs, so without this the browser falls back to whatever Arabic face the
+// device happens to have — a different shape on every phone, and on the ones
+// with none, empty boxes. Amiri is a naskh face that sets the tashkeel
+// properly, which a UI font does not.
+const amiri = Amiri({
+  variable: "--font-amiri",
+  weight: ["400", "700"],
+  subsets: ["arabic"],
+});
+
 export const metadata: Metadata = {
   title: "NovaCart — Home Decor, Kitchen, Watches, Fragrances & More",
   description:
@@ -35,7 +46,7 @@ export default function RootLayout({
  return (
   <html
     lang="en"
-    className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+    className={`${inter.variable} ${poppins.variable} ${amiri.variable} h-full antialiased`}
   >
     <body>
       <ThemeProvider>

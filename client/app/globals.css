@@ -288,6 +288,24 @@
     border-color: var(--border);
   }
 
+  /* Kalima ------------------------------------------------------ */
+  /* Sits in the header's top row, between the logo and the cart. */
+  .kalima {
+    font-family: var(--font-amiri), "Noto Naskh Arabic", "Traditional Arabic",
+      serif;
+    /* Scales with the window rather than stepping at breakpoints: small on a
+       phone, full size on a laptop, and never an in-between width where it
+       would collide with the cart button. The 1.6rem ceiling is where it stops
+       growing on a wide monitor, so it stays a mark on the page and does not
+       start competing with the shop's own name. */
+    font-size: clamp(0.95rem, 1.9vw, 1.6rem);
+    /* Arabic sets its vowel marks above and below the letters, and the default
+       leading clips them. */
+    line-height: 2;
+    color: var(--primary-hover);
+    white-space: nowrap;
+  }
+
   /* Supplier copy ----------------------------------------------- */
   /* The long product description, which arrives as HTML written on the
      supplier's portal — see lib/rich-text.mjs. Everything in it is styled from
