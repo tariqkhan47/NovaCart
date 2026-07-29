@@ -1,3 +1,5 @@
+import type { PaymentMethod, PaymentStatus } from "../lib/payments";
+
 export const ORDER_STATUSES = [
   "Pending",
   "Confirmed",
@@ -28,7 +30,11 @@ export type Order = {
     phone: string;
     address: string;
   };
-  paymentMethod: "cod";
+  paymentMethod: PaymentMethod;
+  // Both missing on orders placed back when Cash on Delivery was the only
+  // way to pay; treat an absent status as "pending".
+  paymentStatus?: PaymentStatus;
+  paymentReference?: string;
   status: OrderStatus;
   createdAt: string;
 };

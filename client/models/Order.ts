@@ -1,4 +1,5 @@
 import mongoose, { Schema, models } from "mongoose";
+import { PAYMENT_METHODS, PAYMENT_STATUSES } from "@/lib/payments";
 
 export const ORDER_STATUSES = [
   "Pending",
@@ -59,8 +60,26 @@ const OrderSchema = new Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["cod"],
+      enum: PAYMENT_METHODS,
       default: "cod",
+    },
+
+    // Separate from the order status below: an order can be paid for and not
+    // yet shipped, or delivered and still unpaid, and the shop needs to be
+    // able to say which. Orders placed before there was anything but Cash on
+    // Delivery have neither field, which reads as "pending".
+    paymentStatus: {
+      type: String,
+      enum: PAYMENT_STATUSES,
+      default: "pending",
+    },
+
+    // What the customer quoted after transferring — an EasyPaisa TID or a bank
+    // reference. The one thing that lets the owner find the money in the
+    // account, so it is worth keeping even after the payment is confirmed.
+    paymentReference: {
+      type: String,
+      trim: true,
     },
 
     status: {

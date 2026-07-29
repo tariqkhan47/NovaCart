@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import type { Order } from "../../types/order";
 import { formatPrice } from "../../lib/currency";
+import {
+  PAYMENT_STATUS_LABELS,
+  paymentMethodLabel,
+} from "../../lib/payments";
 
 export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
@@ -81,6 +85,11 @@ export default function OrdersPage() {
                     </p>
 
                     <span className="badge mt-2">{order.status}</span>
+
+                    <p className="text-muted-soft text-sm mt-2">
+                      {paymentMethodLabel(order.paymentMethod)} ·{" "}
+                      {PAYMENT_STATUS_LABELS[order.paymentStatus ?? "pending"]}
+                    </p>
                   </div>
                 </div>
 

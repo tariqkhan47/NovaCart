@@ -1,8 +1,22 @@
-"use client";
-
 import Link from "next/link";
+import { paymentMethodInfo } from "../../lib/payments";
 
-export default function SuccessPage() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function SuccessPage({ searchParams }: Props) {
+  const { payment } = await searchParams;
+
+  // Checkout passes the method it used. Anything else in the URL — a stale
+  // link, somebody typing — falls through to the Cash on Delivery wording,
+  // which promises nothing that has not happened.
+  const method = paymentMethodInfo(
+    String(Array.isArray(payment) ? payment[0] : (payment ?? ""))
+  );
+
+  const transferred = method?.needsReference ?? false;
+
   return (
     <main className="page flex items-center justify-center px-4 sm:px-6">
       <div className="panel p-6 sm:p-10 text-center max-w-lg">
@@ -14,7 +28,16 @@ export default function SuccessPage() {
 
         <p className="text-muted-soft mb-8">
           Thank you for shopping with Arsalah.
-          Your order has been received successfully.
+          {transferred ? (
+            <>
+              {" "}
+              Aap ka {method?.label} payment check hote hi order confirm kar
+              diya jayega — aam taur par kuch ghanton mein. Status &ldquo;My
+              Orders&rdquo; mein dikhta rahega.
+            </>
+          ) : (
+            <> Your order has been received successfully.</>
+          )}
         </p>
 
         <Link href="/">

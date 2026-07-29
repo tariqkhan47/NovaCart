@@ -6,6 +6,7 @@ import Product from "@/models/Product";
 import Subscriber, { newUnsubscribeToken } from "@/models/Subscriber";
 import { getSessionFromRequest, requireUser } from "@/lib/auth";
 import { DELIVERY_CHARGE } from "@/lib/delivery";
+import { initialPaymentStatus, paymentMethodInfo } from "@/lib/payments";
 
 // LIST ORDERS — admins see every order, customers see only their own.
 export async function GET(req: NextRequest) {
@@ -50,7 +51,8 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
-    const { items, name, email, phone, address } = body;
+    const { items, name, email, phone, address, paymentMethod, paymentReference } =
+      body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -62,6 +64,38 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !phone || !address) {
       return NextResponse.json(
         { message: "Please fill in all delivery details" },
+        { status: 400 }
+      );
+    }
+
+    // Checked here rather than taken on the browser's word: the page could be
+    // stale, or the request could not have come from the page at all. Anything
+    // the owner has not set an account up for is refused.
+    const payment = paymentMethodInfo(String(paymentMethod ?? "cod"));
+
+    if (!payment?.available) {
+      return NextResponse.json(
+        { message: "That payment method is not available" },
+        { status: 400 }
+      );
+    }
+
+    const reference = payment.needsReference
+      ? String(paymentReference ?? "").trim()
+      : "";
+
+    if (payment.needsReference && !reference) {
+      return NextResponse.json(
+        { message: `Please enter the ${payment.referenceLabel}` },
+        { status: 400 }
+      );
+    }
+
+    // No transaction ID runs anywhere near this long; anything that does is
+    // not one, and it would only make the admin list unreadable.
+    if (reference.length > 64) {
+      return NextResponse.json(
+        { message: `That is not a valid ${payment.referenceLabel}` },
         { status: 400 }
       );
     }
@@ -126,7 +160,9 @@ export async function POST(req: NextRequest) {
       deliveryCharge: DELIVERY_CHARGE,
       total: subtotal + DELIVERY_CHARGE,
       customer: { name, email, phone, address },
-      paymentMethod: "cod",
+      paymentMethod: payment.method,
+      paymentStatus: initialPaymentStatus(payment.method),
+      paymentReference: reference || undefined,
       status: "Pending",
     });
 

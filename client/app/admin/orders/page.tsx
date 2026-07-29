@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { ORDER_STATUSES, type Order, type OrderStatus } from "../../../types/order";
 import { formatPrice } from "../../../lib/currency";
+import {
+  PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUSES,
+  paymentMethodLabel,
+  type PaymentStatus,
+} from "../../../lib/payments";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,20 +33,23 @@ export default function AdminOrdersPage() {
     load();
   }, [load]);
 
-  async function updateStatus(id: string, status: OrderStatus) {
+  async function updateOrder(
+    id: string,
+    patch: { status?: OrderStatus; paymentStatus?: PaymentStatus }
+  ) {
     const previous = orders;
 
     // Optimistic, rolled back if the server disagrees.
     setOrders((prev) =>
       prev.map((order) =>
-        order._id === id ? { ...order, status } : order
+        order._id === id ? { ...order, ...patch } : order
       )
     );
 
     const res = await fetch(`/api/orders/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(patch),
     });
 
     if (!res.ok) {
@@ -116,25 +125,51 @@ export default function AdminOrdersPage() {
                     </p>
 
                     <p className="text-muted-soft text-sm mt-1">
-                      Cash on Delivery
+                      {paymentMethodLabel(order.paymentMethod)}
                     </p>
 
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        updateStatus(
-                          order._id,
-                          e.target.value as OrderStatus
-                        )
-                      }
-                      className="field w-auto px-3 py-2 mt-3"
-                    >
-                      {ORDER_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
+                    {/* What the customer says they sent, so it can be matched
+                        against the account statement before the payment is
+                        marked as arrived. */}
+                    {order.paymentReference && (
+                      <p className="text-muted-soft text-sm break-all">
+                        Ref: {order.paymentReference}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 mt-3 sm:justify-end">
+                      <select
+                        value={order.paymentStatus ?? "pending"}
+                        onChange={(e) =>
+                          updateOrder(order._id, {
+                            paymentStatus: e.target.value as PaymentStatus,
+                          })
+                        }
+                        className="field w-auto px-3 py-2"
+                      >
+                        {PAYMENT_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {PAYMENT_STATUS_LABELS[status]}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={order.status}
+                        onChange={(e) =>
+                          updateOrder(order._id, {
+                            status: e.target.value as OrderStatus,
+                          })
+                        }
+                        className="field w-auto px-3 py-2"
+                      >
+                        {ORDER_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
 

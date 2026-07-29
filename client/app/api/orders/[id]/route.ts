@@ -4,8 +4,10 @@ import { connectDB } from "@/lib/mongodb";
 import Order, { ORDER_STATUSES } from "@/models/Order";
 import Product from "@/models/Product";
 import { requireAdmin } from "@/lib/auth";
+import { PAYMENT_STATUSES } from "@/lib/payments";
 
-// UPDATE ORDER STATUS (admin only)
+// UPDATE AN ORDER (admin only) — where it is with the courier, whether the
+// money has arrived, or both.
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -25,11 +27,28 @@ export async function PATCH(
       );
     }
 
-    const { status } = await req.json();
+    const { status, paymentStatus } = await req.json();
 
-    if (!ORDER_STATUSES.includes(status)) {
+    if (status === undefined && paymentStatus === undefined) {
+      return NextResponse.json(
+        { message: "Nothing to update" },
+        { status: 400 }
+      );
+    }
+
+    if (status !== undefined && !ORDER_STATUSES.includes(status)) {
       return NextResponse.json(
         { message: "Invalid status" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      paymentStatus !== undefined &&
+      !PAYMENT_STATUSES.includes(paymentStatus)
+    ) {
+      return NextResponse.json(
+        { message: "Invalid payment status" },
         { status: 400 }
       );
     }
@@ -54,7 +73,9 @@ export async function PATCH(
       }
     }
 
-    order.status = status;
+    if (status !== undefined) order.status = status;
+    if (paymentStatus !== undefined) order.paymentStatus = paymentStatus;
+
     await order.save();
 
     return NextResponse.json(order);

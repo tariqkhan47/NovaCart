@@ -34,8 +34,10 @@ const amiri = Amiri({
 
 export const metadata: Metadata = {
   title: "Arsalah — Home Decor, Kitchen, Watches, Fragrances & More",
+  // Kept under 155 characters so search results do not cut it off mid-sentence,
+  // which is why the category list is shorter than the shop's full range.
   description:
-    "Shop home decor, kitchen, drinkware, watches, smart watches, fragrances, bags, gadgets, toys and baby products at Arsalah. Cash on Delivery across Pakistan.",
+    "Shop home decor, kitchen, drinkware, watches, fragrances, bags, gadgets and toys at Arsalah. Cash on Delivery, EasyPaisa or bank transfer across Pakistan.",
 };
 
 export default function RootLayout({
