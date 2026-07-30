@@ -35,6 +35,8 @@ export type Order = {
   // way to pay; treat an absent status as "pending".
   paymentStatus?: PaymentStatus;
   paymentReference?: string;
+  // Card orders only — the gateway's id for the payment attempt.
+  paymentTracker?: string;
   status: OrderStatus;
   createdAt: string;
 };

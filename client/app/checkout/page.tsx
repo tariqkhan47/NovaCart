@@ -29,6 +29,22 @@ export default function CheckoutPage() {
   const methods = paymentMethods();
   const chosen = methods.find((info) => info.method === method);
 
+  // Safepay sends anyone who backs out of the card form here with
+  // ?payment=cancelled. Read off the URL rather than with useSearchParams,
+  // which would need this page wrapped in a Suspense boundary to keep
+  // prerendering. The cart is still intact, so they can simply try again.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("payment") !== "cancelled") {
+      return;
+    }
+
+    setMethod("card");
+    setError("Card payment cancelled. Aap dobara koshish kar sakte hain.");
+
+    // Take it out of the URL so a refresh does not keep showing the notice.
+    window.history.replaceState(null, "", "/checkout");
+  }, []);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -104,7 +120,20 @@ export default function CheckoutPage() {
         return;
       }
 
+      // A card order is placed but not yet paid for; the shopper finishes on
+      // Safepay's own page. Left as a full page load rather than router.push
+      // because the destination is another site.
+      //
+      // The cart is deliberately left alone here — someone who backs out of
+      // the card form lands on checkout again, and emptying it first would
+      // leave them with nothing to retry with. The success page clears it.
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
       clearCart();
+
       // The success page says something different to someone who has already
       // transferred than to someone paying the courier.
       router.push(`/success?payment=${method}`);

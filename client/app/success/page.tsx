@@ -1,24 +1,34 @@
 import Link from "next/link";
 import { paymentMethodInfo } from "../../lib/payments";
+import ClearCart from "./ClearCart";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+const one = (value: string | string[] | undefined) =>
+  String(Array.isArray(value) ? value[0] : (value ?? ""));
+
 export default async function SuccessPage({ searchParams }: Props) {
-  const { payment } = await searchParams;
+  const { payment, status } = await searchParams;
 
   // Checkout passes the method it used. Anything else in the URL — a stale
   // link, somebody typing — falls through to the Cash on Delivery wording,
   // which promises nothing that has not happened.
-  const method = paymentMethodInfo(
-    String(Array.isArray(payment) ? payment[0] : (payment ?? ""))
-  );
+  const method = paymentMethodInfo(one(payment));
 
   const transferred = method?.needsReference ?? false;
 
+  // Set by the Safepay return route, and only ever to "paid" once the
+  // signature has been checked. Anything else means the shop cannot yet say
+  // the money arrived, so it does not.
+  const card = method?.method === "card";
+  const cardPaid = card && one(status) === "paid";
+
   return (
     <main className="page flex items-center justify-center px-4 sm:px-6">
+      <ClearCart />
+
       <div className="panel p-6 sm:p-10 text-center max-w-lg">
         <h1 className="text-5xl mb-4">✅</h1>
 
@@ -28,7 +38,19 @@ export default async function SuccessPage({ searchParams }: Props) {
 
         <p className="text-muted-soft mb-8">
           Thank you for shopping with Arsalah.
-          {transferred ? (
+          {cardPaid ? (
+            <>
+              {" "}
+              Aap ki card payment mil gayi hai. Order confirm ho chuka hai aur
+              jald bhej diya jayega.
+            </>
+          ) : card ? (
+            <>
+              {" "}
+              Aap ka order mil gaya hai. Card payment confirm hote hi order
+              aage barhega — status &ldquo;My Orders&rdquo; mein dikhta rahega.
+            </>
+          ) : transferred ? (
             <>
               {" "}
               Aap ka {method?.label} payment check hote hi order confirm kar

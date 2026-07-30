@@ -90,8 +90,18 @@ export const PAYMENT_ACCOUNTS: {
  *
  * Null until one is arranged. The card option still appears at checkout, but
  * greyed out, so shoppers can see it is on the way.
+ *
+ * Switched on by NEXT_PUBLIC_SAFEPAY_ENABLED rather than by the presence of
+ * the Safepay keys, because this file is read by the checkout screen in the
+ * browser and a secret consulted here would be bundled into the page. The flag
+ * has to be set deliberately in each place the shop runs, so a deploy that has
+ * not had its keys added yet offers cash and transfer only rather than a card
+ * button that fails — see lib/safepay.ts for the server's own check.
  */
-export const CARD_GATEWAY: { name: string } | null = null;
+export const CARD_GATEWAY: { name: string } | null =
+  process.env.NEXT_PUBLIC_SAFEPAY_ENABLED === "true"
+    ? { name: "Safepay" }
+    : null;
 
 export type PaymentMethodInfo = {
   method: PaymentMethod;
@@ -217,9 +227,14 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
 /**
  * Where a freshly placed order starts.
  *
- * Cash on Delivery owes nothing yet. Everything else has the customer's word
- * that the money is on its way, which is not the same as it having arrived.
+ * Cash on Delivery owes nothing yet. A card order owes nothing yet either —
+ * it is created before the shopper is sent to the gateway, and only the
+ * gateway's own word moves it to paid, so it must not start out claiming
+ * anything happened.
+ *
+ * EasyPaisa and bank transfer have the customer's word that the money is on
+ * its way, which is not the same as it having arrived.
  */
 export function initialPaymentStatus(method: PaymentMethod): PaymentStatus {
-  return method === "cod" ? "pending" : "submitted";
+  return method === "cod" || method === "card" ? "pending" : "submitted";
 }

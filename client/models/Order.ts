@@ -82,6 +82,16 @@ const OrderSchema = new Schema(
       trim: true,
     },
 
+    // Card orders only: the gateway's own id for the attempt. Saved before the
+    // shopper leaves for Safepay, so when Safepay reports an outcome the order
+    // it belongs to can be found without trusting anything the browser sends
+    // back. Indexed because the webhook looks orders up by it.
+    paymentTracker: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+
     status: {
       type: String,
       enum: ORDER_STATUSES,
