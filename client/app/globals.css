@@ -5,72 +5,102 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------
-   Pengu-inspired theme — warm amber brand ramp on cream + deep brown.
+   Bento theme — pale sage canvas, white cards, one lime accent.
+
+   The canvas is deliberately not white: the cards are, and they only
+   read as cards because the page behind them is a shade darker. Every
+   surface here is therefore either the sage or the white, never both.
    --------------------------------------------------------------- */
 @theme {
-  --color-brand-50: #fff9ec;
-  --color-brand-100: #fdefc9;
-  --color-brand-200: #fbdd8e;
-  --color-brand-300: #f9c552;
-  --color-brand-400: #f7b02b;
-  --color-brand-500: #f0a500;
-  --color-brand-600: #d48806;
-  --color-brand-700: #a96407;
-  --color-brand-800: #8a4f0e;
-  --color-brand-900: #74420f;
+  /* The lime. Treat it as a fill only — see --accent below for the
+     text colour, because #d6f24b on white is about 1.2:1 and cannot
+     be read at any size. */
+  --color-brand-50: #f7fde9;
+  --color-brand-100: #edfac3;
+  --color-brand-200: #e0f792;
+  --color-brand-300: #d6f24b;
+  --color-brand-400: #c5e733;
+  --color-brand-500: #a9cd1d;
+  --color-brand-600: #87a616;
+  --color-brand-700: #667d16;
+  --color-brand-800: #4e6117;
+  --color-brand-900: #3a4713;
 
-  --color-ink-50: #f7f2ea;
-  --color-ink-100: #ece0cd;
-  --color-ink-500: #6b5133;
-  --color-ink-700: #3e2c1c;
-  --color-ink-900: #201711;
+  /* Neutrals carry a little green so they settle onto the sage canvas
+     instead of sitting on top of it looking blue. */
+  --color-ink-50: #f4f6f2;
+  --color-ink-100: #e3e8dd;
+  --color-ink-500: #6b7268;
+  --color-ink-700: #2c322c;
+  --color-ink-900: #131613;
+
+  /* Review stars stay gold. Lime stars read as a rendering fault
+     rather than a rating. */
+  --color-star: #f5b301;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 :root {
-  --background: #fcf8f1;
+  --background: #eaeee4;
   --surface: #ffffff;
-  --surface-alt: #fbf5ea;
-  --foreground: #1f1b16;
-  --muted: #7c6a53;
-  --border: #ecdfc9;
+  --surface-alt: #f2f6ec;
+  --foreground: #151814;
+  --muted: #6b7268;
+  --border: #e0e6d8;
 
-  --primary: #f0a500;
-  --primary-hover: #d48806;
-  --on-primary: #201711;
+  --primary: #d6f24b;
+  --primary-hover: #c5e733;
+  --on-primary: #191d14;
 
-  --danger: #c0392b;
-  --danger-hover: #a52f23;
-  --success: #4f7b3a;
-  --success-hover: #416430;
+  /* The lime wherever it has to be read rather than filled: prices,
+     eyebrows, link hovers, list markers. */
+  --accent: #5f7c14;
 
-  --ring: rgb(240 165 0 / 0.35);
-  --shadow: 0 10px 30px -14px rgb(62 44 28 / 0.35);
-  --shadow-lg: 0 24px 50px -22px rgb(62 44 28 / 0.45);
+  --danger: #d2483a;
+  --danger-hover: #b53c30;
+  --success: #3f7d4e;
+  --success-hover: #336640;
+
+  /* Not the lime — a lime focus ring on a white field is invisible,
+     which is the one thing a focus ring may never be. */
+  --ring: rgb(134 166 22 / 0.45);
+
+  /* Wide and faint. The cards are separated by the canvas behind them,
+     so the shadow only has to lift them, not outline them. */
+  --shadow: 0 6px 24px -14px rgb(19 22 19 / 0.3);
+  --shadow-lg: 0 26px 60px -34px rgb(19 22 19 / 0.42);
+
+  --radius-card: 22px;
+  --radius-panel: 28px;
+  --radius-field: 14px;
 }
 
 .dark {
-  --background: #14110d;
-  --surface: #1e1a14;
-  --surface-alt: #262019;
-  --foreground: #f3ece0;
-  --muted: #a2917a;
-  --border: #3a3126;
+  --background: #0f120e;
+  --surface: #171b15;
+  --surface-alt: #1e231b;
+  --foreground: #eef2e8;
+  --muted: #9aa394;
+  --border: #2b3128;
 
-  --primary: #f7b02b;
-  --primary-hover: #f0a500;
-  --on-primary: #17130e;
+  --primary: #d6f24b;
+  --primary-hover: #e0f76e;
+  --on-primary: #191d14;
 
-  --danger: #e0614f;
-  --danger-hover: #c94d3c;
-  --success: #7aa860;
-  --success-hover: #689350;
+  /* Inverted: on a dark surface the bright lime is the readable one and
+     the olive is not. */
+  --accent: #c5e733;
 
-  --ring: rgb(247 176 43 / 0.3);
-  --shadow: 0 10px 30px -14px rgb(0 0 0 / 0.7);
-  --shadow-lg: 0 24px 50px -22px rgb(0 0 0 / 0.8);
+  --danger: #e8695a;
+  --danger-hover: #d1543f;
+  --success: #79b389;
+  --success-hover: #67a077;
+
+  --ring: rgb(214 242 75 / 0.4);
+  --shadow: 0 10px 30px -16px rgb(0 0 0 / 0.75);
+  --shadow-lg: 0 26px 60px -30px rgb(0 0 0 / 0.85);
 }
 
 @theme inline {
@@ -82,6 +112,7 @@
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
   --color-danger: var(--danger);
   --color-success: var(--success);
 }
@@ -139,7 +170,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--primary-hover);
+    color: var(--accent);
   }
 
   .section-title {
@@ -156,7 +187,7 @@
   .price {
     font-family: var(--font-display);
     font-weight: 700;
-    color: var(--primary-hover);
+    color: var(--accent);
   }
 
   /* Buttons ---------------------------------------------------- */
@@ -196,7 +227,7 @@
   .btn-primary {
     background: var(--primary);
     color: var(--on-primary);
-    box-shadow: 0 10px 24px -14px var(--primary);
+    box-shadow: 0 10px 24px -16px var(--accent);
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -260,7 +291,7 @@
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: var(--radius-card);
     box-shadow: var(--shadow);
   }
 
@@ -280,7 +311,7 @@
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 22px;
+    border-radius: var(--radius-panel);
     box-shadow: var(--shadow-lg);
   }
 
@@ -320,7 +351,7 @@
     /* Arabic sets its vowel marks above and below the letters, and the default
        leading clips them. */
     line-height: 2;
-    color: var(--primary-hover);
+    color: var(--accent);
     white-space: nowrap;
   }
 
@@ -391,7 +422,7 @@
   }
 
   .rich-text li::marker {
-    color: var(--primary);
+    color: var(--accent);
   }
 
   .rich-text strong,
@@ -459,7 +490,7 @@
     background: var(--surface);
     color: var(--foreground);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius-field);
     padding: 0.75rem 1rem;
     transition:
       border-color 0.2s ease,
@@ -496,7 +527,7 @@
 
   .chip:hover {
     border-color: var(--primary);
-    color: var(--primary-hover);
+    color: var(--accent);
   }
 
   .chip-active {
@@ -522,32 +553,36 @@
   }
 
   /* Hero ------------------------------------------------------- */
+  /* A card on the canvas rather than a full-bleed dark band. The pages
+     that use it wrap it in their own max-width padding, so it lines up
+     with the grid of cards below it instead of running past them. */
   .hero {
     position: relative;
     overflow: hidden;
+    border-radius: var(--radius-panel);
+    border: 1px solid var(--border);
+    /* One wash of lime in the top corner. It is the only place on the
+       page the accent appears as a large area, which is what keeps it
+       an accent. */
     background:
       radial-gradient(
-        60rem 32rem at 85% -10%,
-        var(--color-brand-300) 0%,
-        transparent 60%
+        38rem 24rem at 88% -25%,
+        rgb(214 242 75 / 0.55) 0%,
+        transparent 62%
       ),
-      linear-gradient(
-        135deg,
-        var(--color-ink-900) 0%,
-        var(--color-ink-700) 55%,
-        var(--color-brand-800) 100%
-      );
-    color: #fff8ec;
+      var(--surface-alt);
+    color: var(--foreground);
+    box-shadow: var(--shadow);
   }
 
   .hero-pattern {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.16;
+    opacity: 0.55;
     background-image: radial-gradient(
       circle at center,
-      var(--color-brand-200) 1.5px,
+      var(--border) 1.5px,
       transparent 1.6px
     );
     background-size: 26px 26px;
@@ -562,7 +597,7 @@
   }
 
   .nav-link:hover {
-    color: var(--primary-hover);
+    color: var(--accent);
   }
 
   .nav-link::after {
@@ -581,7 +616,7 @@
   }
 
   .link-brand {
-    color: var(--primary-hover);
+    color: var(--accent);
     font-weight: 600;
   }
 

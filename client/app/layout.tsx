@@ -1,6 +1,6 @@
 import { AuthProvider } from "../context/AuthContext";
 import type { Metadata } from "next";
-import { Amiri, Inter, Poppins } from "next/font/google";
+import { Amiri, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
@@ -15,8 +15,12 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+// Headings. Poppins was the geometric round face the old amber theme was
+// built on; this one is a grotesk with much tighter apertures, which is what
+// makes the big headings read as a single dense block rather than a row of
+// circles.
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   weight: ["500", "600", "700", "800"],
   subsets: ["latin"],
 });
@@ -48,7 +52,7 @@ export default function RootLayout({
  return (
   <html
     lang="en"
-    className={`${inter.variable} ${poppins.variable} ${amiri.variable} h-full antialiased`}
+    className={`${inter.variable} ${jakarta.variable} ${amiri.variable} h-full antialiased`}
   >
     <body>
       <ThemeProvider>

@@ -124,7 +124,7 @@ export default function AdminPage() {
     { label: "📦 Orders", value: orders.length, tone: "text-ink-700 dark:text-brand-200" },
     { label: "⏳ Pending", value: pendingOrders, tone: "text-brand-700" },
     { label: "✅ Delivered", value: deliveredOrders, tone: "text-success" },
-    { label: "🛒 Cart", value: cart.length, tone: "text-brand-500" },
+    { label: "🛒 Cart", value: cart.length, tone: "text-brand-700" },
     { label: "❤️ Wishlist", value: wishlist.length, tone: "text-danger" },
     { label: "📬 Subscribers", value: subscriberCount, tone: "text-brand-600" },
     {

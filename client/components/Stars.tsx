@@ -33,7 +33,7 @@ export default function Stars({ rating, className = "", size }: StarsProps) {
       <span
         aria-hidden="true"
         style={{ width: filled }}
-        className="absolute left-0 top-0 overflow-hidden text-brand-500"
+        className="absolute left-0 top-0 overflow-hidden text-star"
       >
         ★★★★★
       </span>

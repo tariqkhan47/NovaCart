@@ -15,20 +15,22 @@ export default function CollectionsView() {
 
       <main className="page">
 
-        <section className="hero py-12 sm:py-16">
-          <div className="hero-pattern" />
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <div className="hero py-12 sm:py-16 px-6 sm:px-10">
+            <div className="hero-pattern" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <span className="eyebrow text-brand-300">Browse By</span>
+            <div className="relative text-center">
+              <span className="eyebrow">Browse By</span>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4 mb-4">
-              Collections
-            </h1>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4 mb-4">
+                Collections
+              </h1>
 
-            <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto">
-              {CATEGORIES.length} collections, from kitchen tools to smart
-              watches.
-            </p>
+              <p className="text-base sm:text-lg text-muted-soft max-w-2xl mx-auto">
+                {CATEGORIES.length} collections, from kitchen tools to smart
+                watches.
+              </p>
+            </div>
           </div>
         </section>
 

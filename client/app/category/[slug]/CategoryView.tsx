@@ -79,19 +79,21 @@ export default function CategoryView({ category }: { category: Category }) {
       <main className="page">
 
         {/* Collection header */}
-        <section className="hero py-12 sm:py-16">
-          <div className="hero-pattern" />
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <div className="hero py-12 sm:py-16 px-6 sm:px-10">
+            <div className="hero-pattern" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <div className="text-5xl sm:text-6xl">{category.icon}</div>
+            <div className="relative text-center">
+              <div className="text-5xl sm:text-6xl">{category.icon}</div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4 mb-4">
-              {category.name}
-            </h1>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4 mb-4">
+                {category.name}
+              </h1>
 
-            <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto">
-              {category.tagline}
-            </p>
+              <p className="text-base sm:text-lg text-muted-soft max-w-2xl mx-auto">
+                {category.tagline}
+              </p>
+            </div>
           </div>
         </section>
 

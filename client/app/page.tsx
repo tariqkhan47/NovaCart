@@ -148,29 +148,32 @@ const router = useRouter();
             them the "Shop Now" button was being pushed under the fold on a
             laptop — the one thing on this screen that has to be visible
             without scrolling. */}
-        <section className="hero py-12 sm:py-16">
-          <div className="hero-pattern" />
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <div className="hero py-12 sm:py-16 px-6 sm:px-10">
+            <div className="hero-pattern" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <span className="eyebrow text-brand-300">
-              Quality · Value · Fast Delivery
-            </span>
+            <div className="relative text-center">
+              <span className="eyebrow">
+                Quality · Value · Fast Delivery
+              </span>
 
-            {/* One line from sm up, where it comfortably fits. Left to wrap on
-                a phone, where 36px type across eighteen characters does not fit
-                a 360px screen and forcing it would push the heading off the
-                side; there it breaks before the name rather than inside it. */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mt-3 mb-4 sm:whitespace-nowrap">
-              Welcome to Arsalah
-            </h1>
+              {/* One line from sm up, where it comfortably fits. Left to wrap
+                  on a phone, where 36px type across eighteen characters does
+                  not fit a 360px screen and forcing it would push the heading
+                  off the side; there it breaks before the name rather than
+                  inside it. */}
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mt-3 mb-4 sm:whitespace-nowrap">
+                Welcome to Arsalah
+              </h1>
 
-            <p className="text-base sm:text-lg text-brand-50/80 max-w-2xl mx-auto mb-7">
-              Discover the best products at the best prices.
-            </p>
+              <p className="text-base sm:text-lg text-muted-soft max-w-2xl mx-auto mb-7">
+                Discover the best products at the best prices.
+              </p>
 
-            <button className="btn btn-primary btn-lg">
-              Shop Now
-            </button>
+              <button className="btn btn-primary btn-lg">
+                Shop Now
+              </button>
+            </div>
           </div>
         </section>
 
