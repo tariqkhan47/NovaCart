@@ -138,7 +138,20 @@ export default function Navbar({ cart }: NavbarProps) {
           may as well break somewhere deliberate. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
 
-        <Link href="/" className="shrink-0" onClick={close}>
+        <Link
+          href="/"
+          className="flex items-center gap-2 sm:gap-2.5 shrink-0"
+          onClick={close}
+        >
+          {/* The logo's cart-and-scales mark, painted through a mask so it
+              follows the theme — see .brand-mark in globals.css. Hidden from
+              screen readers because the shop's name is right beside it and
+              would otherwise be announced twice. Kept smaller than its
+              desktop size below sm: the top row also carries the cart and the
+              menu button, and on a 360px phone there is not the width for
+              both a full-size mark and the name. */}
+          <span className="brand-mark h-8 sm:h-11 shrink-0" aria-hidden="true" />
+
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Arsalah
           </h1>
