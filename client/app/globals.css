@@ -401,24 +401,6 @@
     border-color: var(--border);
   }
 
-  /* Brand mark --------------------------------------------------- */
-  /* The cart-and-scales device from the shop's logo, cut out of the supplied
-     artwork and kept in public/arsalah-mark.png as an alpha mask rather than
-     a picture. The mark is drawn in near-black, which reads on the cream
-     header and disappears entirely on the dark one, so it is painted here
-     through the mask in whatever ink the current theme uses — the same
-     colour the name beside it is set in, in both themes.
-
-     Sized by height alone (h-8 / sm:h-11 on the element); the ratio below is
-     the PNG's own 238x224 and keeps the width in step. */
-  .brand-mark {
-    display: block;
-    aspect-ratio: 238 / 224;
-    background-color: var(--foreground);
-    -webkit-mask: url("/arsalah-mark.png") center / contain no-repeat;
-    mask: url("/arsalah-mark.png") center / contain no-repeat;
-  }
-
   /* Kalima ------------------------------------------------------ */
   /* Sits in the header's top row, between the logo and the cart. */
   .kalima {

@@ -7,6 +7,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { CONTACT_LINKS } from "../lib/store";
+import BrandMark from "./BrandMark";
 
 type NavbarProps = {
   cart: number;
@@ -143,14 +144,14 @@ export default function Navbar({ cart }: NavbarProps) {
           className="flex items-center gap-2 sm:gap-2.5 shrink-0"
           onClick={close}
         >
-          {/* The logo's cart-and-scales mark, painted through a mask so it
-              follows the theme — see .brand-mark in globals.css. Hidden from
-              screen readers because the shop's name is right beside it and
-              would otherwise be announced twice. Kept smaller than its
-              desktop size below sm: the top row also carries the cart and the
-              menu button, and on a 360px phone there is not the width for
-              both a full-size mark and the name. */}
-          <span className="brand-mark h-8 sm:h-11 shrink-0" aria-hidden="true" />
+          {/* The logo mark, drawn in the theme's ink because it fills with
+              currentColor — see BrandMark. Hidden from screen readers because
+              the shop's name is right beside it and would otherwise be
+              announced twice. Kept smaller than its desktop size below sm: the
+              top row also carries the cart and the menu button, and on a 360px
+              phone there is not the width for both a full-size mark and the
+              name. */}
+          <BrandMark className="h-8 sm:h-11 w-auto shrink-0" />
 
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Arsalah
