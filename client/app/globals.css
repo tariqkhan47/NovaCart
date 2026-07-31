@@ -401,6 +401,33 @@
     border-color: var(--border);
   }
 
+  /* Brand mark --------------------------------------------------- */
+  /* The paper plane beside the name in the header — see BrandMark.
+     Sized from an explicit ratio rather than the SVG's own intrinsic
+     sizing: an <svg> carrying only a viewBox, dropped into a flex row,
+     can compute to zero width, and a zero-width SVG paints nothing while
+     still holding its place in the line. The colour is pinned to the same
+     token the wordmark uses rather than left to inherit, so the mark can
+     never come out in a shade that matches the header it sits on.
+
+     Selector is svg-qualified on purpose: a browser holding a cached copy
+     of the older header would otherwise match its <span> and paint a
+     solid block where the mark used to be. */
+  svg.brand-mark {
+    display: block;
+    flex: none;
+    height: 2rem;
+    width: auto;
+    aspect-ratio: 76.296 / 90.606;
+    color: var(--foreground);
+  }
+
+  @media (width >= 40rem) {
+    svg.brand-mark {
+      height: 2.75rem;
+    }
+  }
+
   /* Kalima ------------------------------------------------------ */
   /* Sits in the header's top row, between the logo and the cart. */
   .kalima {

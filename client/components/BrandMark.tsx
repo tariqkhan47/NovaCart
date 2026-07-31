@@ -8,10 +8,15 @@
  * browser tab.
  *
  * Two subpaths, filled with `currentColor` and no strokes, which is what lets
- * it inherit the header's ink in both themes — the old cart-and-scales device
- * was a near-black PNG and had to be painted through a CSS mask to survive the
- * dark theme. Sized by height alone; give it `w-auto` and the viewBox keeps
- * the width in step.
+ * it take the header's ink in both themes — the old cart-and-scales device was
+ * a near-black PNG and had to be painted through a CSS mask to survive the
+ * dark theme.
+ *
+ * It carries width and height attributes and is sized by `svg.brand-mark` in
+ * globals.css rather than by height utilities alone. Both matter: without an
+ * intrinsic size an SVG can collapse to zero width in a flex row, and a
+ * zero-width SVG paints nothing while still holding its place — an empty gap
+ * next to the name, which is exactly what it looked like.
  *
  * The same path draws app/icon.png, apple-icon.png and favicon.ico: near-black
  * #16171a on a lime #d6f24b tile, corners at 22% of the tile, the mark 56% of
@@ -22,13 +27,17 @@ export default function BrandMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 76.296 90.606"
-      fill="currentColor"
-      fillRule="evenodd"
+      width="76.296"
+      height="90.606"
       className={className}
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M54.047,0 L40.949,61.623 L0,74.389 Z M57.177,0.665 L76.296,90.606 L44.079,62.289 Z" />
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M54.047,0 L40.949,61.623 L0,74.389 Z M57.177,0.665 L76.296,90.606 L44.079,62.289 Z"
+      />
     </svg>
   );
 }

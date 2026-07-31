@@ -151,7 +151,7 @@ export default function Navbar({ cart }: NavbarProps) {
               top row also carries the cart and the menu button, and on a 360px
               phone there is not the width for both a full-size mark and the
               name. */}
-          <BrandMark className="h-8 sm:h-11 w-auto shrink-0" />
+          <BrandMark className="brand-mark" />
 
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Arsalah
