@@ -10,28 +10,8 @@
  * collection. Day to day the admin panel's Featured checkbox is the easier
  * way to change a pick — re-running this script resets it back to the catalog.
  */
-import mongoose from "mongoose";
 import { readFileSync } from "node:fs";
-
-function loadEnv() {
-  try {
-    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-      const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-      if (match && !process.env[match[1]]) {
-        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
-      }
-    }
-  } catch {
-    // Fall through to the ambient environment.
-  }
-}
-
-loadEnv();
-
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local)");
-  process.exit(1);
-}
+import { prisma } from "./lib/db.mjs";
 
 const apply = process.argv.includes("--apply");
 
@@ -43,10 +23,7 @@ const featuredNames = new Set(
   catalog.filter((product) => product.featured).map((product) => product.name.trim())
 );
 
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-const all = await products.find({}).toArray();
+const all = await prisma.product.findMany();
 
 const toFeature = [];
 const toUnfeature = [];
@@ -82,24 +59,18 @@ if (notFound.length) {
 if (!apply) {
   console.log("\nDry run. Re-run with --apply to write these changes.");
 } else if (toFeature.length || toUnfeature.length) {
-  const result = await products.bulkWrite([
-    ...toFeature.map((product) => ({
-      updateOne: {
-        filter: { _id: product._id },
-        update: { $set: { featured: true, updatedAt: new Date() } },
-      },
-    })),
-    ...toUnfeature.map((product) => ({
-      updateOne: {
-        filter: { _id: product._id },
-        update: { $set: { featured: false, updatedAt: new Date() } },
-      },
-    })),
+  const result = await prisma.$transaction([
+    ...toFeature.map((product) =>
+      prisma.product.update({ where: { id: product.id }, data: { featured: true } })
+    ),
+    ...toUnfeature.map((product) =>
+      prisma.product.update({ where: { id: product.id }, data: { featured: false } })
+    ),
   ]);
 
-  console.log(`\nUpdated ${result.modifiedCount} product(s).`);
+  console.log(`\nUpdated ${result.length} product(s).`);
 } else {
   console.log("\nNothing to do.");
 }
 
-await mongoose.disconnect();
+await prisma.$disconnect();

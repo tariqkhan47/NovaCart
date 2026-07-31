@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import Subscriber from "@/models/Subscriber";
+import { prisma } from "@/lib/db";
 
 /**
  * Mailing list opt-out. Deliberately open — the token in the link is the only
@@ -22,9 +21,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    await connectDB();
-
-    const subscriber = await Subscriber.findOne({ unsubscribeToken: token });
+    const subscriber = await prisma.subscriber.findUnique({
+      where: { unsubscribeToken: token },
+    });
 
     if (!subscriber) {
       return NextResponse.json(
@@ -56,25 +55,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectDB();
+    try {
+      const subscriber = await prisma.subscriber.update({
+        where: { unsubscribeToken: token },
+        data: { active: Boolean(resubscribe) },
+      });
 
-    const subscriber = await Subscriber.findOneAndUpdate(
-      { unsubscribeToken: token },
-      { $set: { active: Boolean(resubscribe) } },
-      { new: true }
-    );
+      return NextResponse.json({
+        email: subscriber.email,
+        active: subscriber.active,
+      });
+    } catch (error) {
+      if (
+        (error as { code?: string }).code === "P2025" // record to update not found
+      ) {
+        return NextResponse.json(
+          { message: "This unsubscribe link is not valid" },
+          { status: 404 }
+        );
+      }
 
-    if (!subscriber) {
-      return NextResponse.json(
-        { message: "This unsubscribe link is not valid" },
-        { status: 404 }
-      );
+      throw error;
     }
-
-    return NextResponse.json({
-      email: subscriber.email,
-      active: subscriber.active,
-    });
   } catch (error) {
     console.error("UNSUBSCRIBE ERROR:", error);
 

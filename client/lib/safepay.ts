@@ -12,6 +12,7 @@
  */
 
 import { createHmac, timingSafeEqual } from "node:crypto";
+import "./load-env";
 
 const HOSTS = {
   sandbox: {

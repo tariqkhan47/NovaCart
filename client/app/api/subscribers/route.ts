@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import Subscriber from "@/models/Subscriber";
+import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { serializeSubscriber } from "@/lib/serialize";
 
 // LIST SUBSCRIBERS (admin only) — the mailing list orders have built up.
 export async function GET(req: NextRequest) {
@@ -9,11 +9,11 @@ export async function GET(req: NextRequest) {
     const guard = await requireAdmin(req);
     if (guard instanceof NextResponse) return guard;
 
-    await connectDB();
+    const subscribers = await prisma.subscriber.findMany({
+      orderBy: { createdAt: "desc" },
+    });
 
-    const subscribers = await Subscriber.find({}).sort({ createdAt: -1 });
-
-    return NextResponse.json(subscribers);
+    return NextResponse.json(subscribers.map(serializeSubscriber));
   } catch (error) {
     console.error("GET SUBSCRIBERS ERROR:", error);
 

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectDB } from "@/lib/mongodb";
-import Product from "@/models/Product";
+import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { normalizeComparePrice } from "@/lib/seo";
 import { normalizeDetailHtml } from "@/lib/rich-text.mjs";
+import { parseId } from "@/lib/ids";
+import { serializeProduct } from "@/lib/serialize";
 
 // GET Single Product
 export async function GET(
@@ -12,38 +12,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
-
     const { id } = await params;
+    const productId = parseId(id);
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (productId === null) {
       return NextResponse.json(
         { message: "Invalid Product ID" },
         { status: 400 }
       );
     }
 
-    // Same shape the list endpoint returns, so the detail page can show the
-    // rating widget without a second round trip for the reviews.
-    const [product] = await Product.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(id) } },
-      {
-        $lookup: {
-          from: "reviews",
-          localField: "_id",
-          foreignField: "product",
-          as: "reviews",
-        },
-      },
-      {
-        $addFields: {
-          // null when a product has no reviews yet
-          rating: { $avg: "$reviews.rating" },
-          reviewCount: { $size: "$reviews" },
-        },
-      },
-      { $project: { reviews: 0 } },
-    ]);
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
 
     if (!product) {
       return NextResponse.json(
@@ -52,8 +33,21 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(product);
+    // Same shape the list endpoint returns, so the detail page can show the
+    // rating widget without a second round trip for the reviews.
+    const rating = await prisma.review.aggregate({
+      where: { productId },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
 
+    return NextResponse.json(
+      serializeProduct({
+        ...product,
+        rating: rating._avg.rating,
+        reviewCount: rating._count.rating,
+      })
+    );
   } catch (error) {
     console.error(error);
 
@@ -73,11 +67,10 @@ export async function PUT(
     const guard = await requireAdmin(req);
     if (guard instanceof NextResponse) return guard;
 
-    await connectDB();
-
     const { id } = await params;
+    const productId = parseId(id);
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (productId === null) {
       return NextResponse.json(
         { message: "Invalid Product ID" },
         { status: 400 }
@@ -97,39 +90,41 @@ export async function PUT(
       featured,
     } = await req.json();
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      {
-        name,
-        price,
-        // An empty box on the form clears the crossed-out price rather than
-        // storing a 0, which would read as a 100% discount.
-        compareAtPrice: normalizeComparePrice(compareAtPrice, price),
-        category,
-        image,
-        description,
-        // Cleaned here rather than at render time, so nothing reaches the
-        // database with a script in it — see lib/rich-text.mjs.
-        detailHtml: normalizeDetailHtml(detailHtml),
-        seoDescription: seoDescription?.trim() || undefined,
-        stock,
-        featured: Boolean(featured),
-      },
-      {
-        new: true,
-        runValidators: true,
+    try {
+      const updatedProduct = await prisma.product.update({
+        where: { id: productId },
+        data: {
+          name,
+          price,
+          // An empty box on the form clears the crossed-out price rather than
+          // storing a 0, which would read as a 100% discount. Explicit null
+          // (rather than undefined) so the update actually clears it.
+          compareAtPrice: normalizeComparePrice(compareAtPrice, price) ?? null,
+          category,
+          image,
+          description,
+          // Cleaned here rather than at render time, so nothing reaches the
+          // database with a script in it — see lib/rich-text.mjs.
+          detailHtml: normalizeDetailHtml(detailHtml),
+          seoDescription: seoDescription?.trim() || null,
+          stock,
+          featured: Boolean(featured),
+        },
+      });
+
+      return NextResponse.json(serializeProduct(updatedProduct));
+    } catch (error) {
+      if (
+        (error as { code?: string }).code === "P2025" // record to update not found
+      ) {
+        return NextResponse.json(
+          { message: "Product not found" },
+          { status: 404 }
+        );
       }
-    );
 
-    if (!updatedProduct) {
-      return NextResponse.json(
-        { message: "Product not found" },
-        { status: 404 }
-      );
+      throw error;
     }
-
-    return NextResponse.json(updatedProduct);
-
   } catch (error) {
     console.error(error);
 
@@ -149,31 +144,33 @@ export async function DELETE(
     const guard = await requireAdmin(req);
     if (guard instanceof NextResponse) return guard;
 
-    await connectDB();
-
     const { id } = await params;
+    const productId = parseId(id);
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (productId === null) {
       return NextResponse.json(
         { message: "Invalid Product ID" },
         { status: 400 }
       );
     }
 
-    const deletedProduct = await Product.findByIdAndDelete(id);
+    try {
+      await prisma.product.delete({ where: { id: productId } });
+    } catch (error) {
+      if ((error as { code?: string }).code === "P2025") {
+        return NextResponse.json(
+          { message: "Product not found" },
+          { status: 404 }
+        );
+      }
 
-    if (!deletedProduct) {
-      return NextResponse.json(
-        { message: "Product not found" },
-        { status: 404 }
-      );
+      throw error;
     }
 
     return NextResponse.json({
       success: true,
       message: "Product deleted successfully",
     });
-
   } catch (error) {
     console.error(error);
 

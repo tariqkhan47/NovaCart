@@ -1,38 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectDB } from "@/lib/mongodb";
-import Review from "@/models/Review";
-import Product from "@/models/Product";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { parseId } from "@/lib/ids";
+import { serializeReview } from "@/lib/serialize";
 
 // LIST REVIEWS — all recent, or just one product's with ?productId=
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
+    const productIdParam = req.nextUrl.searchParams.get("productId");
 
-    const productId = req.nextUrl.searchParams.get("productId");
+    if (productIdParam) {
+      const productId = parseId(productIdParam);
 
-    if (productId) {
-      if (!mongoose.Types.ObjectId.isValid(productId)) {
+      if (productId === null) {
         return NextResponse.json(
           { message: "Invalid Product ID" },
           { status: 400 }
         );
       }
 
-      const reviews = await Review.find({ product: productId }).sort({
-        createdAt: -1,
+      const reviews = await prisma.review.findMany({
+        where: { productId },
+        orderBy: { createdAt: "desc" },
       });
 
-      return NextResponse.json(reviews);
+      return NextResponse.json(reviews.map(serializeReview));
     }
 
-    const reviews = await Review.find()
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .populate("product", "name image");
+    const reviews = await prisma.review.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      include: { product: { select: { name: true, image: true } } },
+    });
 
-    return NextResponse.json(reviews);
+    return NextResponse.json(reviews.map(serializeReview));
   } catch (error) {
     console.error("GET REVIEWS ERROR:", error);
 
@@ -49,11 +51,10 @@ export async function POST(req: NextRequest) {
     const session = await requireUser(req);
     if (session instanceof NextResponse) return session;
 
-    await connectDB();
+    const { productId: productIdRaw, rating, comment } = await req.json();
+    const productId = parseId(String(productIdRaw ?? ""));
 
-    const { productId, rating, comment } = await req.json();
-
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (productId === null) {
       return NextResponse.json(
         { message: "Invalid Product ID" },
         { status: 400 }
@@ -80,7 +81,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const product = await Product.findById(productId);
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
 
     if (!product) {
       return NextResponse.json(
@@ -91,18 +94,23 @@ export async function POST(req: NextRequest) {
 
     // The name comes from the session, never from the request body, so a
     // reviewer cannot post under someone else's name.
-    const review = await Review.create({
-      product: productId,
-      user: session.userId,
-      name: session.name,
-      rating: numericRating,
-      comment: String(comment).trim(),
+    const review = await prisma.review.create({
+      data: {
+        productId,
+        userId: Number(session.userId),
+        name: session.name,
+        rating: numericRating,
+        comment: String(comment).trim(),
+      },
     });
 
-    return NextResponse.json(review, { status: 201 });
+    return NextResponse.json(serializeReview(review), { status: 201 });
   } catch (error) {
-    // Unique index on (product, user)
-    if ((error as { code?: number }).code === 11000) {
+    // Unique constraint on (productId, userId)
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json(
         { message: "You have already reviewed this product" },
         { status: 409 }

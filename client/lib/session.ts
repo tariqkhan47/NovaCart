@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
+import "./load-env";
 
 export const SESSION_COOKIE = "novacart-session";
 

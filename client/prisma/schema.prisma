@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("customer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders  Order[]
+  reviews Review[]
+
+  @@map("users")
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+
+  // What the shop charged for this product before the current price — shown
+  // struck through beside it. Unset means no crossed-out price.
+  compareAtPrice Decimal? @db.Decimal(10, 2)
+
+  category String
+  image    String   @db.Text
+
+  description String @db.Text
+
+  // Meta description / search-snippet override — see lib/seo.ts.
+  seoDescription String? @db.VarChar(200)
+
+  // Sanitized HTML product write-up — see lib/rich-text.mjs.
+  detailHtml String? @db.LongText
+
+  stock    Int     @default(0)
+  featured Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  @@map("products")
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  items          OrderItem[]
+  deliveryCharge Decimal     @db.Decimal(10, 2)
+  total          Decimal     @db.Decimal(10, 2)
+
+  // Flattened embedded "customer" subdocument.
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  customerAddress String @db.Text
+
+  paymentMethod String @default("cod")
+  paymentStatus String @default("pending")
+
+  // EasyPaisa TID or bank reference the customer quoted.
+  paymentReference String?
+
+  // Safepay's own id for the checkout attempt — looked up by the webhook.
+  paymentTracker String? @unique
+
+  status String @default("Pending")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("orders")
+}
+
+// Prices are copied in at order time so the order total stays correct even if
+// the product price changes later. productId is nullable because an order
+// must survive a later product deletion — the snapshot fields carry
+// everything the receipt needs regardless.
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  name     String
+  price    Decimal @db.Decimal(10, 2)
+  image    String? @db.Text
+  quantity Int
+
+  @@map("order_items")
+}
+
+model Review {
+  id Int @id @default(autoincrement())
+
+  // Mongo never enforced this reference — a review could outlive its
+  // product. MySQL has to decide, so a deleted product takes its reviews
+  // with it rather than blocking the delete.
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  // Snapshot of the reviewer's name, so the review still reads correctly if
+  // they change their account name later.
+  name String
+
+  rating  Int
+  comment String @db.VarChar(1000)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
+  @@map("reviews")
+}
+
+// The shop's mailing list. Placing an order signs the customer up
+// automatically — see the order route. One row per email address.
+model Subscriber {
+  id Int @id @default(autoincrement())
+
+  email String @unique
+  name  String?
+  phone String?
+
+  // How they joined the list: by ordering, by using the footer signup box,
+  // or added by hand.
+  source String @default("order")
+
+  // Orders placed with this email — doubles as a repeat-customer count.
+  orderCount Int @default(0)
+
+  // Cleared when someone unsubscribes. The row stays behind so a later order
+  // does not quietly put them back on the list.
+  active Boolean @default(true)
+
+  // What an unsubscribe link carries instead of the email address.
+  unsubscribeToken String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscribers")
+}

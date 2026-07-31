@@ -11,7 +11,9 @@ export const ORDER_STATUSES = [
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export type OrderItem = {
-  product: string;
+  // Null when the product behind this line has since been deleted — the
+  // snapshot fields below still carry everything the receipt needs.
+  product: string | null;
   name: string;
   price: number;
   image?: string;

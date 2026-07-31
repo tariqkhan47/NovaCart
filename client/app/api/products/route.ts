@@ -1,48 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import Product from "@/models/Product";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { normalizeComparePrice } from "@/lib/seo";
 import { normalizeDetailHtml } from "@/lib/rich-text.mjs";
+import { serializeProduct } from "@/lib/serialize";
 
 // GET ALL PRODUCTS, each with its average rating and review count.
-// Done as one aggregation rather than a query per product.
+// Done as one groupBy rather than a query per product.
 //
 // ?category=Home Decor narrows it to one collection, so a category page does
 // not have to pull the whole catalog down and filter in the browser.
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
-
     const category = req.nextUrl.searchParams.get("category");
     const featuredOnly = req.nextUrl.searchParams.get("featured") === "true";
 
-    const match: Record<string, unknown> = {};
-    if (category) match.category = category;
-    if (featuredOnly) match.featured = true;
+    const where: Prisma.ProductWhereInput = {};
+    if (category) where.category = category;
+    if (featuredOnly) where.featured = true;
 
-    const products = await Product.aggregate([
-      ...(Object.keys(match).length ? [{ $match: match }] : []),
-      {
-        $lookup: {
-          from: "reviews",
-          localField: "_id",
-          foreignField: "product",
-          as: "reviews",
-        },
-      },
-      {
-        $addFields: {
-          // null when a product has no reviews yet
-          rating: { $avg: "$reviews.rating" },
-          reviewCount: { $size: "$reviews" },
-        },
-      },
-      { $project: { reviews: 0 } },
-      { $sort: { createdAt: -1 } },
-    ]);
+    const products = await prisma.product.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
 
-    return NextResponse.json(products);
+    const ratings = await prisma.review.groupBy({
+      by: ["productId"],
+      where: { productId: { in: products.map((p) => p.id) } },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const ratingById = new Map(
+      ratings.map((r) => [
+        r.productId,
+        { rating: r._avg.rating, reviewCount: r._count.rating },
+      ])
+    );
+
+    return NextResponse.json(
+      products.map((product) =>
+        serializeProduct({ ...product, ...ratingById.get(product.id) })
+      )
+    );
   } catch (error) {
     console.error("GET PRODUCTS ERROR:", error);
 
@@ -59,8 +60,6 @@ export async function POST(req: NextRequest) {
     const guard = await requireAdmin(req);
     if (guard instanceof NextResponse) return guard;
 
-    await connectDB();
-
     const {
       name,
       price,
@@ -75,23 +74,25 @@ export async function POST(req: NextRequest) {
     } = await req.json();
 
     // Only accept known fields, so a caller cannot inject their own.
-    const product = await Product.create({
-      name,
-      price,
-      // Dropped unless it is genuinely above the selling price — see lib/seo.ts.
-      compareAtPrice: normalizeComparePrice(compareAtPrice, price),
-      category,
-      image,
-      description,
-      // Cleaned here rather than at render time, so nothing reaches the
-      // database with a script in it — see lib/rich-text.mjs.
-      detailHtml: normalizeDetailHtml(detailHtml),
-      seoDescription: seoDescription?.trim() || undefined,
-      stock,
-      featured: Boolean(featured),
+    const product = await prisma.product.create({
+      data: {
+        name,
+        price,
+        // Dropped unless it is genuinely above the selling price — see lib/seo.ts.
+        compareAtPrice: normalizeComparePrice(compareAtPrice, price),
+        category,
+        image,
+        description,
+        // Cleaned here rather than at render time, so nothing reaches the
+        // database with a script in it — see lib/rich-text.mjs.
+        detailHtml: normalizeDetailHtml(detailHtml),
+        seoDescription: seoDescription?.trim() || undefined,
+        stock,
+        featured: Boolean(featured),
+      },
     });
 
-    return NextResponse.json(product, { status: 201 });
+    return NextResponse.json(serializeProduct(product), { status: 201 });
   } catch (error) {
     console.error("POST PRODUCT ERROR:", error);
 

@@ -7,8 +7,7 @@
  * moved on that. The two entry points only differ in what wakes the shop up.
  */
 
-import { connectDB } from "@/lib/mongodb";
-import Order from "@/models/Order";
+import { prisma } from "@/lib/db";
 import { fetchPaymentOutcome, toPaisa } from "@/lib/safepay";
 
 export type Settlement =
@@ -21,9 +20,9 @@ export type Settlement =
 export async function settleCardPayment(tracker: string): Promise<Settlement> {
   if (!tracker) return "unknown-tracker";
 
-  await connectDB();
-
-  const order = await Order.findOne({ paymentTracker: tracker });
+  const order = await prisma.order.findUnique({
+    where: { paymentTracker: tracker },
+  });
 
   if (!order) {
     console.warn("SAFEPAY SETTLE: no order for tracker", { tracker });
@@ -50,12 +49,12 @@ export async function settleCardPayment(tracker: string): Promise<Settlement> {
   // difference here means something is wrong on one side or the other. Paying
   // out goods against the wrong figure is worse than holding the order for
   // someone to look at, so it is left pending and shouted about.
-  const expected = toPaisa(order.total);
+  const expected = toPaisa(Number(order.total));
 
   if (outcome.chargedPaisa !== null && outcome.chargedPaisa !== expected) {
     console.error("SAFEPAY SETTLE: amount mismatch", {
       tracker,
-      orderId: String(order._id),
+      orderId: String(order.id),
       expectedPaisa: expected,
       chargedPaisa: outcome.chargedPaisa,
     });
@@ -63,8 +62,10 @@ export async function settleCardPayment(tracker: string): Promise<Settlement> {
     return "amount-mismatch";
   }
 
-  order.paymentStatus = "paid";
-  await order.save();
+  await prisma.order.update({
+    where: { id: order.id },
+    data: { paymentStatus: "paid" },
+  });
 
   return "paid";
 }

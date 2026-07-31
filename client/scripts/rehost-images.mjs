@@ -25,11 +25,11 @@
  * Needs BLOB_READ_WRITE_TOKEN in .env.local — Vercel dashboard → Storage →
  * the Blob store → the token beginning vercel_blob_rw_.
  */
-import mongoose from "mongoose";
 import sharp from "sharp";
 import { put, list } from "@vercel/blob";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
+import { prisma } from "./lib/db.mjs";
 
 const apply = process.argv.includes("--apply");
 const force = process.argv.includes("--force");
@@ -50,19 +50,6 @@ const QUALITY = 82;
 // Uploads run a few at a time. Hobby allows 15 advanced operations a second
 // and one-at-a-time would take twenty minutes for a thousand files.
 const CONCURRENCY = 6;
-
-function loadEnv() {
-  try {
-    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-      const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-      if (match && !process.env[match[1]]) {
-        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
-      }
-    }
-  } catch {
-    // Fall through to the ambient environment.
-  }
-}
 
 /**
  * The name a photo is stored under: its original URL, hashed.
@@ -133,8 +120,6 @@ async function pooled(items, task) {
 
   return results;
 }
-
-loadEnv();
 
 const catalogPath = new URL("./hhc-catalog.json", import.meta.url);
 const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
@@ -317,22 +302,13 @@ writeFileSync(
 
 console.log("\nCatalog updated.");
 
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local) — database not updated");
-  process.exit(1);
-}
-
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-
 // Driven off the database rather than the catalog file, so products added by
 // hand in the admin panel are repointed too.
-const rows = await products
-  .find({}, { projection: { image: 1, detailHtml: 1 } })
-  .toArray();
+const rows = await prisma.product.findMany({
+  select: { id: true, image: true, detailHtml: true },
+});
 
-const updates = [];
+const toUpdate = [];
 
 for (const row of rows) {
   const image = repoint(row.image);
@@ -340,19 +316,22 @@ for (const row of rows) {
 
   if (image === row.image && detailHtml === row.detailHtml) continue;
 
-  updates.push({
-    updateOne: {
-      filter: { _id: row._id },
-      update: { $set: { image, detailHtml, updatedAt: new Date() } },
-    },
-  });
+  toUpdate.push({ id: row.id, image, detailHtml });
 }
 
-if (updates.length === 0) {
+if (toUpdate.length === 0) {
   console.log("Database: every product already points at the shop's own storage.");
 } else {
-  const result = await products.bulkWrite(updates);
-  console.log(`Database: ${result.modifiedCount} product(s) repointed.`);
+  const result = await prisma.$transaction(
+    toUpdate.map((row) =>
+      prisma.product.update({
+        where: { id: row.id },
+        data: { image: row.image, detailHtml: row.detailHtml },
+      })
+    )
+  );
+
+  console.log(`Database: ${result.length} product(s) repointed.`);
 }
 
 // What is still hotlinked, if anything — the number that matters, since one
@@ -361,9 +340,13 @@ if (updates.length === 0) {
 // supplier's copy embeds photos from other people's sites too.
 const OFF_SITE = /https?:\/\/(?!7fj8qkja1bicwaar\.public\.blob\.vercel-storage\.com)/;
 
-const stragglers = await products.countDocuments({
-  $or: [{ image: OFF_SITE }, { detailHtml: OFF_SITE }],
+const allRows = await prisma.product.findMany({
+  select: { image: true, detailHtml: true },
 });
+
+const stragglers = allRows.filter(
+  (row) => OFF_SITE.test(row.image) || (row.detailHtml && OFF_SITE.test(row.detailHtml))
+).length;
 
 console.log(
   stragglers === 0
@@ -371,4 +354,4 @@ console.log(
     : `${stragglers} product(s) still load a photo from someone else's server.`
 );
 
-await mongoose.disconnect();
+await prisma.$disconnect();

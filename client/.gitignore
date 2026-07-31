@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# deploy archives uploaded to Hostinger's Node.js App runner
+arsalah-deploy*.tar.gz
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -19,21 +19,7 @@
  * price rather than compounding, so a second 10% run does not quietly become
  * 19% off the wrong baseline.
  */
-import mongoose from "mongoose";
-import { readFileSync } from "node:fs";
-
-function loadEnv() {
-  try {
-    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-      const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-      if (match && !process.env[match[1]]) {
-        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
-      }
-    }
-  } catch {
-    // Fall through to the ambient environment.
-  }
-}
+import { prisma } from "./lib/db.mjs";
 
 const argv = process.argv.slice(2);
 const apply = argv.includes("--apply");
@@ -58,25 +44,22 @@ function salePrice(was) {
   return Math.max(Math.round(cut / 10) * 10 - 1, 9);
 }
 
-loadEnv();
+const where = category ? { category } : {};
+const dbRows = await prisma.product.findMany({ where });
 
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local)");
-  process.exit(1);
-}
-
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-
-const filter = category ? { category } : {};
-const rows = await products.find(filter).toArray();
+// Decimal columns come back as decimal.js instances, not plain numbers — the
+// arithmetic below needs real numbers.
+const rows = dbRows.map((row) => ({
+  ...row,
+  price: Number(row.price),
+  compareAtPrice: row.compareAtPrice === null ? null : Number(row.compareAtPrice),
+}));
 
 if (rows.length === 0) {
   console.log(
     category ? `No products in "${category}".` : "No products in the catalog."
   );
-  await mongoose.disconnect();
+  await prisma.$disconnect();
   process.exit(0);
 }
 
@@ -102,22 +85,19 @@ if (ending) {
   if (!apply) {
     console.log("\nDry run. Re-run with --apply to write it.");
   } else {
-    const result = await products.bulkWrite(
-      onSale.map((product) => ({
-        updateOne: {
-          filter: { _id: product._id },
-          update: {
-            $set: { price: product.compareAtPrice, updatedAt: new Date() },
-            $unset: { compareAtPrice: "" },
-          },
-        },
-      }))
+    const result = await prisma.$transaction(
+      onSale.map((product) =>
+        prisma.product.update({
+          where: { id: product.id },
+          data: { price: product.compareAtPrice, compareAtPrice: null },
+        })
+      )
     );
 
-    console.log(`\nDatabase: ${result.modifiedCount} product(s) taken off sale.`);
+    console.log(`\nDatabase: ${result.length} product(s) taken off sale.`);
   }
 
-  await mongoose.disconnect();
+  await prisma.$disconnect();
   process.exit(0);
 }
 
@@ -166,26 +146,20 @@ console.log(
 
 if (!apply) {
   console.log("\nDry run. Re-run with --apply to write it.");
-  await mongoose.disconnect();
+  await prisma.$disconnect();
   process.exit(0);
 }
 
-const result = await products.bulkWrite(
-  changing.map((row) => ({
-    updateOne: {
-      filter: { _id: row.product._id },
-      update: {
-        $set: {
-          price: row.now,
-          compareAtPrice: row.was,
-          updatedAt: new Date(),
-        },
-      },
-    },
-  }))
+const result = await prisma.$transaction(
+  changing.map((row) =>
+    prisma.product.update({
+      where: { id: row.product.id },
+      data: { price: row.now, compareAtPrice: row.was },
+    })
+  )
 );
 
-console.log(`\nDatabase: ${result.modifiedCount} product(s) put on sale.`);
+console.log(`\nDatabase: ${result.length} product(s) put on sale.`);
 console.log("Run with --end --apply to take the catalog off sale again.");
 
-await mongoose.disconnect();
+await prisma.$disconnect();

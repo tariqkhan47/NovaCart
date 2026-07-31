@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectDB } from "@/lib/mongodb";
-import Order from "@/models/Order";
-import Product from "@/models/Product";
-import Subscriber, { newUnsubscribeToken } from "@/models/Subscriber";
+import { prisma } from "@/lib/db";
+import { parseId } from "@/lib/ids";
+import { serializeOrder } from "@/lib/serialize";
 import { getSessionFromRequest, requireUser } from "@/lib/auth";
 import { DELIVERY_CHARGE } from "@/lib/delivery";
 import { initialPaymentStatus, paymentMethodInfo } from "@/lib/payments";
 import { createCheckout, safepayConfigured } from "@/lib/safepay";
 import { STORE } from "@/lib/store";
+import { newUnsubscribeToken } from "@/lib/subscriber-token";
 
 // LIST ORDERS — admins see every order, customers see only their own.
 export async function GET(req: NextRequest) {
@@ -22,14 +21,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    await connectDB();
+    const where =
+      session.role === "admin" ? {} : { userId: Number(session.userId) };
 
-    const filter =
-      session.role === "admin" ? {} : { user: session.userId };
+    const orders = await prisma.order.findMany({
+      where,
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+    });
 
-    const orders = await Order.find(filter).sort({ createdAt: -1 });
-
-    return NextResponse.json(orders);
+    return NextResponse.json(orders.map(serializeOrder));
   } catch (error) {
     console.error("GET ORDERS ERROR:", error);
 
@@ -44,13 +45,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   // Tracks what we already took off the shelf, so we can put it back if a
   // later item turns out to be unavailable.
-  const reserved: { id: string; quantity: number }[] = [];
+  const reserved: { id: number; quantity: number }[] = [];
 
   try {
     const session = await requireUser(req);
     if (session instanceof NextResponse) return session;
-
-    await connectDB();
 
     const body = await req.json();
     const { items, name, email, phone, address, paymentMethod, paymentReference } =
@@ -113,14 +112,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const orderItems = [];
+    const orderItems: {
+      productId: number;
+      name: string;
+      price: number;
+      image: string;
+      quantity: number;
+    }[] = [];
     let subtotal = 0;
 
     for (const item of items) {
-      const productId = String(item.productId ?? "");
+      const productId = parseId(String(item.productId ?? ""));
       const quantity = Number(item.quantity);
 
-      if (!mongoose.Types.ObjectId.isValid(productId)) {
+      if (productId === null) {
         throw Object.assign(new Error("Invalid product in cart"), {
           status: 400,
         });
@@ -132,51 +137,62 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Take the stock only if there is enough, in a single atomic update so
-      // two shoppers cannot both claim the last unit.
-      const claimed = await Product.findOneAndUpdate(
-        { _id: productId, stock: { $gte: quantity } },
-        { $inc: { stock: -quantity } },
-        { new: false }
-      );
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+      });
 
-      if (!claimed) {
-        const exists = await Product.findById(productId);
-
+      if (!product) {
         throw Object.assign(
-          new Error(
-            exists
-              ? `Not enough stock for ${exists.name}`
-              : "A product in your cart no longer exists"
-          ),
+          new Error("A product in your cart no longer exists"),
           { status: 409 }
         );
+      }
+
+      // Take the stock only if there is enough, in a single atomic update so
+      // two shoppers cannot both claim the last unit.
+      const claim = await prisma.product.updateMany({
+        where: { id: productId, stock: { gte: quantity } },
+        data: { stock: { decrement: quantity } },
+      });
+
+      if (claim.count === 0) {
+        throw Object.assign(new Error(`Not enough stock for ${product.name}`), {
+          status: 409,
+        });
       }
 
       reserved.push({ id: productId, quantity });
 
       // Price comes from the database, never from the browser.
-      subtotal += claimed.price * quantity;
+      subtotal += Number(product.price) * quantity;
 
       orderItems.push({
-        product: claimed._id,
-        name: claimed.name,
-        price: claimed.price,
-        image: claimed.image,
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        image: product.image,
         quantity,
       });
     }
 
-    const order = await Order.create({
-      user: session.userId,
-      items: orderItems,
-      deliveryCharge: DELIVERY_CHARGE,
-      total: subtotal + DELIVERY_CHARGE,
-      customer: { name, email, phone, address },
-      paymentMethod: payment.method,
-      paymentStatus: initialPaymentStatus(payment.method),
-      paymentReference: reference || undefined,
-      status: "Pending",
+    const total = subtotal + DELIVERY_CHARGE;
+
+    let order = await prisma.order.create({
+      data: {
+        userId: Number(session.userId),
+        deliveryCharge: DELIVERY_CHARGE,
+        total,
+        customerName: name,
+        customerEmail: email,
+        customerPhone: phone,
+        customerAddress: address,
+        paymentMethod: payment.method,
+        paymentStatus: initialPaymentStatus(payment.method),
+        paymentReference: reference || undefined,
+        status: "Pending",
+        items: { create: orderItems },
+      },
+      include: { items: true },
     });
 
     // A card order is placed before it is paid for. The shopper goes off to
@@ -194,21 +210,24 @@ export async function POST(req: NextRequest) {
 
       try {
         const checkout = await createCheckout({
-          amountRupees: order.total,
-          orderId: String(order._id),
+          amountRupees: total,
+          orderId: String(order.id),
           redirectUrl: `${origin}/api/payments/safepay/return`,
           cancelUrl: `${origin}/checkout?payment=cancelled`,
         });
 
         checkoutUrl = checkout.url;
 
-        order.paymentTracker = checkout.tracker;
-        await order.save();
+        order = await prisma.order.update({
+          where: { id: order.id },
+          data: { paymentTracker: checkout.tracker },
+          include: { items: true },
+        });
       } catch (error) {
         // Nobody can pay for this order, so it should not be left lying
         // around looking placed. The stock goes back via the catch below.
         console.error("SAFEPAY CHECKOUT ERROR:", error);
-        await Order.deleteOne({ _id: order._id }).catch(() => {});
+        await prisma.order.delete({ where: { id: order.id } }).catch(() => {});
 
         throw Object.assign(new Error("Could not start the card payment"), {
           status: 502,
@@ -224,33 +243,42 @@ export async function POST(req: NextRequest) {
     // active and the token are only set on insert: somebody who has already
     // unsubscribed stays off the list no matter how much they order.
     try {
-      await Subscriber.updateOne(
-        { email: String(email).trim().toLowerCase() },
-        {
-          $set: { name, phone },
-          $setOnInsert: {
-            source: "order",
-            active: true,
-            unsubscribeToken: newUnsubscribeToken(),
-          },
-          $inc: { orderCount: 1 },
+      await prisma.subscriber.upsert({
+        where: { email: String(email).trim().toLowerCase() },
+        update: {
+          name,
+          phone,
+          orderCount: { increment: 1 },
         },
-        { upsert: true }
-      );
+        create: {
+          email: String(email).trim().toLowerCase(),
+          name,
+          phone,
+          source: "order",
+          active: true,
+          unsubscribeToken: newUnsubscribeToken(),
+          orderCount: 1,
+        },
+      });
     } catch (error) {
       console.error("SUBSCRIBE ON ORDER ERROR:", error);
     }
 
     // checkoutUrl is only present for a card order; every other method is
     // finished as far as the browser is concerned.
-    return NextResponse.json({ ...order.toObject(), checkoutUrl }, { status: 201 });
+    return NextResponse.json(
+      { ...serializeOrder(order), checkoutUrl },
+      { status: 201 }
+    );
   } catch (error) {
     // Put back anything we already reserved.
     for (const item of reserved) {
-      await Product.updateOne(
-        { _id: item.id },
-        { $inc: { stock: item.quantity } }
-      ).catch(() => {});
+      await prisma.product
+        .update({
+          where: { id: item.id },
+          data: { stock: { increment: item.quantity } },
+        })
+        .catch(() => {});
     }
 
     const status = (error as { status?: number }).status;

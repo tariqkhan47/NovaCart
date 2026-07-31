@@ -30,7 +30,6 @@
  * 401 here means fetching a new one rather than anything being broken. The
  * browser User-Agent below is also required: without it the WAF answers 403.
  */
-import mongoose from "mongoose";
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   sanitizeHtml,
@@ -39,6 +38,7 @@ import {
   isWorthKeeping,
 } from "../lib/rich-text.mjs";
 import { shortName } from "../lib/product-copy.mjs";
+import { prisma } from "./lib/db.mjs";
 
 const API = "https://member.hhcdropshipping.com/api/dropshipper";
 
@@ -429,16 +429,7 @@ writeFileSync(
 
 console.log("\nCatalog updated.");
 
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local) — database not updated");
-  process.exit(1);
-}
-
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-
-// Matched on name because the catalog file has no record of the _id the seeding
+// Matched on name because the catalog file has no record of the id the seeding
 // run generated, and the names are what the store shows.
 const byName = new Map(
   catalog
@@ -446,23 +437,24 @@ const byName = new Map(
     .map((product) => [product.name, found.get(product.hhcId)])
 );
 
-const rows = await products
-  .find({ name: { $in: [...byName.keys()] } })
-  .project({ name: 1 })
-  .toArray();
+const rows = await prisma.product.findMany({
+  where: { name: { in: [...byName.keys()] } },
+  select: { id: true, name: true },
+});
 
-const updates = rows.map((row) => ({
-  updateOne: {
-    filter: { _id: row._id },
-    update: { $set: { detailHtml: byName.get(row.name), updatedAt: new Date() } },
-  },
-}));
-
-if (updates.length === 0) {
+if (rows.length === 0) {
   console.log("Database: no matching products found.");
 } else {
-  const result = await products.bulkWrite(updates);
-  console.log(`Database: ${result.modifiedCount} product(s) updated.`);
+  const result = await prisma.$transaction(
+    rows.map((row) =>
+      prisma.product.update({
+        where: { id: row.id },
+        data: { detailHtml: byName.get(row.name) },
+      })
+    )
+  );
+
+  console.log(`Database: ${result.length} product(s) updated.`);
 }
 
-await mongoose.disconnect();
+await prisma.$disconnect();

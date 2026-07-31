@@ -4,9 +4,9 @@
 // the interactive half.
 
 import { cache } from "react";
-import mongoose from "mongoose";
-import { connectDB } from "./mongodb";
-import Product from "@/models/Product";
+import { prisma } from "./db";
+import { parseId } from "./ids";
+import { serializeProduct } from "./serialize";
 
 export type ProductForPage = {
   _id: string;
@@ -31,33 +31,27 @@ export type ProductForPage = {
  */
 export const getProduct = cache(
   async (id: string): Promise<ProductForPage | null> => {
-    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    const productId = parseId(id);
+    if (productId === null) return null;
 
     try {
-      await connectDB();
-
-      const [product] = await Product.aggregate([
-        { $match: { _id: new mongoose.Types.ObjectId(id) } },
-        {
-          $lookup: {
-            from: "reviews",
-            localField: "_id",
-            foreignField: "product",
-            as: "reviews",
-          },
-        },
-        {
-          $addFields: {
-            rating: { $avg: "$reviews.rating" },
-            reviewCount: { $size: "$reviews" },
-          },
-        },
-        { $project: { reviews: 0 } },
-      ]);
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+      });
 
       if (!product) return null;
 
-      return { ...product, _id: String(product._id) } as ProductForPage;
+      const rating = await prisma.review.aggregate({
+        where: { productId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+
+      return serializeProduct({
+        ...product,
+        rating: rating._avg.rating,
+        reviewCount: rating._count.rating,
+      }) as ProductForPage;
     } catch (error) {
       // A page that renders without its meta tags beats a page that 500s, so
       // the caller falls back to the generic title rather than failing.

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
+import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import {
   SESSION_COOKIE,
@@ -10,8 +9,6 @@ import {
 
 export async function POST(req: Request) {
   try {
-    await connectDB();
-
     const { email, password } = await req.json();
 
     if (!email || !password) {
@@ -21,7 +18,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
       return NextResponse.json(
@@ -40,7 +37,7 @@ export async function POST(req: Request) {
     }
 
     const publicUser = {
-      userId: String(user._id),
+      userId: String(user.id),
       name: user.name,
       email: user.email,
       role: user.role === "admin" ? ("admin" as const) : ("customer" as const),

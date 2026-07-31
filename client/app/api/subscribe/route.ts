@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import Subscriber, { newUnsubscribeToken } from "@/models/Subscriber";
+import { prisma } from "@/lib/db";
+import { newUnsubscribeToken } from "@/lib/subscriber-token";
 
 // Good enough to catch a typo. Anything stricter starts rejecting addresses
 // that are perfectly valid.
@@ -25,9 +25,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectDB();
-
-    const existing = await Subscriber.findOne({ email });
+    const existing = await prisma.subscriber.findUnique({ where: { email } });
 
     if (existing?.active) {
       return NextResponse.json({
@@ -35,17 +33,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    await Subscriber.updateOne(
-      { email },
-      {
-        $set: { active: true },
-        $setOnInsert: {
-          source: "newsletter",
-          unsubscribeToken: newUnsubscribeToken(),
-        },
+    await prisma.subscriber.upsert({
+      where: { email },
+      update: { active: true },
+      create: {
+        email,
+        source: "newsletter",
+        unsubscribeToken: newUnsubscribeToken(),
       },
-      { upsert: true }
-    );
+    });
 
     return NextResponse.json({
       message: existing

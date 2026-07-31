@@ -12,9 +12,9 @@
  *
  * Safe to run at any time — sanitizing already-clean HTML changes nothing.
  */
-import mongoose from "mongoose";
 import { readFileSync, writeFileSync } from "node:fs";
 import { sanitizeHtml, htmlToText, stripShortcodes } from "../lib/rich-text.mjs";
+import { prisma } from "./lib/db.mjs";
 
 /**
  * Both description fields of a product, cleaned by the rules that apply to
@@ -44,21 +44,6 @@ function dirty(product) {
 }
 
 const apply = process.argv.includes("--apply");
-
-function loadEnv() {
-  try {
-    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-      const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-      if (match && !process.env[match[1]]) {
-        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
-      }
-    }
-  } catch {
-    // Fall through to the ambient environment.
-  }
-}
-
-loadEnv();
 
 const catalogPath = new URL("./hhc-catalog.json", import.meta.url);
 const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
@@ -107,33 +92,27 @@ writeFileSync(
 
 console.log("Catalog updated.");
 
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local) — database not updated");
-  process.exit(1);
-}
-
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-
 // Driven off the database rather than the catalog, so descriptions written by
 // hand in the admin panel are cleaned by the same rules.
-const rows = await products
-  .find({}, { projection: { description: 1, detailHtml: 1 } })
-  .toArray();
+const rows = await prisma.product.findMany({
+  select: { id: true, description: true, detailHtml: true },
+});
 
-const updates = rows.filter(dirty).map((row) => ({
-  updateOne: {
-    filter: { _id: row._id },
-    update: { $set: { ...cleaned(row), updatedAt: new Date() } },
-  },
-}));
+const dirtyRows = rows.filter(dirty);
 
-if (updates.length === 0) {
+if (dirtyRows.length === 0) {
   console.log("Database: every description is already clean.");
 } else {
-  const result = await products.bulkWrite(updates);
-  console.log(`Database: ${result.modifiedCount} product(s) cleaned.`);
+  const result = await prisma.$transaction(
+    dirtyRows.map((row) =>
+      prisma.product.update({
+        where: { id: row.id },
+        data: cleaned(row),
+      })
+    )
+  );
+
+  console.log(`Database: ${result.length} product(s) cleaned.`);
 }
 
-await mongoose.disconnect();
+await prisma.$disconnect();

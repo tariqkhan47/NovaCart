@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
+import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    await connectDB();
-
     const { name, email, password } = await req.json();
-const hashedPassword = await bcrypt.hash(password, 10);
-    const existingUser = await User.findOne({ email });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
       return NextResponse.json(
@@ -18,11 +15,14 @@ const hashedPassword = await bcrypt.hash(password, 10);
       );
     }
 
-    const newUser = await User.create({
-  name,
-  email,
-  password: hashedPassword,
-});
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
+
     return NextResponse.json(
       {
         message: "Signup Successful",

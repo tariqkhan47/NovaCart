@@ -18,22 +18,9 @@
  *
  * Copy edited by hand in the admin panel is left alone unless --force is given.
  */
-import mongoose from "mongoose";
 import { readFileSync, writeFileSync } from "node:fs";
 import { productProse } from "../lib/product-copy.mjs";
-
-function loadEnv() {
-  try {
-    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-      const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-      if (match && !process.env[match[1]]) {
-        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
-      }
-    }
-  } catch {
-    // Fall through to the ambient environment.
-  }
-}
+import { prisma } from "./lib/db.mjs";
 
 const apply = process.argv.includes("--apply");
 const force = process.argv.includes("--force");
@@ -108,42 +95,29 @@ writeFileSync(
 
 console.log("Catalog updated.");
 
-loadEnv();
-
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local) — database not updated");
-  process.exit(1);
-}
-
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-
 // Anything added by hand in the admin panel is not in the catalog file, so it
 // gets a description built from its own row rather than being skipped.
-const rows = await products.find({}).toArray();
+const rows = await prisma.product.findMany();
 const byName = new Map(written.map((product) => [product.name, product]));
 
-const updates = rows
-  .filter((row) => force || !row.seoDescription)
-  .map((row) => ({
-    updateOne: {
-      filter: { _id: row._id },
-      update: {
-        $set: {
-          seoDescription:
-            byName.get(row.name)?.seoDescription ?? productProse(row),
-          updatedAt: new Date(),
-        },
-      },
-    },
-  }));
+const toUpdate = rows.filter((row) => force || !row.seoDescription);
 
-if (updates.length === 0) {
+if (toUpdate.length === 0) {
   console.log("Database: every product already has one. Use --force to rewrite.");
 } else {
-  const result = await products.bulkWrite(updates);
-  console.log(`Database: ${result.modifiedCount} product(s) updated.`);
+  const result = await prisma.$transaction(
+    toUpdate.map((row) =>
+      prisma.product.update({
+        where: { id: row.id },
+        data: {
+          seoDescription:
+            byName.get(row.name)?.seoDescription ?? productProse(row),
+        },
+      })
+    )
+  );
+
+  console.log(`Database: ${result.length} product(s) updated.`);
 }
 
-await mongoose.disconnect();
+await prisma.$disconnect();

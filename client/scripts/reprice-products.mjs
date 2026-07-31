@@ -14,8 +14,8 @@
  * the markup is never applied twice. After a supplier re-sync, update costPrice
  * in the catalog and run this again.
  */
-import mongoose from "mongoose";
 import { readFileSync, writeFileSync } from "node:fs";
+import { prisma } from "./lib/db.mjs";
 
 // First tier whose ceiling the cost price does not exceed wins.
 const TIERS = [
@@ -36,19 +36,6 @@ export function markupFor(cost) {
 export function retailPrice(cost) {
   const marked = cost * (1 + markupFor(cost));
   return Math.max(Math.round(marked / 10) * 10 - 1, 9);
-}
-
-function loadEnv() {
-  try {
-    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-      const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
-      if (match && !process.env[match[1]]) {
-        process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
-      }
-    }
-  } catch {
-    // Fall through to the ambient environment.
-  }
 }
 
 const apply = process.argv.includes("--apply");
@@ -125,35 +112,24 @@ const written = priced.map(({ name, price, costPrice, hhcId, ...rest }) => ({
 writeFileSync(catalogPath, JSON.stringify(written, null, 1) + "\n", "utf8");
 console.log("\nCatalog updated.");
 
-loadEnv();
-
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not set (expected in .env.local) — database not updated");
-  process.exit(1);
-}
-
-await mongoose.connect(process.env.MONGODB_URI);
-
-const products = mongoose.connection.db.collection("products");
-
 // costPrice stays out of the database: the products API is public, and the
 // wholesale price is nobody's business but the shop's.
-const updates = priced.map((product) => ({
-  updateOne: {
-    filter: { name: product.name },
-    update: { $set: { price: product.price, updatedAt: new Date() } },
-  },
-}));
-
-const result = await products.bulkWrite(updates);
-
-console.log(
-  `Database: ${result.matchedCount} matched, ${result.modifiedCount} updated.`
+const results = await Promise.all(
+  priced.map((product) =>
+    prisma.product.updateMany({
+      where: { name: product.name },
+      data: { price: product.price },
+    })
+  )
 );
 
-const missing = priced.length - result.matchedCount;
+const matched = results.reduce((sum, r) => sum + r.count, 0);
+
+console.log(`Database: ${matched} matched and updated.`);
+
+const missing = priced.length - matched;
 if (missing > 0) {
   console.log(`${missing} catalog product(s) were not found in the database.`);
 }
 
-await mongoose.disconnect();
+await prisma.$disconnect();

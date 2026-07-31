@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectDB } from "@/lib/mongodb";
-import Order, { ORDER_STATUSES } from "@/models/Order";
-import Product from "@/models/Product";
+import { prisma } from "@/lib/db";
+import { ORDER_STATUSES } from "@/types/order";
 import { requireAdmin } from "@/lib/auth";
 import { PAYMENT_STATUSES } from "@/lib/payments";
+import { parseId } from "@/lib/ids";
+import { serializeOrder } from "@/lib/serialize";
 
 // UPDATE AN ORDER (admin only) — where it is with the courier, whether the
 // money has arrived, or both.
@@ -16,11 +16,10 @@ export async function PATCH(
     const guard = await requireAdmin(req);
     if (guard instanceof NextResponse) return guard;
 
-    await connectDB();
-
     const { id } = await params;
+    const orderId = parseId(id);
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (orderId === null) {
       return NextResponse.json(
         { message: "Invalid Order ID" },
         { status: 400 }
@@ -53,7 +52,10 @@ export async function PATCH(
       );
     }
 
-    const order = await Order.findById(id);
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
 
     if (!order) {
       return NextResponse.json(
@@ -66,19 +68,27 @@ export async function PATCH(
     // times the status is toggled.
     if (status === "Cancelled" && order.status !== "Cancelled") {
       for (const item of order.items) {
-        await Product.updateOne(
-          { _id: item.product },
-          { $inc: { stock: item.quantity } }
-        ).catch(() => {});
+        if (item.productId === null) continue;
+
+        await prisma.product
+          .update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+          .catch(() => {});
       }
     }
 
-    if (status !== undefined) order.status = status;
-    if (paymentStatus !== undefined) order.paymentStatus = paymentStatus;
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        ...(status !== undefined && { status }),
+        ...(paymentStatus !== undefined && { paymentStatus }),
+      },
+      include: { items: true },
+    });
 
-    await order.save();
-
-    return NextResponse.json(order);
+    return NextResponse.json(serializeOrder(updated));
   } catch (error) {
     console.error("UPDATE ORDER ERROR:", error);
 
