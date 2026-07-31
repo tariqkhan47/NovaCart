@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { slugifyCategory } from "../../../lib/categories";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
+import BagIcon from "../../../components/BagIcon";
 import { useCart } from "../../../context/CartContext";
 import PriceTag from "../../../components/PriceTag";
 import RatingScore from "../../../components/RatingScore";
@@ -141,8 +142,9 @@ export default function ProductDetailPage() {
                     })
                   }
                   disabled={product.stock <= 0}
-                  className="btn btn-primary btn-block btn-lg mt-7"
+                  className="btn btn-cart mt-7"
                 >
+                  <BagIcon />
                   Add to Cart
                 </button>
               </div>

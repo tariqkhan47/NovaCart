@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useWishlist } from "../context/WishlistContext";
+import BagIcon from "./BagIcon";
 import PriceTag from "./PriceTag";
 import RatingScore from "./RatingScore";
 
@@ -70,7 +71,7 @@ export default function ProductCard({
       </div>
 
       <Link href={`/products/${id}`}>
-        <h3 className="mt-4 text-xl font-bold text-foreground hover:text-primary transition cursor-pointer">
+        <h3 className="mt-4 text-xl font-bold text-foreground hover:text-accent transition cursor-pointer">
           {name}
         </h3>
       </Link>
@@ -87,8 +88,9 @@ export default function ProductCard({
       <div className="mt-auto pt-4">
         <button
           onClick={onAddToCart}
-          className="btn btn-primary btn-block"
+          className="btn btn-cart"
         >
+          <BagIcon />
           Add to Cart
         </button>
       </div>

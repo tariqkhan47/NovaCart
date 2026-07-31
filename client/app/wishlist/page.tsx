@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import BagIcon from "../../components/BagIcon";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../lib/currency";
@@ -78,9 +79,10 @@ export default function WishlistPage() {
                           image: item.image,
                         })
                       }
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-cart btn-sm"
                     >
-                      🛒 Add to Cart
+                      <BagIcon />
+                      Add to Cart
                     </button>
 
                     <button

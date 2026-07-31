@@ -30,10 +30,14 @@ export default function Stars({ rating, className = "", size }: StarsProps) {
         ★★★★★
       </span>
 
+      {/* Filled in the page's own ink rather than a gold of its own: near
+          black on the light theme, near white on the dark one. The score and
+          the review count sit right beside it in the same colour, so the
+          whole rating reads as one object. */}
       <span
         aria-hidden="true"
         style={{ width: filled }}
-        className="absolute left-0 top-0 overflow-hidden text-star"
+        className="absolute left-0 top-0 overflow-hidden text-foreground"
       >
         ★★★★★
       </span>

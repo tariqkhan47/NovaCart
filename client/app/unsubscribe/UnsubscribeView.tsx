@@ -94,7 +94,7 @@ export default function UnsubscribeView({ token }: { token: string }) {
                   Email{" "}
                   <a
                     href={`mailto:${STORE.email}`}
-                    className="text-primary hover:underline break-words"
+                    className="text-accent hover:underline break-words"
                   >
                     {STORE.email}
                   </a>{" "}

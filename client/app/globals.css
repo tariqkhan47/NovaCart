@@ -26,33 +26,51 @@
   --color-brand-800: #4e6117;
   --color-brand-900: #3a4713;
 
-  /* Neutrals carry a little green so they settle onto the sage canvas
-     instead of sitting on top of it looking blue. */
-  --color-ink-50: #f4f6f2;
-  --color-ink-100: #e3e8dd;
-  --color-ink-500: #6b7268;
-  --color-ink-700: #2c322c;
-  --color-ink-900: #131613;
-
-  /* Review stars stay gold. Lime stars read as a rendering fault
-     rather than a rating. */
-  --color-star: #f5b301;
+  /* Flat neutral greys — no hue in them at all. A tinted grey next to the
+     matte black reads as a colour cast rather than a shade. */
+  --color-ink-50: #f4f4f5;
+  --color-ink-100: #e4e4e7;
+  --color-ink-500: #6b6b70;
+  --color-ink-700: #2c2c2f;
+  --color-ink-900: #131315;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
+/* The light theme is now the toggle, not the default — see .dark below and
+   the class on <html> in layout.tsx. It is a matte grey rather than a white:
+   the canvas is a soft stone and the cards are off-white, so even this side
+   of the switch has no bright paper in it. */
 :root {
-  --background: #eaeee4;
-  --surface: #ffffff;
-  --surface-alt: #f2f6ec;
-  --foreground: #151814;
-  --muted: #6b7268;
-  --border: #e0e6d8;
+  --background: #e3e4e2;
+  --surface: #f6f6f5;
+  --surface-alt: #ecedeb;
+  --foreground: #17181a;
+  --muted: #64656a;
+  --border: #d3d4d1;
 
   --primary: #d6f24b;
   --primary-hover: #c5e733;
   --on-primary: #191d14;
+
+  /* The Add to Cart pill: matte black here, and flipped to near-white on
+     the dark side, because a black pill on a black page is not a button. */
+  --cta: #1b1b1d;
+  --cta-hover: #2c2c2f;
+  --on-cta: #f6f6f5;
+
+  /* The plain solid button — Admin, the theme toggle, Sign Up. */
+  --solid: #2c2c2f;
+  --solid-hover: #131315;
+  --on-solid: #f6f6f5;
+
+  /* The footer stays dark on both sides of the switch; on the dark theme
+     it only has to be a step off the canvas, not another black. */
+  --footer: #17181a;
+
+  /* How much lime is allowed to wash across the hero corner. */
+  --hero-wash: rgb(214 242 75 / 0.42);
 
   /* The lime wherever it has to be read rather than filled: prices,
      eyebrows, link hovers, list markers. */
@@ -77,17 +95,35 @@
   --radius-field: 14px;
 }
 
+/* The default. Matte black canvas, matte grey cards — the greys are stepped
+   far enough apart to separate a card from the page without a hard border,
+   and none of them go to true black, which would kill the shadows and make
+   the whole thing look like a hole rather than a surface. */
 .dark {
-  --background: #0f120e;
-  --surface: #171b15;
-  --surface-alt: #1e231b;
-  --foreground: #eef2e8;
-  --muted: #9aa394;
-  --border: #2b3128;
+  --background: #121213;
+  --surface: #1b1b1d;
+  --surface-alt: #242427;
+  --foreground: #f2f2f3;
+  --muted: #a1a1a6;
+  --border: #2e2e32;
 
   --primary: #d6f24b;
   --primary-hover: #e0f76e;
   --on-primary: #191d14;
+
+  --cta: #f2f2f3;
+  --cta-hover: #ffffff;
+  --on-cta: #131315;
+
+  --solid: #35353a;
+  --solid-hover: #424248;
+  --on-solid: #f2f2f3;
+
+  --footer: #1b1b1d;
+
+  /* A fraction of the light theme's. At full strength on a matte black
+     card the corner stops being a wash and becomes a lamp. */
+  --hero-wash: rgb(214 242 75 / 0.13);
 
   /* Inverted: on a dark surface the bright lime is the readable one and
      the olive is not. */
@@ -163,6 +199,13 @@
     background: var(--surface-alt);
   }
 
+  /* Dark in both themes — the copy inside it is written for a dark ground.
+     It only changes shade, so that on the matte black theme it separates
+     from the canvas instead of merging into it. */
+  .site-footer {
+    background: var(--footer);
+  }
+
   /* Typography ------------------------------------------------- */
   .eyebrow {
     display: inline-block;
@@ -234,13 +277,16 @@
     background: var(--primary-hover);
   }
 
+  /* Tokens rather than the ink ramp: on the matte black theme a fixed
+     ink-700 button sits within a few percent of the card behind it and
+     stops looking like a control at all, so the dark theme lifts it. */
   .btn-dark {
-    background: var(--color-ink-700);
-    color: #fff;
+    background: var(--solid);
+    color: var(--on-solid);
   }
 
   .btn-dark:hover:not(:disabled) {
-    background: var(--color-ink-900);
+    background: var(--solid-hover);
   }
 
   .btn-outline {
@@ -275,6 +321,42 @@
 
   .btn-block {
     width: 100%;
+  }
+
+  /* Add to Cart, and only Add to Cart. The one action every product screen
+     is built around, so it gets a shape nothing else on the page has: full
+     width, matte black, set in caps. Deliberately not .btn-primary — the
+     lime stays with the softer calls to action (Shop Now, Subscribe) and
+     this outranks them. */
+  .btn-cart {
+    width: 100%;
+    background: var(--cta);
+    color: var(--on-cta);
+    padding: 1rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    gap: 0.65rem;
+  }
+
+  .btn-cart:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
+
+  /* The bag. Sized off the label so it tracks the button's own scale. */
+  .btn-cart svg {
+    width: 1.25em;
+    height: 1.25em;
+    flex: none;
+  }
+
+  /* A cart button sitting in a row of other buttons rather than filling a
+     card — the wishlist page, where it is one of three. */
+  .btn-cart.btn-sm {
+    width: auto;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.8125rem;
   }
 
   .btn-lg {
@@ -567,7 +649,7 @@
     background:
       radial-gradient(
         38rem 24rem at 88% -25%,
-        rgb(214 242 75 / 0.55) 0%,
+        var(--hero-wash) 0%,
         transparent 62%
       ),
       var(--surface-alt);

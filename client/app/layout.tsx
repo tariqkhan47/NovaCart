@@ -52,9 +52,22 @@ export default function RootLayout({
  return (
   <html
     lang="en"
-    className={`${inter.variable} ${jakarta.variable} ${amiri.variable} h-full antialiased`}
+    className={`dark ${inter.variable} ${jakarta.variable} ${amiri.variable} h-full antialiased`}
   >
     <body>
+      {/* Runs while the page is still parsing, before anything is painted.
+          The server always sends <html class="dark"> because that is the
+          shop's look; a visitor who has switched to light needs it taken off
+          before the first frame, or every page load flashes black at them.
+          Wrapped in try/catch because localStorage throws outright in a
+          browser with site data blocked, which would take the page with it. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "try{if(localStorage.getItem('theme')==='light')" +
+            "document.documentElement.classList.remove('dark')}catch(e){}",
+        }}
+      />
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>

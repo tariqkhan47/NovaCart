@@ -4,7 +4,7 @@ import { CONTACT_LINKS, STORE } from "../lib/store";
 
 export default function Footer() {
   return (
-    <footer className="bg-ink-900 text-ink-50 pt-14 pb-8 mt-16">
+    <footer className="site-footer text-ink-50 pt-14 pb-8 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12">
         <NewsletterSignup />
       </div>
