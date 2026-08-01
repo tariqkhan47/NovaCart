@@ -76,6 +76,13 @@
   /* How much blue is allowed to wash across the hero corner. */
   --hero-wash: rgb(37 99 235 / 0.14);
 
+  /* The veil over the hero's photo wall. The core sits behind the headline and
+     has to carry #111827 at 4.5:1 over an arbitrary product photo, which is
+     why it is this close to solid; the edge is where the photos are allowed to
+     read as photos. */
+  --veil-core: rgb(255 255 255 / 0.94);
+  --veil-edge: rgb(255 255 255 / 0.66);
+
   /* Prices, eyebrows, link hovers, list markers. Same blue as --primary:
      it clears 4.5:1 on both white and the grey sections, so unlike the
      lime it does not need a darker twin to be read. */
@@ -124,6 +131,12 @@
   --footer: #0b1120;
 
   --hero-wash: rgb(59 130 246 / 0.18);
+
+  /* Darker rather than lighter, and a shade stronger: a bright product photo
+     behind near-white text is a worse collision than a dark one behind dark
+     text, so the dark theme gives the copy more cover. */
+  --veil-core: rgb(15 23 42 / 0.95);
+  --veil-edge: rgb(15 23 42 / 0.70);
 
   /* #2563eb on a slate ground is too dark to read, so the accent moves
      up the ramp here while the fill stays saturated. */
@@ -667,6 +680,100 @@
       var(--surface-alt);
     color: var(--foreground);
     box-shadow: var(--shadow);
+  }
+
+  /* The drifting photo wall — see components/HeroMarquee.tsx. Sits between
+     the hero's own background and its copy. */
+  .hero-marquee {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.9rem;
+    pointer-events: none;
+    /* The rows are wider than the card on purpose; without this they would
+       spill past its rounded corners. */
+    overflow: hidden;
+  }
+
+  .hero-marquee-row {
+    overflow: hidden;
+  }
+
+  .hero-marquee-track {
+    display: flex;
+    gap: 0.9rem;
+    /* max-content, so the row is as wide as its tiles rather than as wide as
+       the hero — a percentage translate on a clipped track would otherwise be
+       a percentage of the wrong number and the loop would jump. */
+    width: max-content;
+    animation: hero-drift 70s linear infinite;
+  }
+
+  .hero-marquee-track-reverse {
+    animation-direction: reverse;
+  }
+
+  /* Exactly half, because the track holds the same run of tiles twice: at
+     -50% the second copy is where the first began. */
+  @keyframes hero-drift {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .hero-tile {
+    display: block;
+    flex: none;
+    width: 8.5rem;
+    height: 8.5rem;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .hero-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (width >= 40rem) {
+    .hero-tile {
+      width: 11rem;
+      height: 11rem;
+    }
+  }
+
+  /* Motion that cannot be stopped is the one thing an auto-scrolling band must
+     not be: for anyone who has asked their system for less of it, the wall is
+     simply a still arrangement of photos. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-marquee-track {
+      animation: none;
+    }
+  }
+
+  /* What keeps the headline readable. Near-opaque through the middle where the
+     copy sits, thinning towards the edges so the photos are still clearly
+     photos — the alternative, one flat wash over everything, either drowns the
+     text or turns the wall into grey mush. */
+  .hero-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      125% 85% at 50% 50%,
+      var(--veil-core) 0%,
+      var(--veil-core) 34%,
+      var(--veil-edge) 100%
+    );
   }
 
   .hero-pattern {

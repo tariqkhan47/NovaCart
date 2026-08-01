@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
+import HeroMarquee from "../components/HeroMarquee";
 import Footer from "../components/Footer";
 import { CATEGORIES } from "../lib/categories";
 
@@ -136,6 +137,17 @@ const router = useRouter();
       ? interleaveByCategory(matchingProducts)
       : matchingProducts;
 
+  // Photos for the hero's drifting wall. The featured row first, because those
+  // are already being downloaded for the cards below and are one per
+  // collection, so the strip shows the breadth of the shop rather than twelve
+  // variations on a wall clock. Falls back to the head of the catalog on a
+  // shop where nothing has been featured yet, and takes the interleaved order
+  // there for the same reason.
+  const heroImages = (featured.length > 0 ? featured : filteredProducts)
+    .slice(0, 14)
+    .map((product) => product.image)
+    .filter(Boolean);
+
   return (
   
     <>
@@ -151,6 +163,14 @@ const router = useRouter();
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
           <div className="hero py-12 sm:py-16 px-6 sm:px-10">
             <div className="hero-pattern" />
+
+            {/* The shop's own stock drifting behind the copy. Fed the featured
+                products because those are the photos the cards further down
+                load anyway, so the strip adds no download of its own — and it
+                renders nothing until they have arrived, which is why the hero
+                still looks right on the first paint. */}
+            <HeroMarquee images={heroImages} />
+            <div className="hero-veil" />
 
             <div className="relative text-center">
               <span className="eyebrow">
