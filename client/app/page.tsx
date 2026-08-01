@@ -190,9 +190,15 @@ const router = useRouter();
                 Discover the best products at the best prices.
               </p>
 
-              <button className="btn btn-primary btn-lg">
+              {/* Down to the catalog, which is the same place the navbar's
+                  "Products" and the footer's link already go — a shopper who
+                  presses the biggest button on the page and one who uses the
+                  nav should not land somewhere different. An anchor rather
+                  than a router push, so it costs no navigation and the
+                  featured row stays scrolled past rather than reloaded. */}
+              <Link href="#products" className="btn btn-primary btn-lg">
                 Shop Now
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -310,7 +316,13 @@ const router = useRouter();
 
         {/* Featured Products */}
 
-        <section id="products" className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
+        {/* scroll-mt keeps the heading clear of the sticky navbar, which is two
+            rows tall — without it the jump puts "All Products" underneath the
+            header and the section looks like it starts mid-grid. */}
+        <section
+          id="products"
+          className="max-w-7xl mx-auto py-12 px-4 sm:px-6 scroll-mt-28 sm:scroll-mt-36"
+        >
 
           <div className="text-center mb-10">
             <span className="eyebrow">Our Collection</span>
