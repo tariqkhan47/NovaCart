@@ -75,9 +75,6 @@ model Order {
   // EasyPaisa TID or bank reference the customer quoted.
   paymentReference String?
 
-  // Safepay's own id for the checkout attempt — looked up by the webhook.
-  paymentTracker String? @unique
-
   status String @default("Pending")
 
   createdAt DateTime @default(now())

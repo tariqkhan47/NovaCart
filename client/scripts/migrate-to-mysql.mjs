@@ -168,7 +168,9 @@ for (const order of orders) {
       paymentMethod: order.paymentMethod ?? "cod",
       paymentStatus: order.paymentStatus ?? "pending",
       paymentReference: order.paymentReference ?? null,
-      paymentTracker: order.paymentTracker ?? null,
+      // No paymentTracker: the shop stopped taking cards on 2026-08-02 and the
+      // column went out of the schema with the rest of the gateway. Passing it
+      // would make Prisma reject the whole write on an unknown field.
       status: order.status ?? "Pending",
       createdAt: order.createdAt ?? new Date(),
       updatedAt: order.updatedAt ?? new Date(),

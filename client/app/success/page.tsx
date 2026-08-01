@@ -19,12 +19,6 @@ export default async function SuccessPage({ searchParams }: Props) {
 
   const transferred = method?.needsReference ?? false;
 
-  // Set by the Safepay return route, and only ever to "paid" once the
-  // signature has been checked. Anything else means the shop cannot yet say
-  // the money arrived, so it does not.
-  const card = method?.method === "card";
-  const cardPaid = card && one(status) === "paid";
-
   return (
     <main className="page flex items-center justify-center px-4 sm:px-6">
       <ClearCart />
@@ -38,19 +32,7 @@ export default async function SuccessPage({ searchParams }: Props) {
 
         <p className="text-muted-soft mb-8">
           Thank you for shopping with Arsalah.
-          {cardPaid ? (
-            <>
-              {" "}
-              Aap ki card payment mil gayi hai. Order confirm ho chuka hai aur
-              jald bhej diya jayega.
-            </>
-          ) : card ? (
-            <>
-              {" "}
-              Aap ka order mil gaya hai. Card payment confirm hote hi order
-              aage barhega — status &ldquo;My Orders&rdquo; mein dikhta rahega.
-            </>
-          ) : transferred ? (
+          {transferred ? (
             <>
               {" "}
               Aap ka {method?.label} payment check hote hi order confirm kar

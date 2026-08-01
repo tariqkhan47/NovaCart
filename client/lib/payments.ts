@@ -6,12 +6,7 @@
  * so a method can never be offered on one screen and rejected by another.
  */
 
-export const PAYMENT_METHODS = [
-  "cod",
-  "easypaisa",
-  "bank",
-  "card",
-] as const;
+export const PAYMENT_METHODS = ["cod", "easypaisa", "bank"] as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
@@ -93,12 +88,17 @@ export const PAYMENT_ACCOUNTS: {
  * now refused with "That payment method is not available", not just hidden
  * from the page.
  *
- * `"card"` stays in PAYMENT_METHODS and in the label map below, because
- * orders placed while it was live still have to read correctly in the admin
- * dashboard and in a customer's order history. The Safepay integration
- * (lib/safepay.ts, the two routes under api/payments/safepay) is left in
- * place and unreachable — nothing routes to it any more, and it is what a
- * change of mind would need.
+ * The Safepay integration is gone with it, at his word — "poori tarah nikaal
+ * do, agar man badal gaya tu shuro se he laga lengy". lib/safepay.ts,
+ * lib/settle-payment.ts, both routes under api/payments/safepay, the
+ * SAFEPAY_* keys in next.config.ts, and Order.paymentTracker in the schema
+ * were all removed; git history is the copy if it is ever wanted back.
+ *
+ * `"card"` survives only in the map below, because orders placed while it was
+ * live still have to read as something in the admin dashboard and in a
+ * customer's order history rather than as a bare "card". Note the physical
+ * `paymentTracker` column is still on the live MySQL table: dropping a column
+ * from a running shop's database buys nothing, and it is nullable and unread.
  */
 const RETIRED_METHOD_LABELS: Record<string, string> = {
   card: "Debit / Credit Card",
@@ -219,14 +219,11 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
 /**
  * Where a freshly placed order starts.
  *
- * Cash on Delivery owes nothing yet. A card order owes nothing yet either —
- * it is created before the shopper is sent to the gateway, and only the
- * gateway's own word moves it to paid, so it must not start out claiming
- * anything happened.
+ * Cash on Delivery owes nothing yet — the courier collects.
  *
  * EasyPaisa and bank transfer have the customer's word that the money is on
  * its way, which is not the same as it having arrived.
  */
 export function initialPaymentStatus(method: PaymentMethod): PaymentStatus {
-  return method === "cod" || method === "card" ? "pending" : "submitted";
+  return method === "cod" ? "pending" : "submitted";
 }

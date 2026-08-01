@@ -5,7 +5,6 @@ import { serializeOrder } from "@/lib/serialize";
 import { getSessionFromRequest, requireUser } from "@/lib/auth";
 import { DELIVERY_CHARGE } from "@/lib/delivery";
 import { initialPaymentStatus, paymentMethodInfo } from "@/lib/payments";
-import { createCheckout, safepayConfigured } from "@/lib/safepay";
 import { STORE } from "@/lib/store";
 import { newUnsubscribeToken } from "@/lib/subscriber-token";
 
@@ -78,17 +77,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { message: "That payment method is not available" },
         { status: 400 }
-      );
-    }
-
-    // The card option is switched on by a public flag so the checkout screen
-    // can read it, which means a deploy could advertise cards while missing
-    // the keys that actually take them. Refuse here rather than take an order
-    // we cannot collect on.
-    if (payment.method === "card" && !safepayConfigured()) {
-      return NextResponse.json(
-        { message: "Card payments are temporarily unavailable" },
-        { status: 503 }
       );
     }
 
@@ -177,7 +165,7 @@ export async function POST(req: NextRequest) {
 
     const total = subtotal + DELIVERY_CHARGE;
 
-    let order = await prisma.order.create({
+    const order = await prisma.order.create({
       data: {
         userId: Number(session.userId),
         deliveryCharge: DELIVERY_CHARGE,
@@ -194,46 +182,6 @@ export async function POST(req: NextRequest) {
       },
       include: { items: true },
     });
-
-    // A card order is placed before it is paid for. The shopper goes off to
-    // Safepay's own page from here, and the order sits at "pending" until
-    // Safepay itself says otherwise — see the return and webhook routes.
-    let checkoutUrl: string | undefined;
-
-    if (payment.method === "card") {
-      // Taken from the shop's own settings rather than the incoming request:
-      // these two URLs are handed to Safepay and used from outside, and behind
-      // a proxy the request's own origin cannot be relied on to be the address
-      // the shopper is actually browsing. Set NEXT_PUBLIC_SITE_URL to point
-      // this at localhost while developing.
-      const origin = STORE.siteUrl.replace(/\/$/, "");
-
-      try {
-        const checkout = await createCheckout({
-          amountRupees: total,
-          orderId: String(order.id),
-          redirectUrl: `${origin}/api/payments/safepay/return`,
-          cancelUrl: `${origin}/checkout?payment=cancelled`,
-        });
-
-        checkoutUrl = checkout.url;
-
-        order = await prisma.order.update({
-          where: { id: order.id },
-          data: { paymentTracker: checkout.tracker },
-          include: { items: true },
-        });
-      } catch (error) {
-        // Nobody can pay for this order, so it should not be left lying
-        // around looking placed. The stock goes back via the catch below.
-        console.error("SAFEPAY CHECKOUT ERROR:", error);
-        await prisma.order.delete({ where: { id: order.id } }).catch(() => {});
-
-        throw Object.assign(new Error("Could not start the card payment"), {
-          status: 502,
-        });
-      }
-    }
 
     // Ordering signs the customer up for the mailing list. One row per email,
     // so a repeat customer just has their details refreshed and their order
@@ -264,12 +212,7 @@ export async function POST(req: NextRequest) {
       console.error("SUBSCRIBE ON ORDER ERROR:", error);
     }
 
-    // checkoutUrl is only present for a card order; every other method is
-    // finished as far as the browser is concerned.
-    return NextResponse.json(
-      { ...serializeOrder(order), checkoutUrl },
-      { status: 201 }
-    );
+    return NextResponse.json(serializeOrder(order), { status: 201 });
   } catch (error) {
     // Put back anything we already reserved.
     for (const item of reserved) {

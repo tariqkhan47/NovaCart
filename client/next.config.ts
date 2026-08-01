@@ -22,10 +22,6 @@ const nextConfig: NextConfig = {
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
     JWT_SECRET: process.env.JWT_SECRET,
-    SAFEPAY_ENVIRONMENT: process.env.SAFEPAY_ENVIRONMENT,
-    SAFEPAY_API_KEY: process.env.SAFEPAY_API_KEY,
-    SAFEPAY_SECRET_KEY: process.env.SAFEPAY_SECRET_KEY,
-    SAFEPAY_WEBHOOK_SECRET: process.env.SAFEPAY_WEBHOOK_SECRET,
   },
 
   // The product photos in public/img/. Next serves everything under public/
