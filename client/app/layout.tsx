@@ -1,18 +1,25 @@
 import { AuthProvider } from "../context/AuthContext";
 import type { Metadata } from "next";
-import { Amiri, Inter } from "next/font/google";
+import { Amiri, Inter, Poppins } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "../context/ThemeContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
 
-// Body and headings both. The SaaS look this theme is built on sets the
-// whole page in one grotesk and separates the headings by weight and tight
-// tracking rather than by a second face — so there is no display font to
-// load beside this one.
+// Body copy.
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+// Headings. The amber theme separates them by face as well as by weight —
+// Poppins' rounder, wider letterforms are half of why that look reads warm
+// rather than corporate, so restoring the palette without it gets the
+// colours back but not the character.
+const poppins = Poppins({
+  variable: "--font-poppins",
+  weight: ["500", "600", "700", "800"],
   subsets: ["latin"],
 });
 
@@ -43,7 +50,7 @@ export default function RootLayout({
  return (
   <html
     lang="en"
-    className={`${inter.variable} ${amiri.variable} h-full antialiased`}
+    className={`${inter.variable} ${poppins.variable} ${amiri.variable} h-full antialiased`}
   >
     <body>
       {/* Runs while the page is still parsing, before anything is painted.

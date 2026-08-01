@@ -5,57 +5,61 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------
-   NovaCart theme — the original modern-SaaS palette: white canvas,
-   #2563EB blue, light grey sections, 16px corners, soft shadows.
+   The warm amber theme, restored at the owner's request on 2026-08-01
+   — cream canvas, #f0a500 amber, brown ink, Poppins headings. It ran
+   from 2026-07-28 until the bento retheme and was asked for back by
+   name; the palette was recovered from b4ad689.
 
-   White is both the canvas and the card here, which is the whole trick
-   of this look: a card is told apart from the page by its hairline and
-   its shadow, not by a change of shade. The grey (#f8fafc) is for
-   sections, not for cards — the moment a card takes it, the border
-   stops doing any work.
+   White cards on a cream page, so a card is told apart from the canvas
+   by being *lighter* than it as well as by its hairline — the opposite
+   of the white-on-white theme this replaces, where the border and the
+   shadow did all the work on their own.
+
+   Restored as it was, deliberately, including the accent below: the
+   owner was shown the low-contrast prices and chose the authentic
+   colour over the readable one.
    --------------------------------------------------------------- */
 @theme {
-  /* The blue. Unlike the lime it replaces, this one is readable as text
-     as well as a fill — #2563eb on white is 5.17:1 — so --accent and
-     --primary are allowed to be the same colour on the light side. */
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  /* The amber. Unlike the blue it replaces this is a fill colour only —
+     500 is 1.9:1 on the cream and cannot carry text at any size, which
+     is why --accent below has to come from further down the ramp. */
+  --color-brand-50: #fff9ec;
+  --color-brand-100: #fdefc9;
+  --color-brand-200: #fbdd8e;
+  --color-brand-300: #f9c552;
+  --color-brand-400: #f7b02b;
+  --color-brand-500: #f0a500;
+  --color-brand-600: #d48806;
+  --color-brand-700: #a96407;
+  --color-brand-800: #8a4f0e;
+  --color-brand-900: #74420f;
 
-  /* Cool greys, faintly blue. They sit under a blue brand rather than
-     beside a matte black, so a little hue in them reads as considered
-     instead of as a cast. 900/500/200 are the spec's text, muted and
-     border values exactly. */
-  --color-ink-50: #f9fafb;
-  --color-ink-100: #f3f4f6;
-  --color-ink-500: #6b7280;
-  --color-ink-700: #374151;
-  --color-ink-900: #111827;
+  /* Warm browns rather than greys. Under an amber brand a neutral grey
+     reads as dirty, so the whole ink ramp carries the same warmth the
+     canvas does. */
+  --color-ink-50: #f7f2ea;
+  --color-ink-100: #ece0cd;
+  --color-ink-500: #6b5133;
+  --color-ink-700: #3e2c1c;
+  --color-ink-900: #201711;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
-/* The default, and the theme the shop is designed in: white background,
-   blue primary, grey sections. */
+/* The default, and the theme the shop is designed in: cream background,
+   amber primary, white cards. */
 :root {
-  --background: #ffffff;
+  --background: #fcf8f1;
   --surface: #ffffff;
-  --surface-alt: #f8fafc;
-  --foreground: #111827;
-  --muted: #6b7280;
-  --border: #e5e7eb;
+  --surface-alt: #fbf5ea;
+  --foreground: #1f1b16;
+  --muted: #7c6a53;
+  --border: #ecdfc9;
 
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --on-primary: #ffffff;
+  --primary: #f0a500;
+  --primary-hover: #d48806;
+  --on-primary: #201711;
 
   /* The Add to Cart pill, kept exactly as it was through the retheme at
      the owner's request: matte black here, flipped to near-white on the
@@ -65,40 +69,46 @@
   --on-cta: #f6f6f5;
 
   /* The plain solid button — Admin, the theme toggle, Sign Up. */
-  --solid: #111827;
-  --solid-hover: #1f2937;
-  --on-solid: #ffffff;
+  --solid: #201711;
+  --solid-hover: #3e2c1c;
+  --on-solid: #fff9ec;
 
   /* The footer stays dark on both sides of the switch; the copy inside
      it is written for a dark ground. */
-  --footer: #111827;
+  --footer: #201711;
 
-  /* How much blue is allowed to wash across the hero corner. */
-  --hero-wash: rgb(37 99 235 / 0.14);
+  /* How much amber is allowed to wash across the hero corner. */
+  --hero-wash: rgb(240 165 0 / 0.14);
 
   /* The veil over the hero's photo wall. The core sits behind the headline and
      has to carry #111827 at 4.5:1 over an arbitrary product photo, which is
      why it is this close to solid; the edge is where the photos are allowed to
      read as photos. */
-  --veil-core: rgb(255 255 255 / 0.94);
-  --veil-edge: rgb(255 255 255 / 0.66);
+  --veil-core: rgb(252 248 241 / 0.94);
+  --veil-edge: rgb(252 248 241 / 0.66);
 
-  /* Prices, eyebrows, link hovers, list markers. Same blue as --primary:
-     it clears 4.5:1 on both white and the grey sections, so unlike the
-     lime it does not need a darker twin to be read. */
-  --accent: #2563eb;
+  /* Prices, eyebrows, link hovers, list markers — one step down the ramp
+     from --primary, which is what the amber theme itself used.
 
-  --danger: #dc2626;
-  --danger-hover: #b91c1c;
-  --success: #16a34a;
-  --success-hover: #15803d;
+     Known and accepted: this is 2.6:1 on the cream, under the 4.5:1 that
+     body text needs and under even the 3:1 large-text floor, so prices
+     and the hero eyebrow read faint. The owner was shown exactly this and
+     asked for the original colour rather than the darker #a96407 that
+     would clear it. Don't "fix" it unnoticed — it is a decision, not an
+     oversight. */
+  --accent: #d48806;
 
-  --ring: rgb(37 99 235 / 0.35);
+  --danger: #c0392b;
+  --danger-hover: #a52f23;
+  --success: #4f7b3a;
+  --success-hover: #416430;
+
+  --ring: rgb(240 165 0 / 0.35);
 
   /* Soft and wide rather than tight and dark — on a white page a heavy
      shadow reads as a smudge. */
-  --shadow: 0 4px 16px -6px rgb(17 24 39 / 0.1);
-  --shadow-lg: 0 18px 45px -20px rgb(17 24 39 / 0.18);
+  --shadow: 0 10px 30px -14px rgb(62 44 28 / 0.35);
+  --shadow-lg: 0 24px 50px -22px rgb(62 44 28 / 0.45);
 
   --radius-card: 16px;
   --radius-panel: 16px;
@@ -109,45 +119,49 @@
 /* The toggle, not the default. Cool slate rather than a neutral black,
    so the blue still belongs to the page it is sitting on. */
 .dark {
-  --background: #0f172a;
-  --surface: #1e293b;
-  --surface-alt: #172033;
-  --foreground: #f8fafc;
-  --muted: #94a3b8;
-  --border: #334155;
+  --background: #14110d;
+  --surface: #1e1a14;
+  --surface-alt: #262019;
+  --foreground: #f3ece0;
+  --muted: #a2917a;
+  --border: #3a3126;
 
-  --primary: #3b82f6;
-  --primary-hover: #60a5fa;
-  --on-primary: #ffffff;
+  /* Up the ramp from the light theme's #f0a500: on a near-black brown a
+     fully saturated amber goes muddy, and this is the shade the amber
+     theme itself used on its dark side. */
+  --primary: #f7b02b;
+  --primary-hover: #f0a500;
+  --on-primary: #17130e;
 
   --cta: #f2f2f3;
   --cta-hover: #ffffff;
   --on-cta: #131315;
 
-  --solid: #334155;
-  --solid-hover: #475569;
-  --on-solid: #f8fafc;
+  --solid: #3a3126;
+  --solid-hover: #4a3f31;
+  --on-solid: #f3ece0;
 
-  --footer: #0b1120;
+  --footer: #0f0d0a;
 
-  --hero-wash: rgb(59 130 246 / 0.18);
+  --hero-wash: rgb(247 176 43 / 0.18);
 
   /* Darker rather than lighter, and a shade stronger: a bright product photo
      behind near-white text is a worse collision than a dark one behind dark
      text, so the dark theme gives the copy more cover. */
-  --veil-core: rgb(15 23 42 / 0.95);
-  --veil-edge: rgb(15 23 42 / 0.70);
+  --veil-core: rgb(20 17 13 / 0.95);
+  --veil-edge: rgb(20 17 13 / 0.70);
 
-  /* #2563eb on a slate ground is too dark to read, so the accent moves
-     up the ramp here while the fill stays saturated. */
-  --accent: #93c5fd;
+  /* The light theme's #d48806 would disappear into this brown, so prices
+     and eyebrows take the brighter amber here. Unlike on the cream side,
+     this one is comfortably readable — about 9:1 on the canvas. */
+  --accent: #f7b02b;
 
-  --danger: #f87171;
-  --danger-hover: #ef4444;
-  --success: #4ade80;
-  --success-hover: #22c55e;
+  --danger: #e0614f;
+  --danger-hover: #c94d3c;
+  --success: #7aa860;
+  --success-hover: #689350;
 
-  --ring: rgb(59 130 246 / 0.45);
+  --ring: rgb(247 176 43 / 0.3);
   --shadow: 0 10px 30px -16px rgb(0 0 0 / 0.7);
   --shadow-lg: 0 26px 60px -30px rgb(0 0 0 / 0.8);
 }
