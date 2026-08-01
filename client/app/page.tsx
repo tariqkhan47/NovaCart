@@ -212,7 +212,7 @@ const router = useRouter();
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {featured.map((product) => (
                 <ProductCard
                   key={product._id}
@@ -325,7 +325,7 @@ const router = useRouter();
             </div>
           ) : (
             <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
 
               {filteredProducts.slice(0, visible).map((product) => (
                <ProductCard

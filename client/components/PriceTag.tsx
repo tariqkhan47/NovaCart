@@ -26,7 +26,10 @@ export default function PriceTag({
 
   return (
     <span className={`inline-flex flex-wrap items-baseline gap-x-2 gap-y-1 ${className}`}>
-      <span className={`price ${size === "lg" ? "text-2xl sm:text-3xl" : "text-lg"}`}>
+      {/* The small size steps down again on phones: two cards to a row leaves
+          this about 150px, and a price with a struck-through original and an
+          "N% off" badge beside it wraps to three lines at text-lg. */}
+      <span className={`price ${size === "lg" ? "text-2xl sm:text-3xl" : "text-base sm:text-lg"}`}>
         {formatPrice(price)}
       </span>
 

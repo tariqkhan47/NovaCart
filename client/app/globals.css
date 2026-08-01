@@ -360,6 +360,24 @@
     background: var(--cta-hover);
   }
 
+  /* Phones show two cards to a row, which leaves this about 150px of width to
+     live in. Everything that makes it itself is kept — full width, the matte
+     fill, the caps, the drawn bag — and only the scale comes down; at the
+     desktop 0.9375rem and 0.07em of tracking, "ADD TO CART" wraps to two lines
+     in a card that narrow. */
+  @media (width < 40rem) {
+    .btn-cart {
+      padding: 0.6rem 0.5rem;
+      font-size: 0.6875rem;
+      letter-spacing: 0.04em;
+      gap: 0.4rem;
+      /* On the narrowest phones the card is about 150px inside its padding,
+         and a wrapped "ADD TO / CART" would make this the only two-line
+         button on the page. */
+      white-space: nowrap;
+    }
+  }
+
   /* The bag. Sized off the label so it tracks the button's own scale. */
   .btn-cart svg {
     width: 1.25em;
