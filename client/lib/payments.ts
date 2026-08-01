@@ -83,25 +83,26 @@ export const PAYMENT_ACCOUNTS: {
 };
 
 /**
- * Card payments need an internet-merchant account with a payment gateway. An
- * ordinary bank account cannot charge a card, and card numbers must never be
- * typed into this site — the gateway's own page collects them, which is what
- * keeps the shop out of PCI scope.
+ * Card is not offered. The owner asked for it off the shop on 2026-08-02 —
+ * it had been sitting at checkout greyed out as "Coming soon" while the
+ * merchant paperwork went through, and he decided against taking cards at all.
  *
- * Null until one is arranged. The card option still appears at checkout, but
- * greyed out, so shoppers can see it is on the way.
+ * Deliberately removed from `paymentMethods()` rather than left in and
+ * disabled. That list is the one the order API checks too, so dropping the
+ * entry closes the door on both sides: a hand-made POST asking for `card` is
+ * now refused with "That payment method is not available", not just hidden
+ * from the page.
  *
- * Switched on by NEXT_PUBLIC_SAFEPAY_ENABLED rather than by the presence of
- * the Safepay keys, because this file is read by the checkout screen in the
- * browser and a secret consulted here would be bundled into the page. The flag
- * has to be set deliberately in each place the shop runs, so a deploy that has
- * not had its keys added yet offers cash and transfer only rather than a card
- * button that fails — see lib/safepay.ts for the server's own check.
+ * `"card"` stays in PAYMENT_METHODS and in the label map below, because
+ * orders placed while it was live still have to read correctly in the admin
+ * dashboard and in a customer's order history. The Safepay integration
+ * (lib/safepay.ts, the two routes under api/payments/safepay) is left in
+ * place and unreachable — nothing routes to it any more, and it is what a
+ * change of mind would need.
  */
-export const CARD_GATEWAY: { name: string } | null =
-  process.env.NEXT_PUBLIC_SAFEPAY_ENABLED === "true"
-    ? { name: "Safepay" }
-    : null;
+const RETIRED_METHOD_LABELS: Record<string, string> = {
+  card: "Debit / Credit Card",
+};
 
 export type PaymentMethodInfo = {
   method: PaymentMethod;
@@ -190,17 +191,6 @@ export function paymentMethods(): PaymentMethodInfo[] {
       ]),
     },
 
-    {
-      method: "card",
-      label: "Debit / Credit Card",
-      icon: "💳",
-      blurb: CARD_GATEWAY
-        ? `Card se pay karein — ${CARD_GATEWAY.name} ke secure page par.`
-        : "",
-      needsReference: false,
-      available: CARD_GATEWAY !== null,
-      unavailableNote: "Coming soon",
-    },
   ];
 }
 
@@ -214,7 +204,9 @@ export function paymentMethodInfo(method: string): PaymentMethodInfo | undefined
  * been switched off still reads sensibly.
  */
 export function paymentMethodLabel(method: string) {
-  return paymentMethodInfo(method)?.label ?? method;
+  return (
+    paymentMethodInfo(method)?.label ?? RETIRED_METHOD_LABELS[method] ?? method
+  );
 }
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
