@@ -27,8 +27,16 @@ export const RULES = [
     "Home Decor",
   ],
 
+  // This is the shop's personal-care aisle as much as its perfume one, so
+  // grooming appliances and body creams land here rather than in Gadgets:
+  // a hair straightener is bought for the same reason as the serum beside it.
+  //
+  // "cream" is always qualified, and "moisturising" has to be sitting on one:
+  // a bare /moisturi/ pulled in "Restore Shine Moisturizing Care for Leather
+  // Products", which is shoe polish and belongs in Bags & Travel — and since
+  // this rule runs before that one, it won.
   [
-    /perfume|parfum|fragrance|eau de|cologne|lip balm|lipstick|makeup|eyeliner|kajal|mascara|nail polish|foundation stick|concealer|teeth whitening|whitening pen|toothpaste|shampoo|soap|skin care|lotion|face wash|serum/i,
+    /perfume|parfum|fragrance|eau de|cologne|lip balm|lipstick|makeup|eyeliner|kajal|mascara|nail polish|foundation stick|concealer|teeth whitening|whitening pen|toothpaste|shampoo|soap|skin care|lotion|face wash|serum|moisturi\w+ cream|(body|face|hand) cream|hair (styler|straightener|curler|dryer|volumizer)|blow ?dry|callus|foot (pedi|file|care)|pedicure|massager/i,
     "Fragrances & Beauty",
   ],
   [
@@ -45,11 +53,16 @@ export const RULES = [
     // The phone-accessory pattern allows a couple of words in the middle:
     // these are sold as "Mobile Bubble Grip" and "Phone Strong Holder" as often
     // as they are sold as "phone holder".
-    /earbud|earphone|headphone|airpods|power ?bank|(phone|mobile)(\s+\w+){0,2}\s+(holder|grip|mount|bracket|stand)|tv (wall )?(mount|bracket|stand)|data cable|charging cable|charger|led light|flash ?light|head ?lamp|torch|camping (bulb|lamp)|emergency light|\bfan\b|speaker|usb/i,
+    // A nebuliser is a medical device and this shop has no health aisle; of
+    // the twelve collections it has, an electrically powered personal device
+    // belongs here and nowhere closer.
+    /earbud|earphone|headphone|airpods|power ?bank|(phone|mobile)(\s+\w+){0,2}\s+(holder|grip|mount|bracket|stand)|tv (wall )?(mount|bracket|stand)|laptop stand|data cable|charging cable|charger|led light|flash ?light|head ?lamp|torch|camping (bulb|lamp)|emergency light|\bfan\b|speaker|usb|nebuli[sz]er|inhaler/i,
     "Gadgets & Electronics",
   ],
   [
-    /baby|infant|toddler|feeder|nappy|diaper|play mat|kids chair|pram|stroller/i,
+    // "child safety" and "baby proof" spelled out rather than a bare "child":
+    // the word turns up in "childhood memories" on photo frames.
+    /baby|infant|toddler|feeder|nappy|diaper|play mat|kids chair|pram|stroller|child (safety|lock)|baby ?proof/i,
     "Baby & Kids",
   ],
   [
@@ -69,11 +82,13 @@ export const RULES = [
   [
     // Household cleaning lives here: almost all of it is for the kitchen, and
     // the shop has no cupboard of its own for it.
-    /kitchen|cookware|sauce ?pan|chopper|slicer|grater|knife|ice cube|mixing bowl|blender|whisk|spice|measuring (cup|spoon)|sink|jar opener|food (processor|storage)|stain remover|grease (cleaner|remover)|cleaning (powder|wipes)|dish ?wash|degreaser|countertop cleaner/i,
+    /kitchen|cookware|sauce ?pan|chopper|slicer|grater|knife|ice cube|mixing bowl|blender|whisk|spice|measuring (cup|spoon)|sink|jar opener|food (processor|storage)|stain remover|grease (cleaner|remover)|cleaning (powder|wipes|brush)|crevice brush|dish ?wash|degreaser|countertop cleaner|bottle stand|dispens(er|ing)/i,
     "Kitchen",
   ],
   [
-    /decor|showpiece|candle|vase|ornament|night lamp|night light|projector|diffuser|ashtray|tissue box|frame|door ?mat|shelf liner/i,
+    // "mosquito coil" only reaches here when nothing electrical matched first,
+    // which is what separates a cast-iron incense burner from the USB racket.
+    /decor|showpiece|candle|vase|ornament|night lamp|night light|projector|diffuser|ashtray|tissue box|frame|door ?mat|shelf liner|incense|mosquito coil/i,
     "Home Decor",
   ],
 ];
