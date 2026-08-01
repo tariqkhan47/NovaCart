@@ -1,6 +1,6 @@
 import { AuthProvider } from "../context/AuthContext";
 import type { Metadata } from "next";
-import { Amiri, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Amiri, Inter } from "next/font/google";
 import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
@@ -10,18 +10,12 @@ import { ThemeProvider } from "../context/ThemeContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
 
+// Body and headings both. The SaaS look this theme is built on sets the
+// whole page in one grotesk and separates the headings by weight and tight
+// tracking rather than by a second face — so there is no display font to
+// load beside this one.
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-// Headings. Poppins was the geometric round face the old amber theme was
-// built on; this one is a grotesk with much tighter apertures, which is what
-// makes the big headings read as a single dense block rather than a row of
-// circles.
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  weight: ["500", "600", "700", "800"],
   subsets: ["latin"],
 });
 
@@ -52,20 +46,20 @@ export default function RootLayout({
  return (
   <html
     lang="en"
-    className={`dark ${inter.variable} ${jakarta.variable} ${amiri.variable} h-full antialiased`}
+    className={`${inter.variable} ${amiri.variable} h-full antialiased`}
   >
     <body>
       {/* Runs while the page is still parsing, before anything is painted.
-          The server always sends <html class="dark"> because that is the
-          shop's look; a visitor who has switched to light needs it taken off
-          before the first frame, or every page load flashes black at them.
+          The white theme is the shop's own look, so the server sends <html>
+          bare; a visitor who has switched to dark needs the class put on
+          before the first frame, or every page load flashes white at them.
           Wrapped in try/catch because localStorage throws outright in a
           browser with site data blocked, which would take the page with it. */}
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "try{if(localStorage.getItem('theme')==='light')" +
-            "document.documentElement.classList.remove('dark')}catch(e){}",
+            "try{if(localStorage.getItem('theme')==='dark')" +
+            "document.documentElement.classList.add('dark')}catch(e){}",
         }}
       />
       <ThemeProvider>

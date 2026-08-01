@@ -22,14 +22,14 @@ export function ThemeProvider({
 }: {
   children: ReactNode;
 }) {
-  // Dark is the shop's own look, not a preference the visitor has to find:
-  // <html> ships with the class already on it (see layout.tsx), so this has
-  // to start on the same value or the toggle's first click does nothing.
-  const [theme, setTheme] = useState<Theme>("dark");
+  // White is the shop's own look, and <html> ships without the class on it
+  // (see layout.tsx), so this has to start on the same value or the toggle's
+  // first click does nothing.
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const next = savedTheme === "light" ? "light" : "dark";
+    const next = savedTheme === "dark" ? "dark" : "light";
 
     setTheme(next);
     document.documentElement.classList.toggle("dark", next === "dark");
