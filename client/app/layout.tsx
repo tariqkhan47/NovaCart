@@ -3,9 +3,6 @@ import type { Metadata } from "next";
 import { Amiri, Inter } from "next/font/google";
 import "./globals.css";
 
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-
 import { ThemeProvider } from "../context/ThemeContext";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
@@ -71,10 +68,6 @@ export default function RootLayout({
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>
-
-      {/* Both are no-ops until switched on in the Vercel dashboard. */}
-      <Analytics />
-      <SpeedInsights />
     </body>
   </html>
 );
