@@ -39,6 +39,11 @@ yarn-error.log*
 # deploy archives uploaded to Hostinger's Node.js App runner
 arsalah-deploy*.tar.gz
 
+# The catalog photos, pulled down by scripts/localize-images.mjs. ~2,200 files
+# and about 100 MB — they belong in the deploy archive (which is built from an
+# explicit file list, not from git) but not in the repo's history.
+public/img/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

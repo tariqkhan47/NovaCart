@@ -445,16 +445,26 @@ const rows = await prisma.product.findMany({
 if (rows.length === 0) {
   console.log("Database: no matching products found.");
 } else {
-  const result = await prisma.$transaction(
-    rows.map((row) =>
-      prisma.product.update({
-        where: { id: row.id },
-        data: { detailHtml: byName.get(row.name) },
-      })
-    )
-  );
+  // One at a time rather than prisma.$transaction over all of them. These are
+  // LongText columns and the database is remote: a single batch of ~480 blows
+  // the 5s interactive transaction timeout and rolls the whole thing back with
+  // P2028, after the catalog file has already been written — which leaves the
+  // two out of step and is exactly what happened on 2026-08-01. There is
+  // nothing to roll back here anyway; each write is independent and re-running
+  // simply sets the same value again.
+  let written = 0;
 
-  console.log(`Database: ${result.length} product(s) updated.`);
+  for (const row of rows) {
+    await prisma.product.update({
+      where: { id: row.id },
+      data: { detailHtml: byName.get(row.name) },
+    });
+
+    written += 1;
+    if (written % 50 === 0 || written === rows.length) {
+      console.log(`  database ${written}/${rows.length}`);
+    }
+  }
 }
 
 await prisma.$disconnect();

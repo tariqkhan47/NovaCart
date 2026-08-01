@@ -28,6 +28,29 @@ const nextConfig: NextConfig = {
     SAFEPAY_WEBHOOK_SECRET: process.env.SAFEPAY_WEBHOOK_SECRET,
   },
 
+  // The product photos in public/img/. Next serves everything under public/
+  // with `Cache-Control: public, max-age=0`, because it cannot know whether a
+  // file will be replaced — which for 2,200 catalog photos means every one of
+  // them is revalidated on every page view, and the shop feels slower than it
+  // did when the pictures were on a CDN. These filenames are a sha1 of the
+  // source image, so a changed picture is a changed name and the old one is
+  // simply never asked for again: safe to pin for a year and mark immutable.
+  // Header rules are matched before the filesystem, so this wins over the
+  // default. See scripts/localize-images.mjs.
+  async headers() {
+    return [
+      {
+        source: "/img/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
+
   // Standalone mode ships a pruned .next/standalone folder that never gets
   // our own .env files copied into it — fine for the Dockerfile, which
   // copies them in itself (see COPY steps there), but fatal for any host
