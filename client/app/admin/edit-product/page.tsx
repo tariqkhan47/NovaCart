@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "../../../lib/currency";
 import { CATEGORY_NAMES } from "../../../lib/categories";
+import { ADMIN_LIST_LIMIT, searchProducts } from "../../../lib/product-search";
 
 type Product = {
   _id: string;
@@ -125,31 +126,15 @@ export default function EditProductPage() {
     router.refresh();
   }
 
-  /**
-   * The list the owner is actually looking at.
-   *
-   * Matched on name and on category, because half the time what he remembers
-   * is "that kitchen thing" rather than any word in the supplier's
-   * two-hundred-character title. Every term has to hit somewhere, so "watch
-   * gold" narrows instead of widening — with 502 products a search that ORs
-   * its words returns most of the shop.
-   */
-  const matches = useMemo(() => {
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-
-    if (terms.length === 0) return products;
-
-    return products.filter((product) => {
-      const haystack = `${product.name} ${product.category}`.toLowerCase();
-      return terms.every((term) => haystack.includes(term));
-    });
-  }, [products, query]);
+  const matches = useMemo(
+    () => searchProducts(products, query),
+    [products, query]
+  );
 
   // Rendering all 502 rows is the other half of why this screen was slow —
   // it is a lot of DOM to build before anything can be clicked. A search that
   // has not narrowed things down yet does not need to show everything.
-  const LIST_LIMIT = 40;
-  const shown = matches.slice(0, LIST_LIMIT);
+  const shown = matches.slice(0, ADMIN_LIST_LIMIT);
 
   return (
     <main className="page py-12 px-4 sm:px-6">
