@@ -132,21 +132,47 @@ export default function ProductDetailPage() {
                     : "Out of stock"}
                 </p>
 
-                <button
-                  onClick={() =>
-                    addToCart({
-                      id: product._id,
-                      name: product.name,
-                      price: product.price,
-                      image: product.image,
-                    })
-                  }
-                  disabled={product.stock <= 0}
-                  className="btn btn-cart mt-7"
-                >
-                  <BagIcon />
-                  Add to Cart
-                </button>
+                {/* Add to Cart no longer runs the full width: it shares the
+                    row so that "Buy it now" can sit under it as the wider,
+                    heavier control. Someone who already knows they want this
+                    should not have to find the cart first. */}
+                <div className="mt-7 flex flex-col gap-3">
+                  <button
+                    onClick={() =>
+                      addToCart({
+                        id: product._id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                      })
+                    }
+                    disabled={product.stock <= 0}
+                    className="btn btn-cart btn-sm sm:w-auto sm:self-start sm:px-8"
+                  >
+                    <BagIcon />
+                    Add to Cart
+                  </button>
+
+                  {/* Adds and goes, in that order — checkout reads the cart,
+                      so pushing first would arrive at an empty one. Nothing
+                      here asks who they are; the checkout screen takes guests
+                      now, and a login wall is where a phone customer leaves. */}
+                  <button
+                    onClick={() => {
+                      addToCart({
+                        id: product._id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                      });
+                      router.push("/checkout");
+                    }}
+                    disabled={product.stock <= 0}
+                    className="btn btn-primary btn-lg w-full"
+                  >
+                    Buy it now
+                  </button>
+                </div>
               </div>
             </div>
           )}

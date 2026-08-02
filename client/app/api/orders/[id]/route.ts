@@ -98,3 +98,59 @@ export async function PATCH(
     );
   }
 }
+
+// REMOVE AN ORDER (admin only) — for the junk the shop accumulates: a test
+// order, a duplicate, someone who filled the form in twice. There is no undo,
+// so the dashboard asks first.
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const guard = await requireAdmin(req);
+    if (guard instanceof NextResponse) return guard;
+
+    const { id } = await params;
+    const orderId = parseId(id);
+
+    if (orderId === null) {
+      return NextResponse.json({ message: "Invalid Order ID" }, { status: 400 });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    // The same release a cancellation does, and for the same reason — the
+    // stock was taken when the order was placed. Skipped for an order already
+    // cancelled, which has had it back once already; putting it back twice
+    // would invent inventory that does not exist.
+    if (order.status !== "Cancelled") {
+      for (const item of order.items) {
+        if (item.productId === null) continue;
+
+        await prisma.product
+          .update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+          .catch(() => {});
+      }
+    }
+
+    // The items go with it: OrderItem has onDelete: Cascade on its order
+    // relation, so this is one statement rather than two.
+    await prisma.order.delete({ where: { id: orderId } });
+
+    return NextResponse.json({ id: String(orderId), deleted: true });
+  } catch (error) {
+    console.error("DELETE ORDER ERROR:", error);
+
+    return NextResponse.json({ message: "Server Error" }, { status: 500 });
+  }
+}

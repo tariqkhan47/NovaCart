@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { parseId } from "@/lib/ids";
 import { serializeOrder } from "@/lib/serialize";
-import { getSessionFromRequest, requireUser } from "@/lib/auth";
+import { getSessionFromRequest } from "@/lib/auth";
 import { DELIVERY_CHARGE } from "@/lib/delivery";
 import { initialPaymentStatus, paymentMethodInfo } from "@/lib/payments";
 import { STORE } from "@/lib/store";
@@ -47,8 +47,11 @@ export async function POST(req: NextRequest) {
   const reserved: { id: number; quantity: number }[] = [];
 
   try {
-    const session = await requireUser(req);
-    if (session instanceof NextResponse) return session;
+    // Not required. A shopper who has signed in gets the order tied to their
+    // account so it shows up under "My Orders"; a guest gets the same order
+    // with no account attached. Everything the shop actually needs to fulfil
+    // and to chase payment is in the form below either way.
+    const session = await getSessionFromRequest(req);
 
     const body = await req.json();
     const { items, name, email, phone, address, paymentMethod, paymentReference } =
@@ -167,7 +170,7 @@ export async function POST(req: NextRequest) {
 
     const order = await prisma.order.create({
       data: {
-        userId: Number(session.userId),
+        userId: session ? Number(session.userId) : null,
         deliveryCharge: DELIVERY_CHARGE,
         total,
         customerName: name,

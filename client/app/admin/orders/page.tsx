@@ -59,6 +59,35 @@ export default function AdminOrdersPage() {
     }
   }
 
+  /**
+   * Throws an order away for good — a test, a duplicate, someone who filled
+   * the form in twice.
+   *
+   * Confirmed first because there is no undo, and the prompt names the
+   * customer and the total rather than saying "are you sure": the rows all
+   * look alike at a glance, and the one thing worth checking is that this is
+   * the row you meant.
+   */
+  async function deleteOrder(id: string, customerName: string, total: number) {
+    const ok = window.confirm(
+      `Delete order #${id} from ${customerName} for ${formatPrice(total)}?\n\n` +
+        `This cannot be undone. Any stock it is holding goes back to the shelf.`
+    );
+
+    if (!ok) return;
+
+    const previous = orders;
+    setOrders((prev) => prev.filter((order) => order._id !== id));
+
+    const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+
+    if (!res.ok) {
+      setOrders(previous);
+      const data = await res.json().catch(() => ({}));
+      setError(data.message ?? "Could not delete the order");
+    }
+  }
+
   const revenue = orders
     .filter((order) => order.status !== "Cancelled")
     .reduce((sum, order) => sum + order.total, 0);
@@ -169,6 +198,22 @@ export default function AdminOrdersPage() {
                           </option>
                         ))}
                       </select>
+
+                      {/* Last, and the only control here that is not a
+                          dropdown, so it cannot be hit while reaching for
+                          one. Danger colouring rather than a red fill: it
+                          sits beside two neutral selects and a red block
+                          would read as the primary action on the row. */}
+                      <button
+                        onClick={() =>
+                          deleteOrder(order._id, order.customer.name, order.total)
+                        }
+                        title="Delete this order"
+                        aria-label={`Delete order ${order._id}`}
+                        className="btn btn-sm border border-danger/40 text-danger hover:bg-danger/10 px-3 py-2"
+                      >
+                        🗑 Delete
+                      </button>
                     </div>
                   </div>
                 </div>

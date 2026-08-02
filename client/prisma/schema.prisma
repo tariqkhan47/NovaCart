@@ -56,8 +56,12 @@ model Product {
 model Order {
   id Int @id @default(autoincrement())
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
+  // Null for a guest order. The shop takes orders without an account —
+  // a login wall is where a phone customer leaves — and everything a receipt
+  // or a courier needs is on the flattened customer fields below, not on the
+  // account. An order therefore does not need a User to be a real order.
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
 
   items          OrderItem[]
   deliveryCharge Decimal     @db.Decimal(10, 2)

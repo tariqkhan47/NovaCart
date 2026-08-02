@@ -29,18 +29,15 @@ export default function CheckoutPage() {
   const methods = paymentMethods();
   const chosen = methods.find((info) => info.method === method);
 
+  // No login gate. Signing in is worth something — it prefills the form and
+  // puts the order under "My Orders" — but it is not worth losing the sale
+  // over, which is what a redirect to /login at this point costs.
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-      return;
-    }
-
-    // Prefill from the session so the customer does not retype it.
     if (user) {
       setName((current) => current || user.name);
       setEmail((current) => current || user.email);
     }
-  }, [loading, user, router]);
+  }, [user]);
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
