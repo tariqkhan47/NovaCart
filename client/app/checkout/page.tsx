@@ -8,6 +8,16 @@ import { DELIVERY_CHARGE } from "../../lib/delivery";
 import { paymentMethods, type PaymentMethod } from "../../lib/payments";
 import { trackTikTok } from "../../lib/tiktok";
 
+// One line of the order as /api/orders hands it back — see lib/serialize.ts.
+// `product` is the catalog id TikTok matches against, and is null only for an
+// item whose product has since been deleted.
+type PlacedOrderItem = {
+  product: string | null;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
@@ -48,6 +58,12 @@ export default function CheckoutPage() {
 
     trackTikTok("InitiateCheckout", {
       content_type: "product",
+      contents: cart.map((item) => ({
+        content_id: item.id,
+        content_name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+      })),
       quantity: cart.reduce((sum, item) => sum + item.quantity, 0),
       value: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
     });
@@ -115,6 +131,31 @@ export default function CheckoutPage() {
         setError(data.message ?? "Could not place your order.");
         return;
       }
+
+      // Reported here rather than on the success page, and priced from the
+      // response rather than from the cart. The server is what decides an
+      // order's total, and this is the last moment the order exists in one
+      // piece: clearCart() below empties it before /success ever mounts, which
+      // is why the event used to arrive reading value 0. Firing on a confirmed
+      // 200 also means a refresh of /success cannot report the order twice.
+      const items: PlacedOrderItem[] = data.items ?? [];
+
+      trackTikTok("PlaceAnOrder", {
+        content_type: "product",
+        contents: items
+          // productId only goes null if the product is deleted later, so this
+          // filter drops nothing on a fresh order — but an empty content_id is
+          // rejected outright, and one bad line would void the whole event.
+          .filter((item) => item.product)
+          .map((item) => ({
+            content_id: String(item.product),
+            content_name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        quantity: items.reduce((sum, item) => sum + item.quantity, 0),
+        value: data.total,
+      });
 
       clearCart();
 

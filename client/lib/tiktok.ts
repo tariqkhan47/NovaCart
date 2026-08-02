@@ -29,10 +29,24 @@ type TikTokEvent =
   | "InitiateCheckout"
   | "PlaceAnOrder";
 
+/**
+ * One product inside an event that covers several of them. An order-level
+ * event has no single content_id to give, and TikTok rejects an event without
+ * one ("Content ID is missing in your events"), so a cart or an order is
+ * itemised here instead of being flattened into a bare total.
+ */
+type EventContent = {
+  content_id: string;
+  content_name?: string;
+  quantity?: number;
+  price?: number;
+};
+
 type EventProperties = {
   content_id?: string;
   content_name?: string;
   content_type?: "product";
+  contents?: EventContent[];
   quantity?: number;
   price?: number;
   value?: number;
