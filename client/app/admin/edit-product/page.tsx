@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "../../../lib/currency";
 import { CATEGORY_NAMES } from "../../../lib/categories";
@@ -25,6 +25,8 @@ export default function EditProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] =
     useState<Product | null>(null);
+
+  const [query, setQuery] = useState("");
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -123,6 +125,32 @@ export default function EditProductPage() {
     router.refresh();
   }
 
+  /**
+   * The list the owner is actually looking at.
+   *
+   * Matched on name and on category, because half the time what he remembers
+   * is "that kitchen thing" rather than any word in the supplier's
+   * two-hundred-character title. Every term has to hit somewhere, so "watch
+   * gold" narrows instead of widening — with 502 products a search that ORs
+   * its words returns most of the shop.
+   */
+  const matches = useMemo(() => {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+
+    if (terms.length === 0) return products;
+
+    return products.filter((product) => {
+      const haystack = `${product.name} ${product.category}`.toLowerCase();
+      return terms.every((term) => haystack.includes(term));
+    });
+  }, [products, query]);
+
+  // Rendering all 502 rows is the other half of why this screen was slow —
+  // it is a lot of DOM to build before anything can be clicked. A search that
+  // has not narrowed things down yet does not need to show everything.
+  const LIST_LIMIT = 40;
+  const shown = matches.slice(0, LIST_LIMIT);
+
   return (
     <main className="page py-12 px-4 sm:px-6">
 
@@ -138,7 +166,30 @@ export default function EditProductPage() {
 
         <div className="panel p-4 sm:p-6 mb-10">
 
-          {products.map((product) => (
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="🔍 Search by name or collection…"
+            autoFocus
+            className="field mb-4"
+          />
+
+          <p className="text-muted-soft text-sm mb-4">
+            {query
+              ? `${matches.length} of ${products.length} products`
+              : `${products.length} products`}
+            {matches.length > shown.length &&
+              ` — showing the first ${shown.length}, keep typing to narrow it down`}
+          </p>
+
+          {matches.length === 0 && (
+            <p className="py-6 text-center text-muted-soft">
+              Nothing matches “{query}”.
+            </p>
+          )}
+
+          {shown.map((product) => (
             <div
               key={product._id}
               className="flex flex-wrap justify-between items-center gap-3 border-b divider py-4"
