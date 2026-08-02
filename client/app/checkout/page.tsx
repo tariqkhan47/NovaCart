@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { formatPrice } from "../../lib/currency";
 import { DELIVERY_CHARGE } from "../../lib/delivery";
 import { paymentMethods, type PaymentMethod } from "../../lib/payments";
+import { trackTikTok } from "../../lib/tiktok";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -38,6 +39,20 @@ export default function CheckoutPage() {
       setEmail((current) => current || user.email);
     }
   }, [user]);
+
+  // Once per arrival at checkout, not on every cart edit — someone changing a
+  // quantity here has not started checking out a second time, and counting it
+  // twice would flatter the funnel TikTok optimises against.
+  useEffect(() => {
+    if (cart.length === 0) return;
+
+    trackTikTok("InitiateCheckout", {
+      content_type: "product",
+      quantity: cart.reduce((sum, item) => sum + item.quantity, 0),
+      value: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,

@@ -11,6 +11,7 @@ import { useCart } from "../../../context/CartContext";
 import PriceTag from "../../../components/PriceTag";
 import RatingScore from "../../../components/RatingScore";
 import ProductReviews from "../../../components/ProductReviews";
+import { trackTikTok } from "../../../lib/tiktok";
 
 type Product = {
   _id: string;
@@ -47,6 +48,17 @@ export default function ProductDetailPage() {
 
         const data = await res.json();
         setProduct(data);
+
+        // After the fetch, not on mount: the price and name are what make
+        // this event worth anything to TikTok, and neither exists until the
+        // product has actually arrived.
+        trackTikTok("ViewContent", {
+          content_id: data._id,
+          content_name: data.name,
+          content_type: "product",
+          price: data.price,
+          value: data.price,
+        });
       } catch (err) {
         console.error(err);
         setError("Failed to load product");

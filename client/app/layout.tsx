@@ -4,6 +4,7 @@ import { Amiri, Inter, Poppins } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "../context/ThemeContext";
+import TikTokPixel from "../components/TikTokPixel";
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
 
@@ -75,6 +76,9 @@ export default function RootLayout({
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>
+
+      {/* Nothing at all until a pixel id is configured — see lib/tiktok.ts. */}
+      <TikTokPixel />
     </body>
   </html>
 );

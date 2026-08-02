@@ -7,6 +7,7 @@ import {
   ReactNode,
   useEffect,
 } from "react";
+import { trackTikTok } from "../lib/tiktok";
 
 type CartItem = {
   id: string
@@ -58,6 +59,18 @@ export function CartProvider({
   }, [cart]);
 
   function addToCart(product: Omit<CartItem, "quantity">) {
+    // Reported here rather than at each button, so the product page, the
+    // cards and "Buy it now" all count the same way and a new button added
+    // later cannot quietly go unreported.
+    trackTikTok("AddToCart", {
+      content_id: product.id,
+      content_name: product.name,
+      content_type: "product",
+      quantity: 1,
+      price: product.price,
+      value: product.price,
+    });
+
     setCart((prev) => {
       const existing = prev.find(
         (item) => item.id === product.id
