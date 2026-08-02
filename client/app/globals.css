@@ -411,17 +411,23 @@
   }
 
   /* Buy Now, which sits directly under the cart pill on a card. Shaped to
-     match it — same full width, same 9999px corner — but outlined instead
-     of filled and a size down, so the two read as one block and the matte
-     button keeps its rank as the card's main action. Amber only on hover,
-     where it is the moment of intent rather than a second thing shouting
-     for attention in a grid of twenty-four cards. */
+     match it — same full width, same 9999px corner — but filled in the
+     theme's amber and a size down, so the two read as one block while the
+     matte button keeps its rank as the card's main action.
+
+     Filled rather than outlined at the owner's request. It was outlined
+     when it shipped, on the reasoning that a second solid button in a grid
+     of twenty-four cards competes with the first; the owner asked for the
+     brand amber instead, and the size gap is what separates the two now.
+
+     The text colour has to be --on-primary and not the ink ramp: the amber
+     is a fill colour only, and --foreground over it is unreadable. */
   .btn-buy {
     width: 100%;
     border-radius: 9999px;
-    background: transparent;
-    color: var(--foreground);
-    border-color: var(--border);
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
     padding: 0.6rem 1.25rem;
     font-size: 0.875rem;
     font-weight: 700;
@@ -430,9 +436,8 @@
   }
 
   .btn-buy:hover:not(:disabled) {
-    background: var(--primary);
-    color: var(--on-primary);
-    border-color: var(--primary);
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
   }
 
   /* Same squeeze the cart pill takes at two cards to a row: the label holds
