@@ -868,3 +868,181 @@
     text-decoration: underline;
   }
 }
+
+/* ---------------------------------------------------------------
+   The shipping label — see components/ShippingLabel.tsx.
+
+   Hidden outright on screen and drawn only by the printer. The
+   `visibility` dance rather than `display: none` is deliberate: a
+   label inside a display:none ancestor is not laid out at all, and
+   printing it would give a blank page. Hiding everything by
+   visibility and then turning the label back on keeps it in the
+   flow, and lifting it to the top-left corner takes it out from
+   under whatever it was nested in.
+   --------------------------------------------------------------- */
+.shipping-label {
+  display: none;
+}
+
+@media print {
+  /* No dashboard chrome, no navbar, no shadows to waste toner on. */
+  body * {
+    visibility: hidden;
+    box-shadow: none !important;
+  }
+
+  .shipping-label,
+  .shipping-label * {
+    visibility: visible;
+  }
+
+  .shipping-label {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Always ink on white. The shop's own theme is cream, and a dark
+       theme label would empty a cartridge for one parcel. */
+    background: #ffffff;
+    color: #000000;
+    padding: 14mm 12mm;
+    font-family: var(--font-sans);
+  }
+
+  /* One parcel, one sheet — a label that breaks across two pages is
+     two labels, and the second one has no address on it. */
+  .shipping-label {
+    page-break-inside: avoid;
+  }
+
+  .label-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 4mm;
+  }
+
+  .label-brand {
+    font-size: 20pt;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .label-site,
+  .label-date,
+  .label-muted {
+    font-size: 9pt;
+    color: #444;
+  }
+
+  .label-order {
+    text-align: right;
+  }
+
+  .label-order-no {
+    font-size: 13pt;
+    font-weight: 700;
+  }
+
+  .label-caption {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 1.5mm;
+  }
+
+  .label-block {
+    margin-top: 6mm;
+  }
+
+  /* The address is the whole point of the sheet, so it is set at a size
+     that can be read at arm's length off a moving trolley. */
+  .label-name {
+    font-size: 19pt;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .label-address {
+    font-size: 14pt;
+    line-height: 1.35;
+    margin-top: 1.5mm;
+  }
+
+  .label-phone {
+    font-size: 15pt;
+    font-weight: 700;
+    margin-top: 2mm;
+  }
+
+  .label-cod,
+  .label-paid {
+    margin-top: 6mm;
+    border: 2px solid #000;
+    padding: 4mm;
+  }
+
+  .label-cod-amount {
+    font-size: 26pt;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .label-paid {
+    border-style: dashed;
+  }
+
+  .label-paid-note {
+    font-size: 12pt;
+    font-weight: 700;
+  }
+
+  .label-columns {
+    display: flex;
+    gap: 10mm;
+    margin-top: 6mm;
+    border-top: 1px solid #999;
+    padding-top: 4mm;
+  }
+
+  .label-columns > * {
+    flex: 1;
+  }
+
+  .label-from,
+  .label-items {
+    font-size: 10pt;
+    line-height: 1.45;
+  }
+
+  /* Black, and stated rather than inherited. The shop's list styling puts the
+     accent colour on markers, and this sheet may well come out of a mono
+     laser — an amber "2 ×" prints as pale grey next to a black product name,
+     which is exactly the digit someone packing the box needs to read. */
+  .label-items {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .label-items li,
+  .label-items li::marker {
+    color: #000;
+    margin-bottom: 0.8mm;
+  }
+
+  .label-foot {
+    margin-top: 6mm;
+    border-top: 1px solid #999;
+    padding-top: 3mm;
+    font-size: 9pt;
+    color: #444;
+  }
+
+  @page {
+    margin: 0;
+  }
+}

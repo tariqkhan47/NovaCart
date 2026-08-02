@@ -15,6 +15,16 @@ export const STORE = {
   /** Same number in international form — what tel: and wa.me links need. */
   phoneIntl: "+92 311 2424058",
 
+  /**
+   * The return address, printed on shipping labels as the sender.
+   *
+   * A courier needs somewhere to bring a parcel back to when nobody answers
+   * the door. Left blank until the owner fills it in, and the label simply
+   * omits the line rather than printing a placeholder onto a box — a wrong
+   * return address is worse than none.
+   */
+  address: "",
+
   country: "Pakistan",
 
   /**

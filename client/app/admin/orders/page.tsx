@@ -9,11 +9,36 @@ import {
   paymentMethodLabel,
   type PaymentStatus,
 } from "../../../lib/payments";
+import ShippingLabel from "../../../components/ShippingLabel";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // The one order currently on its way to the printer. Only ever one at a
+  // time: the print stylesheet lifts the label to the top-left of the sheet,
+  // so two of them rendered at once would sit on top of each other.
+  const [printing, setPrinting] = useState<Order | null>(null);
+
+  useEffect(() => {
+    if (!printing) return;
+
+    // A frame first, or the dialog opens over a label React has not painted
+    // yet and the sheet comes out blank.
+    const frame = requestAnimationFrame(() => window.print());
+
+    // Cleared on afterprint rather than straight after print() returns:
+    // Safari and Firefox return immediately and keep rendering in the
+    // background, and tearing the label down under them prints nothing.
+    const done = () => setPrinting(null);
+    window.addEventListener("afterprint", done);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("afterprint", done);
+    };
+  }, [printing]);
 
   const load = useCallback(async () => {
     try {
@@ -199,6 +224,14 @@ export default function AdminOrdersPage() {
                         ))}
                       </select>
 
+                      <button
+                        onClick={() => setPrinting(order)}
+                        title="Print the shipping label for this order"
+                        className="btn btn-sm btn-outline px-3 py-2"
+                      >
+                        🖨 Label
+                      </button>
+
                       {/* Last, and the only control here that is not a
                           dropdown, so it cannot be hit while reaching for
                           one. Danger colouring rather than a red fill: it
@@ -240,6 +273,11 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Outside the dashboard's own wrapper so the print stylesheet can lift
+          it to the corner of the sheet without dragging a max-width and a
+          page padding along with it. */}
+      <ShippingLabel order={printing} />
     </main>
   );
 }
