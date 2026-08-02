@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import BagIcon from "../../components/BagIcon";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
@@ -13,6 +14,20 @@ export default function WishlistPage() {
   } = useWishlist();
 
   const { addToCart } = useCart();
+  const router = useRouter();
+
+  // Adds and goes, in that order — checkout reads the cart, so pushing first
+  // would arrive at an empty one. The item stays on the wishlist; nothing
+  // here says it has been bought, only that it is on its way to checkout.
+  const buyNow = (item: {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+  }) => {
+    addToCart(item);
+    router.push("/checkout");
+  };
 
   return (
     <main className="page py-10 px-4 sm:px-6">
@@ -83,6 +98,13 @@ export default function WishlistPage() {
                     >
                       <BagIcon />
                       Add to Cart
+                    </button>
+
+                    <button
+                      onClick={() => buyNow(item)}
+                      className="btn btn-buy btn-sm"
+                    >
+                      Buy Now
                     </button>
 
                     <button

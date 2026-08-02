@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useWishlist } from "../context/WishlistContext";
 import BagIcon from "./BagIcon";
 import PriceTag from "./PriceTag";
@@ -33,9 +34,20 @@ export default function ProductCard({
     removeFromWishlist,
   } = useWishlist();
 
+  const router = useRouter();
+
   const isWishlisted = wishlist.some(
     (item) => item.id === id
   );
+
+  // Adds and goes, in that order — checkout reads the cart, so pushing first
+  // would arrive at an empty one. Goes through the card's own onAddToCart
+  // rather than reaching for the cart itself, so a card keeps its one way in
+  // and the TikTok AddToCart event stays reported from the context.
+  const buyNow = () => {
+    onAddToCart();
+    router.push("/checkout");
+  };
 
   return (
     // A column with the button pushed to the bottom, so a card with a rating
@@ -93,13 +105,23 @@ export default function ProductCard({
         className="mt-1 sm:mt-2"
       />
 
-      <div className="mt-auto pt-2.5 sm:pt-4">
+      {/* Both actions in the block the layout pushes to the bottom, so cards
+          with and without a rating still line up across a row — now on the
+          pair rather than on the cart button alone. */}
+      <div className="mt-auto pt-2.5 sm:pt-4 flex flex-col gap-1.5 sm:gap-2">
         <button
           onClick={onAddToCart}
           className="btn btn-cart"
         >
           <BagIcon />
           Add to Cart
+        </button>
+
+        <button
+          onClick={buyNow}
+          className="btn btn-buy"
+        >
+          Buy Now
         </button>
       </div>
 
